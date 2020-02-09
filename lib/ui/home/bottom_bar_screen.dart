@@ -1,5 +1,5 @@
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
-import 'package:deep_seed/ui/image_list/MovieScreen.dart';
+import 'package:deep_seed/ui/image_list/image_list.dart';
 import 'package:flutter/material.dart';
 
 class BottomBarScreen extends StatefulWidget {

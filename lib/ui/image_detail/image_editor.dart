@@ -1,45 +1,60 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:deep_seed/constants.dart';
 import 'package:deep_seed/model/model.dart';
+import 'package:deep_seed/network/image_cache_manager.dart';
 import 'package:deep_seed/ui/image_detail/draggable_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'dart:ui' as ui;
 import 'package:flutter_svg/flutter_svg.dart';
 
 class ImageEditor extends StatefulWidget {
   final Urls photoUrls;
   final int index;
-  ImageEditor(this.photoUrls, this.index);
+  final String tempFileUrl;
+  ImageEditor(this.photoUrls, this.index, this.tempFileUrl);
   @override
   State<StatefulWidget> createState() {
-    return ImageEditorState(photoUrls, index);
+    return ImageEditorState(photoUrls, index, tempFileUrl);
   }
 }
 
 class ImageEditorState extends State<ImageEditor> {
   final Urls photoUrls;
   final int index;
-  ImageEditorState(this.photoUrls, this.index);
+  final String tempFileUrl;
+  ImageEditorState(this.photoUrls, this.index, this.tempFileUrl);
   DraggableText draggableText = DraggableText();
   double height = 0;
   ImageRatio imageRatio = ImageRatio.Instagram;
   GlobalKey captureKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     CachedNetworkImage image = CachedNetworkImage(
-        imageUrl: photoUrls.full,
-        placeholder: (context, url) => CachedNetworkImage(
-            imageUrl: photoUrls.small,
+        imageUrl: photoUrls.regular,
+        placeholderFadeInDuration: Duration.zero,
+        placeholder: (context, string) => Image.file(new File(tempFileUrl),
+            fit: BoxFit.cover,
             width: MediaQuery.of(context).size.width,
-            height: height > 0 ? height : MediaQuery.of(context).size.height,
-            fit: BoxFit.fitHeight),
+            height:
+                height > 0 ? height : MediaQuery.of(context).size.height / 2),
+        /*return StreamBuilder<FileInfo>(
+      key: _streamBuilderKey,
+      initialData: fromMemory,
+      stream: ImageCacheManager().getFileFromCache(photoUrls.small),
+          builder: (BuildContext context, AsyncSnapshot<FileInfo> snapshot) {
+            return Image(image: Image.file(snapshot.data));
+          }
+        ),*/
         width: MediaQuery.of(context).size.width,
-        height: height > 0 ? height : MediaQuery.of(context).size.height,
-        fit: BoxFit.fitHeight);
+        height: height > 0 ? height : MediaQuery.of(context).size.height / 2,
+        fit: BoxFit.cover);
     draggableText.setMaxXY(0, image.height - 40);
     return Scaffold(
         body: Stack(children: <Widget>[
