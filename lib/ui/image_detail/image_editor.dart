@@ -7,6 +7,7 @@ import 'package:deep_seed/constants.dart';
 import 'package:deep_seed/model/model.dart';
 import 'package:deep_seed/network/image_cache_manager.dart';
 import 'package:deep_seed/ui/image_detail/draggable_text.dart';
+import 'package:deep_seed/ui/util/dialog_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -31,7 +32,8 @@ class ImageEditorState extends State<ImageEditor> {
   ImageEditorState(this.photoUrls, this.index, this.tempFileUrl);
   DraggableText draggableText = DraggableText();
   double height = 0;
-  ImageRatio imageRatio = ImageRatio.Instagram;
+  ImageRatio imageRatio = ImageRatio.Facebook;
+  Font currentFont = Font.CHERRY;
   GlobalKey captureKey = GlobalKey();
 
   @override
@@ -43,17 +45,15 @@ class ImageEditorState extends State<ImageEditor> {
             fit: BoxFit.cover,
             width: MediaQuery.of(context).size.width,
             height:
-                height > 0 ? height : MediaQuery.of(context).size.height / 2),
-        /*return StreamBuilder<FileInfo>(
-      key: _streamBuilderKey,
-      initialData: fromMemory,
-      stream: ImageCacheManager().getFileFromCache(photoUrls.small),
-          builder: (BuildContext context, AsyncSnapshot<FileInfo> snapshot) {
-            return Image(image: Image.file(snapshot.data));
-          }
-        ),*/
+                height > 0 ? height : MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              imageRatio.ratio),
         width: MediaQuery.of(context).size.width,
-        height: height > 0 ? height : MediaQuery.of(context).size.height / 2,
+        height: height > 0 ? height : MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              imageRatio.ratio,
         fit: BoxFit.cover);
     draggableText.setMaxXY(0, image.height - 40);
     return Scaffold(
@@ -71,8 +71,8 @@ class ImageEditorState extends State<ImageEditor> {
       Align(
           alignment: Alignment.bottomCenter,
           child: Container(
-              color: Color(0xfffafafa),
-              padding: EdgeInsets.all(32),
+
+              padding: EdgeInsets.fromLTRB(32, 0, 32, 32),
               child: Column(
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.end,
@@ -86,65 +86,144 @@ class ImageEditorState extends State<ImageEditor> {
                             child: TextField(
                                 decoration: InputDecoration.collapsed(
                                     hintText: "Feeling..."),
+                                autofocus: false,
                                 onChanged: (value) =>
                                     {draggableText.setText(value)}),
                             padding: EdgeInsets.all(12),
                           ),
                         )),
                     Container(
-                      color: Color(0xfffafafa),
                       child: Padding(
                           padding: EdgeInsets.all(32),
-                          child: Row(
+                          child: Column(mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: <Widget>[
+                             Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: <Widget>[
-                              SvgPicture.asset(
-                                'graphics/android/font.svg',
+                               Padding(
+                                padding: EdgeInsets.all(20),
+                                    child: InkWell(
+                                  onTap: () {
+                                    DialogUtils.showFontChooser(context).then((
+                                        font) {
+                                      if (font != null) {
+                                        setState(() {
+                                          currentFont = font;
+                                        });
+                                        draggableText.setFont(font);
+                                      }
+                                    });
+                                  },
+                                  child: SvgPicture.asset(
+                                'graphics/icon/font.svg',
                                 height: 32,
                                 width: 32,
-                              ),
-                              SvgPicture.asset(
-                                'graphics/android/art.svg',
+                              )
+                              )),
+                              Padding(
+                                  padding: EdgeInsets.all(20),
+                              child: InkWell(
+                                  onTap: () {
+                                    DialogUtils.showColorChooser(draggableText.getColor(), context).then((
+                                        color) {
+                                      if (color != null) {
+                                        draggableText.setColor(color);
+                                      }
+                                    });
+                                  },
+                              child: SvgPicture.asset(
+                                'graphics/icon/art.svg',
                                 height: 32,
                                 width: 32,
-                              ),
-                              InkWell(
+                              ))),
+                             
+                              Padding(
+                                padding: EdgeInsets.all(20),
+                                  child: InkWell(
                                   onTap: () {
                                     setState(() {
-                                      switch (imageRatio) {
-                                        case ImageRatio.Facebook:
-                                          height = MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              (0.75.toDouble());
-                                          imageRatio = ImageRatio.Instagram;
-                                          break;
-                                        case ImageRatio.Instagram:
-                                          height = MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              (0.5625.toDouble());
-                                          imageRatio = ImageRatio.Facebook;
-                                          break;
+
+                                      if (imageRatio.index < ImageRatio.values.length-1) {
+                                        imageRatio =
+                                        ImageRatio.values[imageRatio.index + 1];
+
+                                      } else {
+                                        imageRatio = ImageRatio.values[0];
                                       }
+
+                                      height = MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              imageRatio.ratio;
                                     });
 
                                     /*_capturePng(captureKey); */
                                   },
                                   child: SvgPicture.asset(
-                                    'graphics/android/ratio.svg',
+                                    'graphics/icon/ratio.svg',
                                     height: 32,
                                     width: 32,
                                   ))
+                              )
                             ],
-                          )),
+                          ),
+                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: <Widget>[
+                              SizedBox(width: 60,height: 30, child: Text(currentFont.family, textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontFamily: currentFont.family),)),
+                              SizedBox(width: 60,height: 30, child: Text("Color", textAlign: TextAlign.center, style: TextStyle(fontSize: 12, ))),
+                              SizedBox(width: 60,height: 30, child: Text(imageRatio.name, textAlign: TextAlign.center, style: TextStyle(fontSize: 12, )))
+                            ],
+                          )
+                          ],)
+                           ),
                     )
                   ])))
     ]));
   }
 }
 
-enum ImageRatio { Facebook, Instagram }
+enum ImageRatio { Facebook, Instagram, Story, Cover}
+
+extension ImageRatioExtension on ImageRatio {
+  double get ratio {
+    switch(this) {
+
+      case ImageRatio.Facebook:
+        return 1.33;
+        break;
+      case ImageRatio.Instagram:
+        return 1.0;
+        break;
+      case ImageRatio.Story:
+        return 1.77;
+        break;
+      case ImageRatio.Cover:
+        return 0.6;
+        break;
+    }
+    return 1.0;
+  }
+
+  String get name {
+       switch(this) {
+
+      case ImageRatio.Facebook:
+        return "Facebook";
+        break;
+      case ImageRatio.Instagram:
+        return "Instagram";
+        break;
+      case ImageRatio.Story:
+        return "Story";
+        break;
+      case ImageRatio.Cover:
+        return "Cover";
+        break;
+    }
+    return "";
+  }
+}
 
 Future<void> _capturePng(GlobalKey globalKey) async {
   ui.Image image;

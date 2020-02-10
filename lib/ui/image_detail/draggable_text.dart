@@ -1,3 +1,4 @@
+import 'package:deep_seed/ui/util/dialog_utils.dart';
 import 'package:flutter/material.dart';
 
 class DraggableText extends StatefulWidget {
@@ -5,10 +6,18 @@ class DraggableText extends StatefulWidget {
   void setMaxXY(double maxX, double maxY) {
     _draggableTextState.setMaxXY(maxX, maxY);
   }
-
+  void setFont(Font font) {
+    _draggableTextState.setFont(font);
+  }
   void setText(String value) {
     _draggableTextState.setText(value);
   }
+  void setColor(Color color) {
+    _draggableTextState.setColor(color);
+  }
+
+  Color getColor() => _draggableTextState.currentColor;
+
 
   @override
   State<StatefulWidget> createState() {
@@ -20,12 +29,12 @@ class DraggableTextState extends State<DraggableText> {
   double maxY;
   double maxX;
   Offset offset;
-  String value = "Default value";
+  String value = "Write something here";
+  Font currentFont = Font.CHERRY;
+  Color currentColor = Colors.black12;
   void setMaxXY(double maxX, double maxY) {
     this.maxY = maxY;
     this.maxX = maxX;
-    print(maxY.toString() + "Max Y");
-    print(maxX.toString() + "Max X");
   }
 
   void setText(String value) {
@@ -33,10 +42,19 @@ class DraggableTextState extends State<DraggableText> {
       this.value = value;
     });
   }
-
+  void setFont(Font font) {
+    setState(() {
+      currentFont = font;
+    });
+  }
+  void setColor(Color color) {
+    setState(() {
+      currentColor = color;
+    });
+  }
   @override
   void initState() {
-    offset = Offset(0, 0);
+    offset = Offset(0, maxY/2);
     super.initState();
   }
 
@@ -45,22 +63,20 @@ class DraggableTextState extends State<DraggableText> {
       top: offset.dy,
       child: GestureDetector(
         onPanUpdate: (details) {
-          if (offset.dy + details.delta.dy > maxY) return;
-          if (offset.dy + details.delta.dy < 0 && details.delta.dy < 0) return;
+          if (offset.dy + details.delta.dy+40 > maxY) return;
+          if (offset.dy + details.delta.dy < 0 && details.delta.dy< 0) return;
           setState(() {
-            print(details);
             offset = Offset(offset.dx, offset.dy + details.delta.dy);
-            print(maxY);
-            print(offset);
           });
         },
         child: Container(
-          color: Colors.black12,
+          color: currentColor,
           child: Padding(
             child: Text(value,
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 24,
+                  fontFamily: currentFont.family
                 ),
                 textAlign: TextAlign.center),
             padding: EdgeInsets.all(24),
@@ -72,4 +88,6 @@ class DraggableTextState extends State<DraggableText> {
   Widget build(BuildContext context) {
     return container();
   }
+
+
 }

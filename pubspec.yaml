@@ -14,7 +14,7 @@ description: DeepSeed
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.2.0 <3.0.0"
+  sdk: ">=2.6.0 <3.0.0"
 
 dependencies:
   http: ^0.12.0+4
@@ -26,6 +26,7 @@ dependencies:
   flutter_cache_manager: ^1.1.3
   sqflite: ^1.2.0
   infinite_widgets: ^1.0.1
+  flutter_colorpicker: any
   flutter:
     sdk: flutter
 
@@ -57,10 +58,18 @@ flutter:
   #  - images/a_dot_ham.jpeg
 
   assets:
-    - graphics/android/font.svg
-    - graphics/android/art.svg
-    - graphics/android/ratio.svg
+    - graphics/icon/font.svg
+    - graphics/icon/art.svg
+    - graphics/icon/ratio.svg
 
+  fonts:
+  - family: Cherry
+    fonts:
+      - asset: graphics/font/cherry_unicode.ttf
+
+  - family: Padauk Ghost
+    fonts:
+      - asset: graphics/font/padauk_ghost.ttf
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
 
