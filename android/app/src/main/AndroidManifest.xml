@@ -9,6 +9,15 @@
         android:name="io.flutter.app.FlutterApplication"
         android:label="deep_seed"
         android:icon="@mipmap/ic_launcher">
+        <provider
+    android:name="androidx.core.content.FileProvider"
+    android:authorities="co.deepseed.deep_seed"
+    android:exported="false"
+    android:grantUriPermissions="true">
+    <meta-data
+        android:name="android.support.FILE_PROVIDER_PATHS"
+        android:resource="@xml/file_paths" />
+</provider>
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

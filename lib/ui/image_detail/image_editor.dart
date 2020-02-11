@@ -8,11 +8,14 @@ import 'package:deep_seed/model/model.dart';
 import 'package:deep_seed/network/image_cache_manager.dart';
 import 'package:deep_seed/ui/image_detail/draggable_text.dart';
 import 'package:deep_seed/ui/util/dialog_utils.dart';
+import 'package:esys_flutter_share/esys_flutter_share.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'dart:ui' as ui;
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ImageEditor extends StatefulWidget {
   final Urls photoUrls;
@@ -44,16 +47,13 @@ class ImageEditorState extends State<ImageEditor> {
         placeholder: (context, string) => Image.file(new File(tempFileUrl),
             fit: BoxFit.cover,
             width: MediaQuery.of(context).size.width,
-            height:
-                height > 0 ? height : MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              imageRatio.ratio),
+            height: height > 0
+                ? height
+                : MediaQuery.of(context).size.width * imageRatio.ratio),
         width: MediaQuery.of(context).size.width,
-        height: height > 0 ? height : MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              imageRatio.ratio,
+        height: height > 0
+            ? height
+            : MediaQuery.of(context).size.width * imageRatio.ratio,
         fit: BoxFit.cover);
     draggableText.setMaxXY(0, image.height - 40);
     return Scaffold(
@@ -71,7 +71,6 @@ class ImageEditorState extends State<ImageEditor> {
       Align(
           alignment: Alignment.bottomCenter,
           child: Container(
-
               padding: EdgeInsets.fromLTRB(32, 0, 32, 32),
               child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -95,100 +94,145 @@ class ImageEditorState extends State<ImageEditor> {
                     Container(
                       child: Padding(
                           padding: EdgeInsets.all(32),
-                          child: Column(mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: <Widget>[
-                             Row(
+                          child: Column(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: <Widget>[
-                               Padding(
-                                padding: EdgeInsets.all(20),
-                                    child: InkWell(
-                                  onTap: () {
-                                    DialogUtils.showFontChooser(context).then((
-                                        font) {
-                                      if (font != null) {
-                                        setState(() {
-                                          currentFont = font;
-                                        });
-                                        draggableText.setFont(font);
-                                      }
-                                    });
-                                  },
-                                  child: SvgPicture.asset(
-                                'graphics/icon/font.svg',
-                                height: 32,
-                                width: 32,
-                              )
-                              )),
-                              Padding(
-                                  padding: EdgeInsets.all(20),
-                              child: InkWell(
-                                  onTap: () {
-                                    DialogUtils.showColorChooser(draggableText.getColor(), context).then((
-                                        color) {
-                                      if (color != null) {
-                                        draggableText.setColor(color);
-                                      }
-                                    });
-                                  },
-                              child: SvgPicture.asset(
-                                'graphics/icon/art.svg',
-                                height: 32,
-                                width: 32,
-                              ))),
-                             
-                              Padding(
-                                padding: EdgeInsets.all(20),
-                                  child: InkWell(
-                                  onTap: () {
-                                    setState(() {
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: <Widget>[
+                                  Padding(
+                                      padding: EdgeInsets.all(20),
+                                      child: InkWell(
+                                          onTap: () {
+                                            DialogUtils.showFontChooser(context)
+                                                .then((font) {
+                                              if (font != null) {
+                                                setState(() {
+                                                  currentFont = font;
+                                                });
+                                                draggableText.setFont(font);
+                                              }
+                                            });
+                                          },
+                                          child: SvgPicture.asset(
+                                            'graphics/icon/font.svg',
+                                            height: 32,
+                                            width: 32,
+                                          ))),
+                                  Padding(
+                                      padding: EdgeInsets.all(20),
+                                      child: InkWell(
+                                          onTap: () {
+                                            DialogUtils.showColorChooser(
+                                                    draggableText.getColor(),
+                                                    context)
+                                                .then((color) {
+                                              if (color != null) {
+                                                draggableText.setColor(color);
+                                              }
+                                            });
+                                          },
+                                          child: SvgPicture.asset(
+                                            'graphics/icon/art.svg',
+                                            height: 32,
+                                            width: 32,
+                                          ))),
+                                  Padding(
+                                      padding: EdgeInsets.all(20),
+                                      child: InkWell(
+                                          onTap: () {
+                                            /*setState(() {
+                                              if (imageRatio.index <
+                                                  ImageRatio.values.length -
+                                                      1) {
+                                                imageRatio = ImageRatio.values[
+                                                    imageRatio.index + 1];
+                                              } else {
+                                                imageRatio =
+                                                    ImageRatio.values[0];
+                                              }
 
-                                      if (imageRatio.index < ImageRatio.values.length-1) {
-                                        imageRatio =
-                                        ImageRatio.values[imageRatio.index + 1];
+                                              height = MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  imageRatio.ratio;
+                                            });*/
 
-                                      } else {
-                                        imageRatio = ImageRatio.values[0];
-                                      }
-
-                                      height = MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              imageRatio.ratio;
-                                    });
-
-                                    /*_capturePng(captureKey); */
-                                  },
-                                  child: SvgPicture.asset(
-                                    'graphics/icon/ratio.svg',
-                                    height: 32,
-                                    width: 32,
-                                  ))
+                                            _capturePng(captureKey)
+                                                .then((pngBytes) {
+                                              DialogUtils.showImageShareDialog(
+                                                      context, pngBytes)
+                                                  .then((imageShare) {
+                                                if (imageShare != null) {
+                                                  switch (imageShare) {
+                                                    case ImageShare.DOWNLOAD:
+                                                      break;
+                                                    case ImageShare.SHARE:
+                                                      _shareImage(pngBytes);
+                                                      break;
+                                                  }
+                                                }
+                                              });
+                                            });
+                                            /*
+                                                (image) => DialogUtils
+                                                    .showImageShareDialog(
+                                                        context, image));
+*/
+                                          },
+                                          child: SvgPicture.asset(
+                                            'graphics/icon/ratio.svg',
+                                            height: 32,
+                                            width: 32,
+                                          )))
+                                ],
+                              ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: <Widget>[
+                                  SizedBox(
+                                      width: 60,
+                                      height: 30,
+                                      child: Text(
+                                        currentFont.family,
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            fontSize: 12,
+                                            fontFamily: currentFont.family),
+                                      )),
+                                  SizedBox(
+                                      width: 60,
+                                      height: 30,
+                                      child: Text("Color",
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                          ))),
+                                  SizedBox(
+                                      width: 60,
+                                      height: 30,
+                                      child: Text(imageRatio.name,
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                          )))
+                                ],
                               )
                             ],
-                          ),
-                           Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: <Widget>[
-                              SizedBox(width: 60,height: 30, child: Text(currentFont.family, textAlign: TextAlign.center, style: TextStyle(fontSize: 12, fontFamily: currentFont.family),)),
-                              SizedBox(width: 60,height: 30, child: Text("Color", textAlign: TextAlign.center, style: TextStyle(fontSize: 12, ))),
-                              SizedBox(width: 60,height: 30, child: Text(imageRatio.name, textAlign: TextAlign.center, style: TextStyle(fontSize: 12, )))
-                            ],
-                          )
-                          ],)
-                           ),
+                          )),
                     )
                   ])))
     ]));
   }
 }
 
-enum ImageRatio { Facebook, Instagram, Story, Cover}
+enum ImageRatio { Facebook, Instagram, Story, Cover }
 
 extension ImageRatioExtension on ImageRatio {
   double get ratio {
-    switch(this) {
-
+    switch (this) {
       case ImageRatio.Facebook:
         return 1.33;
         break;
@@ -206,8 +250,7 @@ extension ImageRatioExtension on ImageRatio {
   }
 
   String get name {
-       switch(this) {
-
+    switch (this) {
       case ImageRatio.Facebook:
         return "Facebook";
         break;
@@ -225,7 +268,7 @@ extension ImageRatioExtension on ImageRatio {
   }
 }
 
-Future<void> _capturePng(GlobalKey globalKey) async {
+Future<Uint8List> _capturePng(GlobalKey globalKey) async {
   ui.Image image;
   bool catched = false;
   RenderRepaintBoundary boundary = globalKey.currentContext.findRenderObject();
@@ -241,6 +284,19 @@ Future<void> _capturePng(GlobalKey globalKey) async {
   if (catched) {
     ByteData byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     Uint8List pngBytes = byteData.buffer.asUint8List();
-    print(pngBytes);
+    return pngBytes;
+  }
+}
+
+_shareImage(Uint8List bytes) async {
+  try {
+    final tempDir = await getTemporaryDirectory();
+    final file = await new File('${tempDir.path}/shareImage.jpg').create();
+    file.writeAsBytesSync(bytes);
+
+    final channel = const MethodChannel('channel:co.deepseed.deep_seed/share');
+    channel.invokeMethod('shareFile', 'shareImage.jpg');
+  } catch (e) {
+    print('Share error: $e');
   }
 }

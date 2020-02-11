@@ -27,6 +27,7 @@ dependencies:
   sqflite: ^1.2.0
   infinite_widgets: ^1.0.1
   flutter_colorpicker: any
+  esys_flutter_share: ^1.0.2
   flutter:
     sdk: flutter
 
