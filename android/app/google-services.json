@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "377858334264",
+    "firebase_url": "https://deepseed-3528d.firebaseio.com",
+    "project_id": "deepseed-3528d",
+    "storage_bucket": "deepseed-3528d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:377858334264:android:ea641d236065205efe90cd",
+        "android_client_info": {
+          "package_name": "co.deepseed.deep_seed"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "377858334264-4gp96sruoohet6es1k7j59sbv9a0e8g2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjCWbZsZRbr2qZD4DIaJvQH8ofb8nv4XY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "377858334264-4gp96sruoohet6es1k7j59sbv9a0e8g2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

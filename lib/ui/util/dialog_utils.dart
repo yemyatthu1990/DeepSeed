@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 import 'dart:ui';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:deep_seed/model/poem.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/block_picker.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -80,6 +82,45 @@ class DialogUtils {
                 },
               )
             ],
+          );
+        });
+  }
+
+  static Future<Poem> showPoemPickerDialog(
+      BuildContext context, List<Poem> poems) async {
+    BoxDecoration decoration = BoxDecoration(
+        border: Border.all(
+            width: 1.0, style: BorderStyle.solid, color: Colors.grey),
+        borderRadius: BorderRadius.all(Radius.circular(5.0)));
+    List<Widget> childWidgets = new List();
+    poems.forEach((poem) {
+      Container container = Container(
+        padding: const EdgeInsets.all(10.0),
+        decoration: decoration,
+        child: IntrinsicHeight(
+            child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Expanded(child: Text(poem.body)),
+            Text(poem.author),
+          ],
+        )),
+      );
+
+      childWidgets.add(new SimpleDialogOption(
+        onPressed: () {
+          Navigator.pop(context, poem);
+        },
+        child: container,
+      ));
+    });
+    return await showDialog<Poem>(
+        context: context,
+        builder: (BuildContext context) {
+          return SimpleDialog(
+            children: childWidgets,
           );
         });
   }
