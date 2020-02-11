@@ -19,7 +19,6 @@ environment:
 dependencies:
   http: ^0.12.0+4
   path_provider: ^1.6.0
-  simple_permissions: ^0.1.9
   flutter_svg: ^0.17.1
   bubble_bottom_bar: ^1.2.0
   cached_network_image: ^2.0.0
@@ -27,6 +26,8 @@ dependencies:
   sqflite: ^1.2.0
   infinite_widgets: ^1.0.1
   flutter_colorpicker: any
+  firebase_crashlytics: ^0.1.2+5
+  firebase_analytics: ^5.0.11
   flutter:
     sdk: flutter
 

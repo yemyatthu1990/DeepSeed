@@ -2,9 +2,20 @@ import 'package:deep_seed/constants.dart';
 import 'package:deep_seed/navigation/Router.dart';
 import 'package:deep_seed/ui/home/bottom_bar_screen.dart';
 import 'package:deep_seed/ui/image_detail/image_editor.dart';
+import 'package:deep_seed/util/Analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+void main() {
+  // Set `enableInDevMode` to true to see reports while in debug mode
+  // This is only to be used for confirming that reports are being
+  // submitted as expected. It is not intended to be used for everyday
+  // development.
+  Crashlytics.instance.enableInDevMode = true;
 
-void main() => runApp(MyApp());
+  // Pass all uncaught errors from the framework to Crashlytics.
+  FlutterError.onError = Crashlytics.instance.recordFlutterError;
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.

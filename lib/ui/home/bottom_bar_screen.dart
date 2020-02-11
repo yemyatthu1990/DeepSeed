@@ -1,5 +1,7 @@
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:deep_seed/ui/image_list/image_list.dart';
+import 'package:deep_seed/util/Analytics.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 
 class BottomBarScreen extends StatefulWidget {
@@ -31,6 +33,8 @@ class _BottomBarState extends State<BottomBarScreen> {
   void initState() {
     super.initState();
     currentIndex = 0;
+    Crashlytics.instance.recordFlutterError(new FlutterErrorDetails(exception: Exception("fake error")));
+    Analytics().logAppOpen();
   }
 
   void changePage(int index) {
