@@ -28,6 +28,7 @@ dependencies:
   flutter_colorpicker: any
   firebase_crashlytics: ^0.1.2+5
   firebase_analytics: ^5.0.11
+  cloud_firestore: ^0.13.1+1
   flutter:
     sdk: flutter
 

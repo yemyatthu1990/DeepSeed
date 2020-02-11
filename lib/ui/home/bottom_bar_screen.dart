@@ -1,4 +1,5 @@
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:deep_seed/ui/image_list/image_list.dart';
 import 'package:deep_seed/util/Analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -33,8 +34,13 @@ class _BottomBarState extends State<BottomBarScreen> {
   void initState() {
     super.initState();
     currentIndex = 0;
-    Crashlytics.instance.recordFlutterError(new FlutterErrorDetails(exception: Exception("fake error")));
     Analytics().logAppOpen();
+    Firestore.instance.collection("poems").snapshots(includeMetadataChanges: false)
+    .listen( (data) {
+      data.documents.forEach((snapshot) {
+        print(snapshot.data["data"]);
+      });
+    });
   }
 
   void changePage(int index) {
