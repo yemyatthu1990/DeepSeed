@@ -5,6 +5,7 @@ import 'package:deep_seed/ui/util/dialog_utils.dart';
 import 'package:deep_seed/util/Analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:image_picker/image_picker.dart';
 
 class BottomBarScreen extends StatefulWidget {
@@ -146,21 +147,74 @@ class _BottomBarState extends State<BottomBarScreen> {
         backgroundColor: Colors.transparent,
         builder: (builder) {
           return Container(
-              padding: EdgeInsets.all(32.0),
-              color: Colors.transparent,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-
-                  Card(
-
-                      color: Colors.white,
-                      child: Padding(
-                          padding: EdgeInsets.all(20.0),
-                          child: Text("Camera"))),
-                  Text("two")
-                ],
-              ));
+            padding: EdgeInsets.all(32.0),
+            color: Colors.transparent,
+            child: Card(
+              child: Padding(
+                  padding: EdgeInsets.only(top: 32, bottom: 32),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      InkWell(
+                          onTap: () {
+                            ImagePicker.pickImage(source: ImageSource.camera)
+                                .then((value) => value.readAsBytes().then(
+                                    (value) => DialogUtils.showImageShareDialog(
+                                        context, value)));
+                          },
+                          child: Padding(
+                              padding: EdgeInsets.only(right: 16),
+                              child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.camera,
+                                      size: 56,
+                                      color: Colors.red,
+                                    ),
+                                    Text("Camera")
+                                  ]))),
+                      InkWell(
+                          onTap: () {
+                            ImagePicker.pickImage(source: ImageSource.gallery)
+                                .then((value) => value.readAsBytes().then(
+                                    (value) => DialogUtils.showImageShareDialog(
+                                        context, value)));
+                          },
+                          child: Padding(
+                              padding: EdgeInsets.only(left: 16),
+                              child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    InkResponse(
+                                        onTap: () {
+                                          ImagePicker.pickImage(
+                                                  source: ImageSource.gallery)
+                                              .then((value) => value
+                                                  .readAsBytes()
+                                                  .then((value) => DialogUtils
+                                                      .showImageShareDialog(
+                                                          context, value)));
+                                        },
+                                        child: Container(
+                                          width: 56,
+                                          height: 56,
+                                          decoration: new BoxDecoration(
+                                            color: Colors.green,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: new Icon(
+                                            Icons.photo_album,
+                                            color: Colors.white,
+                                          ),
+                                        )),
+                                    Text("Gallery")
+                                  ])))
+                    ],
+                  )),
+            ),
+          );
         });
   }
 }
