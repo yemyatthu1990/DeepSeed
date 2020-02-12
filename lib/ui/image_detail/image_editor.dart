@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui' as ui;
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:path_provider/path_provider.dart';
 
 class ImageEditor extends StatefulWidget {
@@ -36,11 +35,13 @@ class ImageEditorState extends State<ImageEditor> {
   double height = 0;
   ImageRatio imageRatio = ImageRatio.Facebook;
   Font currentFont = Font.CHERRY;
+  String _textFieldText = "";
   GlobalKey captureKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
     CachedNetworkImage image = CachedNetworkImage(
+
         imageUrl: photoUrls.regular,
         placeholderFadeInDuration: Duration.zero,
         placeholder: (context, string) => Image.file(new File(tempFileUrl),
@@ -54,7 +55,7 @@ class ImageEditorState extends State<ImageEditor> {
             ? height
             : MediaQuery.of(context).size.width * imageRatio.ratio,
         fit: BoxFit.cover);
-    draggableText.setMaxXY(0, image.height - 40);
+    draggableText.setMaxXY(0, image.height);
     return Scaffold(
         body: Stack(children: <Widget>[
       RepaintBoundary(
@@ -64,9 +65,13 @@ class ImageEditorState extends State<ImageEditor> {
               Hero(
                   tag: heroPhotoTag + index.toString(),
                   child: Material(child: image)),
-              draggableText
+              draggableText,
             ],
           )),
+       Positioned.fill(child: Align(
+                alignment: Alignment.bottomCenter,
+                child: _bottomBar(),
+              )),
       Align(
           alignment: Alignment.bottomCenter,
           child: Container(
@@ -81,19 +86,31 @@ class ImageEditorState extends State<ImageEditor> {
                       elevation: 0.0,
                       child: Padding(
                         child: TextField(
+                          controller: TextEditingController.fromValue(TextEditingValue(text: _textFieldText, selection: TextSelection.collapsed(offset: _textFieldText.length-1))),
+                           keyboardType: TextInputType.multiline,
+                            maxLines: 5,
+                            minLines: 1,
                             decoration: InputDecoration.collapsed(
                                 hintText: "Feeling..."),
+
                             autofocus: false,
                             onChanged: (value) =>
                                 {draggableText.setText(value)}),
                         padding: EdgeInsets.all(12),
                       ),
                     )),
-                Container(
+
+              ])))
+    ]));
+  }
+
+  Widget _bottomBar() {
+    return  Container(
                   child: Padding(
                       padding: EdgeInsets.all(32),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -112,10 +129,8 @@ class ImageEditorState extends State<ImageEditor> {
                                           }
                                         });
                                       },
-                                      child: SvgPicture.asset(
-                                        'graphics/icon/font.svg',
-                                        height: 32,
-                                        width: 32,
+                                      child: Icon(
+                                        Icons.font_download
                                       ))),
                               Padding(
                                   padding: EdgeInsets.all(20),
@@ -130,16 +145,14 @@ class ImageEditorState extends State<ImageEditor> {
                                           }
                                         });
                                       },
-                                      child: SvgPicture.asset(
-                                        'graphics/icon/art.svg',
-                                        height: 32,
-                                        width: 32,
+                                      child: Icon(
+                                        Icons.color_lens
                                       ))),
                               Padding(
                                   padding: EdgeInsets.all(20),
                                   child: InkWell(
                                       onTap: () {
-                                        /*setState(() {
+                                        setState(() {
                                               if (imageRatio.index <
                                                   ImageRatio.values.length -
                                                       1) {
@@ -154,34 +167,13 @@ class ImageEditorState extends State<ImageEditor> {
                                                       .size
                                                       .width *
                                                   imageRatio.ratio;
-                                            });*/
+                                            });
 
-                                        _capturePng(captureKey)
-                                            .then((pngBytes) {
-                                          DialogUtils.showImageShareDialog(
-                                                  context, pngBytes)
-                                              .then((imageShare) {
-                                            if (imageShare != null) {
-                                              switch (imageShare) {
-                                                case ImageShare.DOWNLOAD:
-                                                  break;
-                                                case ImageShare.SHARE:
-                                                  _shareImage(pngBytes);
-                                                  break;
-                                              }
-                                            }
-                                          });
-                                        });
-                                        /*
-                                                (image) => DialogUtils
-                                                    .showImageShareDialog(
-                                                        context, image));
-*/
+
+
                                       },
-                                      child: SvgPicture.asset(
-                                        'graphics/icon/ratio.svg',
-                                        height: 32,
-                                        width: 32,
+                                      child: Icon(
+                                        Icons.image_aspect_ratio
                                       ))),
                               Padding(
                                   padding: EdgeInsets.all(20),
@@ -204,18 +196,22 @@ class ImageEditorState extends State<ImageEditor> {
                                           DialogUtils.showPoemPickerDialog(
                                                   context, poems)
                                               .then((poem) {
-                                            draggableText.setText(poem.body +
-                                                "\n" +
+                                            if (poem == null) return;
+                                            setState(() {
+                                              _textFieldText =  poem.body +
+                                                "\n\n" +
                                                 poem.title +
                                                 " - " +
-                                                poem.author);
+                                                poem.author;
+                                            });
+                                            draggableText.setText(_textFieldText);
+                                            draggableText.setOffSet(Offset(0, 0));
+
                                           });
                                         });
                                       },
-                                      child: SvgPicture.asset(
-                                        'graphics/icon/poem.svg',
-                                        height: 32,
-                                        width: 32,
+                                      child: Icon(
+                                        Icons.note
                                       ))),
                             ],
                           ),
@@ -252,13 +248,11 @@ class ImageEditorState extends State<ImageEditor> {
                           )
                         ],
                       )),
-                )
-              ])))
-    ]));
+                );
   }
 }
 
-enum ImageRatio { Facebook, Instagram, Story, Cover }
+enum ImageRatio { Facebook, Instagram }
 
 extension ImageRatioExtension on ImageRatio {
   double get ratio {
@@ -268,12 +262,6 @@ extension ImageRatioExtension on ImageRatio {
         break;
       case ImageRatio.Instagram:
         return 1.0;
-        break;
-      case ImageRatio.Story:
-        return 1.77;
-        break;
-      case ImageRatio.Cover:
-        return 0.6;
         break;
     }
     return 1.0;
@@ -286,13 +274,7 @@ extension ImageRatioExtension on ImageRatio {
         break;
       case ImageRatio.Instagram:
         return "Instagram";
-        break;
-      case ImageRatio.Story:
-        return "Story";
-        break;
-      case ImageRatio.Cover:
-        return "Cover";
-        break;
+
     }
     return "";
   }
@@ -328,5 +310,24 @@ _shareImage(Uint8List bytes) async {
     channel.invokeMethod('shareFile', 'shareImage.jpg');
   } catch (e) {
     print('Share error: $e');
+  }
+
+  _shareFinalImage(BuildContext context, GlobalKey captureKey, Uint8List pngBytes) {
+      _capturePng(captureKey)
+                                            .then((pngBytes) {
+                                          DialogUtils.showImageShareDialog(
+                                                  context, pngBytes)
+                                              .then((imageShare) {
+                                            if (imageShare != null) {
+                                              switch (imageShare) {
+                                                case ImageShare.DOWNLOAD:
+                                                  break;
+                                                case ImageShare.SHARE:
+                                                  _shareImage(pngBytes);
+                                                  break;
+                                              }
+                                            }
+                                          });
+                                        });
   }
 }

@@ -1,9 +1,11 @@
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:deep_seed/ui/image_list/image_list.dart';
+import 'package:deep_seed/ui/util/dialog_utils.dart';
 import 'package:deep_seed/util/Analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class BottomBarScreen extends StatefulWidget {
   BottomBarScreen({Key key, this.title}) : super(key: key);
@@ -50,11 +52,23 @@ class _BottomBarState extends State<BottomBarScreen> {
         title: Text("Deep Seed"),
       ),
       body: _children[0],
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: Icon(Icons.add),
-        backgroundColor: Colors.red,
-      ),
+      floatingActionButton: _buildFloatingActionButton()
+
+      /* FloatingActionButton(
+        onPressed: () {
+          ImagePicker.pickImage(source: ImageSource.gallery)
+              .then((image) {
+                if(image == null) return;
+                image.readAsBytes().then((bytes) {
+                  DialogUtils.showImageShareDialog(context, bytes);
+                });
+
+          });
+        },
+        child: Icon(Icons.add, color: Colors.black,),
+        backgroundColor: Colors.white,
+      )*/
+      ,
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       bottomNavigationBar: BubbleBottomBar(
         hasNotch: true,
@@ -113,5 +127,40 @@ class _BottomBarState extends State<BottomBarScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildFloatingActionButton() {
+    return FloatingActionButton(
+      onPressed: _showModalSheet,
+      backgroundColor: Colors.white,
+      child: Icon(
+        Icons.add,
+        color: Colors.black,
+      ),
+    );
+  }
+
+  void _showModalSheet() {
+    showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (builder) {
+          return Container(
+              padding: EdgeInsets.all(32.0),
+              color: Colors.transparent,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+
+                  Card(
+
+                      color: Colors.white,
+                      child: Padding(
+                          padding: EdgeInsets.all(20.0),
+                          child: Text("Camera"))),
+                  Text("two")
+                ],
+              ));
+        });
   }
 }

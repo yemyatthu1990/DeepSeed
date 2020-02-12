@@ -29,7 +29,7 @@ dependencies:
   firebase_crashlytics: ^0.1.2+5
   firebase_analytics: ^5.0.11
   cloud_firestore: ^0.13.1+1
-
+  image_picker: ^0.6.3+1
   flutter:
     sdk: flutter
 
@@ -60,11 +60,6 @@ flutter:
   #  - images/a_dot_burr.jpeg
   #  - images/a_dot_ham.jpeg
 
-  assets:
-    - graphics/icon/font.svg
-    - graphics/icon/art.svg
-    - graphics/icon/ratio.svg
-    - graphics/icon/poem.svg
 
   fonts:
   - family: Cherry

@@ -76,7 +76,9 @@ class DialogUtils {
             content: Image.memory(imageBytes),
             actions: <Widget>[
               IconButton(
-                icon: SvgPicture.asset("graphics/icon/art.svg"),
+                icon: Icon(
+                  Icons.share
+                ),
                 onPressed: () {
                   Navigator.pop(context, ImageShare.SHARE);
                 },

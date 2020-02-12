@@ -16,6 +16,10 @@ class DraggableText extends StatefulWidget {
     _draggableTextState.setColor(color);
   }
 
+  void setOffSet(Offset offset) {
+    _draggableTextState.setOffSet(offset);
+  }
+
   Color getColor() => _draggableTextState.currentColor;
 
 
@@ -52,6 +56,12 @@ class DraggableTextState extends State<DraggableText> {
       currentColor = color;
     });
   }
+
+  void setOffSet(Offset offset) {
+    setState(() {
+      this.offset = offset;
+    });
+  }
   @override
   void initState() {
     offset = Offset(0, maxY/2);
@@ -63,7 +73,7 @@ class DraggableTextState extends State<DraggableText> {
       top: offset.dy,
       child: GestureDetector(
         onPanUpdate: (details) {
-          if (offset.dy + details.delta.dy+40 > maxY) return;
+          if (offset.dy + details.delta.dy+ context.size.height> maxY) return;
           if (offset.dy + details.delta.dy < 0 && details.delta.dy< 0) return;
           setState(() {
             offset = Offset(offset.dx, offset.dy + details.delta.dy);
@@ -75,7 +85,7 @@ class DraggableTextState extends State<DraggableText> {
             child: Text(value,
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 24,
+                  fontSize: 18,
                   fontFamily: currentFont.family
                 ),
                 textAlign: TextAlign.center),
