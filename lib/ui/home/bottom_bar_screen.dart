@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../constants.dart';
+
 class BottomBarScreen extends StatefulWidget {
   BottomBarScreen({Key key, this.title}) : super(key: key);
 
@@ -50,26 +52,11 @@ class _BottomBarState extends State<BottomBarScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).secondaryHeaderColor,
         title: Text("Deep Seed"),
       ),
       body: _children[0],
-      floatingActionButton: _buildFloatingActionButton()
-
-      /* FloatingActionButton(
-        onPressed: () {
-          ImagePicker.pickImage(source: ImageSource.gallery)
-              .then((image) {
-                if(image == null) return;
-                image.readAsBytes().then((bytes) {
-                  DialogUtils.showImageShareDialog(context, bytes);
-                });
-
-          });
-        },
-        child: Icon(Icons.add, color: Colors.black,),
-        backgroundColor: Colors.white,
-      )*/
-      ,
+      floatingActionButton: _buildFloatingActionButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       bottomNavigationBar: BubbleBottomBar(
         hasNotch: true,
@@ -159,9 +146,13 @@ class _BottomBarState extends State<BottomBarScreen> {
                       InkWell(
                           onTap: () {
                             ImagePicker.pickImage(source: ImageSource.camera)
-                                .then((value) => value.readAsBytes().then(
-                                    (value) => DialogUtils.showImageShareDialog(
-                                        context, value)));
+                                .then((value){
+                                  Map<String, dynamic> data = {
+                                "file_url": value.path
+                              };
+                                  Navigator.pushNamed(context, detailRoute,
+                                      arguments: data);
+                            });
                           },
                           child: Padding(
                               padding: EdgeInsets.only(right: 16),
@@ -178,26 +169,22 @@ class _BottomBarState extends State<BottomBarScreen> {
                       InkWell(
                           onTap: () {
                             ImagePicker.pickImage(source: ImageSource.gallery)
-                                .then((value) => value.readAsBytes().then(
-                                    (value) => DialogUtils.showImageShareDialog(
-                                        context, value)));
+                                .then((value) {
+                              Map<String, dynamic> data = {
+                                "file_url": value.path
+                              };
+                                  Navigator.pushNamed(context, detailRoute,
+                                      arguments: data);
+                            }
+                            );
                           },
                           child: Padding(
                               padding: EdgeInsets.only(left: 16),
                               child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    InkResponse(
-                                        onTap: () {
-                                          ImagePicker.pickImage(
-                                                  source: ImageSource.gallery)
-                                              .then((value) => value
-                                                  .readAsBytes()
-                                                  .then((value) => DialogUtils
-                                                      .showImageShareDialog(
-                                                          context, value)));
-                                        },
-                                        child: Container(
+
+                                         Container(
                                           width: 56,
                                           height: 56,
                                           decoration: new BoxDecoration(
@@ -208,7 +195,7 @@ class _BottomBarState extends State<BottomBarScreen> {
                                             Icons.photo_album,
                                             color: Colors.white,
                                           ),
-                                        )),
+                                        ),
                                     Text("Gallery")
                                   ])))
                     ],

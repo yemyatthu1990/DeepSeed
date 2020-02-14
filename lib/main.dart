@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:deep_seed/constants.dart';
 import 'package:deep_seed/navigation/Router.dart';
 import 'package:deep_seed/ui/home/bottom_bar_screen.dart';
@@ -22,7 +24,17 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+
+      return GestureDetector(
+      onTap: ()
+      {
+        FocusScopeNode currentFocus = FocusScope.of(context);
+
+        if (!currentFocus.hasPrimaryFocus) {
+          currentFocus.unfocus();
+        }
+      },
+      child: MaterialApp(
         title: 'Flutter Demo',
         onGenerateRoute: Router.generateRoute,
         initialRoute: bottomBarRoute,
@@ -36,10 +48,12 @@ class MyApp extends StatelessWidget {
           // or simply save your changes to "hot reload" in a Flutter IDE).
           // Notice that the counter didn't reset back to zero; the application
           // is not restarted.
-          primarySwatch: Colors.blue,
+          primarySwatch: Colors.grey
+
         ),
+
         home: Scaffold(
           body: BottomBarScreen(),
-        ));
+        )));
   }
 }

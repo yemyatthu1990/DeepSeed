@@ -20,7 +20,10 @@ class DraggableText extends StatefulWidget {
     _draggableTextState.setOffSet(offset);
   }
 
+
   Color getColor() => _draggableTextState.currentColor;
+
+  double getHeight() => _draggableTextState.context.size.height;
 
 
   @override
@@ -61,6 +64,10 @@ class DraggableTextState extends State<DraggableText> {
     setState(() {
       this.offset = offset;
     });
+  }
+
+  Size getSize() {
+    return context.size;
   }
   @override
   void initState() {

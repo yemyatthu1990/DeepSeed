@@ -7,9 +7,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:deep_seed/constants.dart';
 import 'package:deep_seed/model/model.dart';
 import 'package:deep_seed/model/poem.dart';
+import 'package:deep_seed/navigation/router.dart';
+import 'package:deep_seed/network/image_cache_manager.dart';
 import 'package:deep_seed/ui/image_detail/draggable_text.dart';
 import 'package:deep_seed/ui/util/dialog_utils.dart';
 import 'package:deep_seed/util/keyboard_visibility.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -20,95 +23,120 @@ class ImageEditor extends StatefulWidget {
   final Urls photoUrls;
   final int index;
   final String tempFileUrl;
-  ImageEditor(this.photoUrls, this.index, this.tempFileUrl);
+  final String fileUrl;
+
+  ImageEditor(this.photoUrls, this.index, this.tempFileUrl, this.fileUrl);
   @override
   State<StatefulWidget> createState() {
-    return ImageEditorState(photoUrls, index, tempFileUrl);
+    return ImageEditorState(photoUrls, index, tempFileUrl, this.fileUrl);
   }
 }
 
 class ImageEditorState extends State<ImageEditor> {
   final Urls photoUrls;
   final int index;
-  final String tempFileUrl;
-  ImageEditorState(this.photoUrls, this.index, this.tempFileUrl);
+  String tempFileUrl;
+  String fileUrl;
+  ImageEditorState(this.photoUrls, this.index, this.tempFileUrl, this.fileUrl);
   DraggableText draggableText = DraggableText();
   double height = 0;
-  ImageRatio imageRatio = ImageRatio.Facebook;
+  ImageRatio imageRatio = ImageRatio.Instagram;
   Font currentFont = Font.CHERRY;
   String _textFieldText = "";
   GlobalKey captureKey = GlobalKey();
   @override
   void initState() {
     super.initState();
+    if (fileUrl == null || fileUrl.isEmpty) {
+      fileUrl = tempFileUrl;
+      ImageCacheManager().downloadFile(photoUrls.regular).then((fileInfo) {
+        setState(() {
+          fileUrl = fileInfo.file.path;
+        });
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    CachedNetworkImage image = CachedNetworkImage(
-        imageUrl: photoUrls.regular,
-        placeholderFadeInDuration: Duration.zero,
-        placeholder: (context, string) => Image.file(new File(tempFileUrl),
-            fit: BoxFit.cover,
-            width: MediaQuery.of(context).size.width,
-            height: height > 0
-                ? height
-                : MediaQuery.of(context).size.width * imageRatio.ratio),
+    Image image = Image.file(new File(fileUrl),
         width: MediaQuery.of(context).size.width,
+        gaplessPlayback: true,
         height: height > 0
             ? height
             : MediaQuery.of(context).size.width * imageRatio.ratio,
         fit: BoxFit.cover);
     draggableText.setMaxXY(0, image.height);
     return Scaffold(
-        body: Stack(children: <Widget>[
-      RepaintBoundary(
-          key: captureKey,
-          child: Stack(
-            children: <Widget>[
-              Hero(
-                  tag: heroPhotoTag + index.toString(),
-                  child: Material(child: image)),
-              draggableText,
-            ],
-          )),
-      Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-              margin: EdgeInsets.only(bottom: 8),
-              child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget>[
-                    _bottomBar(),
-                    Container(
-                        margin: EdgeInsets.only(left: 32, right: 32),
-                        child: Card(
-                          margin: EdgeInsets.zero,
-                          elevation: 0.0,
-                          child: Padding(
-                            child: TextField(
-                                controller: _textFieldText.length > 0
-                                    ? TextEditingController.fromValue(
-                                        TextEditingValue(
-                                            text: _textFieldText,
-                                            selection: TextSelection.collapsed(
-                                                offset:
-                                                    _textFieldText.length - 1)))
-                                    : null,
-                                keyboardType: TextInputType.multiline,
-                                maxLines: 5,
-                                minLines: 1,
-                                decoration: InputDecoration.collapsed(
-                                    hintText: "Feeling..."),
-                                autofocus: false,
-                                onChanged: (value) =>
-                                    {draggableText.setText(value)}),
-                            padding: EdgeInsets.all(12),
-                          ),
-                        )),
-                  ])))
-    ]));
+        backgroundColor: Theme.of(context).dialogBackgroundColor,
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).secondaryHeaderColor,
+          actions: <Widget>[
+            InkWell(
+                onTap: () {
+                  _shareFinalImage(context, captureKey);
+                },
+                child: Padding(
+                    padding: EdgeInsets.all(8),
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.save_alt,
+                        color: Theme.of(context).primaryIconTheme.color,
+                      ),
+                    )))
+          ],
+        ),
+        body: SafeArea(child:Stack(children: <Widget>[
+          RepaintBoundary(
+              key: captureKey,
+              child: Stack(
+                children: <Widget>[
+                  Hero(tag: heroPhotoTag + index.toString(), child: image),
+                  draggableText,
+                ],
+              )),
+          Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                  margin: EdgeInsets.only(bottom: 8),
+                  child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        _bottomBar(),
+                        Container(
+                            margin: EdgeInsets.only(left: 32, right: 32),
+                            child: Container(
+                               decoration: BoxDecoration(
+                                 color: Colors.white,
+                                 border: Border.all(color: Theme.of(context).primaryColor),borderRadius: BorderRadius.all(Radius.circular(4)),
+                               ),
+
+                              child: Padding(
+                                child: TextField(
+                                    controller: _textFieldText.length > 0
+                                        ? TextEditingController.fromValue(
+                                            TextEditingValue(
+                                                text: _textFieldText,
+                                                selection:
+                                                    TextSelection.collapsed(
+                                                        offset: _textFieldText
+                                                                .length)))
+                                        : null,
+                                    focusNode: null,
+                                    keyboardType: TextInputType.multiline,
+                                    maxLines: 5,
+                                    minLines: 1,
+                                    decoration: InputDecoration.collapsed(
+                                        hintText: "Feeling..."),
+                                    autofocus: false,
+                                    onChanged: (value) =>
+                                        {draggableText.setText(value)}),
+                                padding: EdgeInsets.all(12),
+                              ),
+                            )),
+                      ])))
+        ])));
   }
 
   Widget _bottomBar() {
@@ -119,12 +147,12 @@ class ImageEditorState extends State<ImageEditor> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Row(
+              Container(
+
+                  child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
-                  Padding(
-                      padding: EdgeInsets.all(20),
-                      child: InkWell(
+                 InkWell(
                           onTap: () {
                             DialogUtils.showFontChooser(context).then((font) {
                               if (font != null) {
@@ -135,10 +163,10 @@ class ImageEditorState extends State<ImageEditor> {
                               }
                             });
                           },
-                          child: Icon(Icons.font_download))),
-                  Padding(
+                          child:  Padding(
                       padding: EdgeInsets.all(20),
-                      child: InkWell(
+                      child: Icon(Icons.font_download))),
+                  InkWell(
                           onTap: () {
                             DialogUtils.showColorChooser(
                                     draggableText.getColor(), context)
@@ -148,10 +176,10 @@ class ImageEditorState extends State<ImageEditor> {
                               }
                             });
                           },
-                          child: Icon(Icons.color_lens))),
-                  Padding(
+                          child:Padding(
                       padding: EdgeInsets.all(20),
-                      child: InkWell(
+                      child: Icon(Icons.color_lens))),
+                  InkWell(
                           onTap: () {
                             setState(() {
                               if (imageRatio.index <
@@ -165,20 +193,12 @@ class ImageEditorState extends State<ImageEditor> {
                               height = MediaQuery.of(context).size.width *
                                   imageRatio.ratio;
                             });
+                            draggableText.setOffSet(Offset(0, 80));
                           },
-                          child: Icon(Icons.image_aspect_ratio))),
-                  Padding(
+                          child: Padding(
                       padding: EdgeInsets.all(20),
-                      child: InkWell(
-                          onTap: () {
-                            _capturePng(captureKey).then((pngBytes) =>
-                                _shareFinalImage(
-                                    context, captureKey, pngBytes));
-                          },
-                          child: Icon(Icons.image_aspect_ratio))),
-                  Padding(
-                      padding: EdgeInsets.all(20),
-                      child: InkWell(
+                      child: Icon(Icons.aspect_ratio))),
+                 InkWell(
                           onTap: () {
                             Firestore.instance
                                 .collection("poems")
@@ -204,13 +224,15 @@ class ImageEditorState extends State<ImageEditor> {
                                       poem.author;
                                 });
                                 draggableText.setText(_textFieldText);
-                                draggableText.setOffSet(Offset(0, 0));
+                                draggableText.setOffSet(Offset(0, 80));
                               });
                             });
                           },
-                          child: Icon(Icons.note))),
+                          child:  Padding(
+                      padding: EdgeInsets.all(20),
+                      child: Icon(Icons.art_track))),
                 ],
-              )
+              ))
             ],
           )),
     );
@@ -277,8 +299,7 @@ _shareImage(Uint8List bytes) async {
   }
 }
 
-_shareFinalImage(
-    BuildContext context, GlobalKey captureKey, Uint8List pngBytes) {
+_shareFinalImage(BuildContext context, GlobalKey captureKey) {
   _capturePng(captureKey).then((pngBytes) {
     DialogUtils.showImageShareDialog(context, pngBytes).then((imageShare) {
       if (imageShare != null) {

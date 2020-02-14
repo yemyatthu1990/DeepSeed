@@ -15,7 +15,7 @@ class Router {
 
         return MaterialPageRoute(
             builder: (_) => ImageEditor(
-                data["urls"], data["index"], data["temp_file_url"]));
+                data["urls"], data["index"], data["temp_file_url"], data["file_url"]));
       default:
         return MaterialPageRoute(
             builder: (_) => Scaffold(
