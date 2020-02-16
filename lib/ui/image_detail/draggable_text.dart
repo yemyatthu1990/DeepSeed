@@ -47,9 +47,9 @@ class DraggableTextState extends State<DraggableText> {
   double maxX;
   Offset offset;
   double fontSize = 18;
-  String value = "Write something here";
-  Font currentFont = Font.CHERRY;
-  Color currentColor = Colors.black12;
+  String value = "";
+  Font currentFont = Font.SABAE;
+  Color currentColor = Color(0x80A1887F);
   void setMaxXY(double maxX, double maxY) {
     this.maxY = maxY;
     this.maxX = maxX;

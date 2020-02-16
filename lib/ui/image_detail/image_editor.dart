@@ -40,7 +40,7 @@ class ImageEditorState extends State<ImageEditor> {
   DraggableText draggableText = DraggableText();
   double height = 0;
   ImageRatio imageRatio = ImageRatio.Instagram;
-  Font currentFont = Font.CHERRY;
+  Font currentFont = Font.WASO;
   String _textFieldText = "";
   bool isFavorite = false;
   IconData favoriteIcon = Icons.favorite_border;
@@ -240,32 +240,22 @@ class ImageEditorState extends State<ImageEditor> {
                           child: const Icon(Icons.aspect_ratio))),
                   InkWell(
                       onTap: () {
-                        Firestore.instance
-                            .collection("poems")
-                            .snapshots(includeMetadataChanges: false)
-                            .listen((data) {
-                          List<Poem> poems = new List();
-                          data.documents.forEach((snapshot) {
-                            Poem poem = new Poem();
-                            poem.body = snapshot["body"];
-                            poem.title = snapshot["title"];
-                            poem.author = snapshot["author"];
-                            poems.add(poem);
+                        DialogUtils.showPoemPickerDialog(
+                                context,
+                                Firestore.instance
+                                    .collection("poems")
+                                    .snapshots(includeMetadataChanges: false))
+                            .then((poem) {
+                          if (poem == null) return;
+                          setState(() {
+                            _textFieldText = poem.body +
+                                "\n\n" +
+                                poem.title +
+                                " - " +
+                                poem.author;
                           });
-
-                          DialogUtils.showPoemPickerDialog(context, poems)
-                              .then((poem) {
-                            if (poem == null) return;
-                            setState(() {
-                              _textFieldText = poem.body +
-                                  "\n\n" +
-                                  poem.title +
-                                  " - " +
-                                  poem.author;
-                            });
-                            draggableText.setText(_textFieldText);
-                            draggableText.setOffSet(Offset(0, 80));
-                          });
+                          draggableText.setText(_textFieldText);
+                          draggableText.setOffSet(Offset(0, 80));
                         });
                       },
                       child: Padding(
@@ -328,10 +318,8 @@ Future<Uint8List> _capturePng(GlobalKey globalKey) async {
 
 _shareFinalImage(
     BuildContext context, GlobalKey captureKey, String imageRatio) {
-  _capturePng(captureKey).then((pngBytes) {
-    DialogUtils.showImageShareDialog(context, pngBytes, imageRatio)
-        .then((imagePath) {
-      if (imagePath != null) Utils.shareImage(imagePath);
-    });
+  DialogUtils.showImageShareDialog(context, _capturePng(captureKey), imageRatio)
+      .then((imagePath) {
+    if (imagePath != null) Utils.shareImage(imagePath);
   });
 }

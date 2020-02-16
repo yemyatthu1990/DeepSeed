@@ -16,15 +16,16 @@ class FavoriteListBloc {
     _favoriteListController = StreamController<ApiResponse<List<Urls>>>();
   }
 
-  fetchFavoriteList() async {
-    favoriteListSink.add(ApiResponse.loading('Fetching Favorites'));
+  Future<bool> fetchFavoriteList() async {
+    favoriteListSink.add(ApiResponse.loading(true, ''));
     try {
       List<Urls> favorites = await PreferenceUtils.getFavorites();
       favoriteListSink.add(ApiResponse.completed(favorites));
     } catch (e) {
-      favoriteListSink.add(ApiResponse.error(e.toString()));
+      favoriteListSink.add(ApiResponse.error(true, "Add to favorites"));
       print(e);
     }
+    return true;
   }
 
   dispose() {

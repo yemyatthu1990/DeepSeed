@@ -37,6 +37,7 @@ dependencies:
   shared_preferences: ^0.5.6+1
   event_bus: ^1.1.1
   intl: any
+  pull_to_refresh_notification: any
 
   
   flutter:
@@ -71,6 +72,34 @@ flutter:
 
 
   fonts:
+  - family: Sabae
+    fonts:
+      - asset: graphics/font/MyanmarSabae.ttf
+
+  - family: Sagar
+    fonts:
+      - asset: graphics/font/MyanmarSagar.ttf
+
+  - family: San Pya
+    fonts:
+      - asset: graphics/font/MyanmarSanpya.ttf
+
+  - family: Tagu
+    fonts:
+      - asset: graphics/font/MyanmarTagu.ttf
+
+  - family: Thuriya
+    fonts:
+      - asset: graphics/font/MyanmarThuriya.ttf
+
+  - family: Waso
+    fonts:
+      - asset: graphics/font/MyanmarWaso.ttf
+
+  - family: Yinmar
+    fonts:
+      - asset: graphics/font/MyanmarYinmar.ttf
+
   - family: Cherry
     fonts:
       - asset: graphics/font/cherry_unicode.ttf
@@ -78,6 +107,22 @@ flutter:
   - family: Padauk Ghost
     fonts:
       - asset: graphics/font/padauk_ghost.ttf
+
+  - family: Pauk Lay
+    fonts:
+      - asset: graphics/font/MyanmarPauklay.ttf
+
+  - family: Phet Sot
+    fonts:
+      - asset: graphics/font/MyanmarPhetsot.ttf
+
+  - family: Phik Sel
+    fonts:
+      - asset: graphics/font/MyanmarPhiksel.ttf
+
+  - family: Pone Nyet
+    fonts:
+      - asset: graphics/font/MyanmarPonenyet.ttf
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
 

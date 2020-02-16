@@ -21,12 +21,12 @@ class PhotoBloc {
   }
 
   fetchPhotoList(int pageNo, String query) async {
-    photoListSink.add(ApiResponse.loading('Fetching Popular Movies'));
+    photoListSink.add(ApiResponse.loading(pageNo == 1, ''));
     try {
       List<Photo> photos = await _photoRepository.fetchPhotoList(pageNo, query);
       photoListSink.add(ApiResponse.completed(photos));
     } catch (e) {
-      photoListSink.add(ApiResponse.error(e.toString()));
+      photoListSink.add(ApiResponse.error(pageNo == 1, e.toString()));
       print(e);
     }
   }

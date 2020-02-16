@@ -32,9 +32,12 @@ class _PhotoInfiniteInterface {
 class _PhotoListScreenState extends State<PhotoListScreen>
     implements _PhotoInfiniteInterface {
   String query;
+  bool showFooter = false;
+  bool showError = false;
+  bool showLoading = false;
   void setQuery(String query) {
     this.query = query;
-    this._pageNo = 0;
+    this._pageNo = 1;
     _bloc.fetchPhotoList(this._pageNo, this.query);
   }
 
@@ -52,14 +55,27 @@ class _PhotoListScreenState extends State<PhotoListScreen>
       setState(() {
         status = event.status;
         if (status == Status.COMPLETED) {
-          if (_pageNo == 0) {
+          showLoading = false;
+          showError = false;
+          showFooter = !(event.data == null || event.data.length == 0);
+
+          if (_pageNo == 1) {
             photoList.clear();
           }
-
+          if (event.data == null) return;
           photoList.addAll(event.data);
-          print("clearing and adding photo");
-        } else if (status == Status.LOADING || status == Status.ERROR) {
-          message = event.message;
+        } else if (status == Status.LOADING) {
+          if (event.show) {
+            showLoading = true;
+            message = event.message;
+          }
+        } else if (status == Status.ERROR) {
+          showLoading = false;
+          showFooter = false;
+          if (event.show) {
+            showError = true;
+            message = event.message;
+          }
         }
       });
     });
@@ -105,47 +121,67 @@ class _PhotoListScreenState extends State<PhotoListScreen>
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Theme.of(context).dialogBackgroundColor,
-        body: CustomScrollView(
-          controller: _buildScrollController(),
-          slivers: <Widget>[
-            new SliverGrid(
-                delegate: new SliverChildBuilderDelegate(
-                    (BuildContext buildContext, int index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Hero(
-                        tag: heroPhotoTag + index.toString(),
-                        child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                                onTap: () {
-                                  Map<String, dynamic> data = {
-                                    "urls": photoList[index].urls,
-                                    "index": index,
-                                    "temp_file_url": ImageCacheManager()
-                                        .getFileFromMemory(
-                                            photoList[index].urls.small)
-                                        .file
-                                        .path,
-                                    "hero_tag": heroPhotoTag + index.toString()
-                                  };
-                                  Navigator.pushNamed(context, detailRoute,
-                                      arguments: data);
-                                },
-                                child: CachedNetworkImage(
-                                  imageUrl: photoList[index].urls.small,
-                                  cacheManager: ImageCacheManager(),
-                                  fit: BoxFit.cover,
-                                )))),
-                  );
-                }, childCount: photoList.length),
-                gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2)),
-            new SliverToBoxAdapter(
-              child: new Footer(),
-            )
-          ],
-        ));
+        body: showError
+            ? Error(
+                key: GlobalKey(),
+                errorMessage: message,
+                onRetryPressed: () {
+                  _pageNo = 1;
+                  _bloc.fetchPhotoList(_pageNo, query);
+                })
+            : showLoading
+                ? Loading(
+                    key: GlobalKey(debugLabel: "Loading"),
+                    loadingMessage: message,
+                  )
+                : CustomScrollView(
+                    controller: _buildScrollController(),
+                    slivers: <Widget>[
+                      new SliverGrid(
+                          delegate: new SliverChildBuilderDelegate(
+                              (BuildContext buildContext, int index) {
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Hero(
+                                  tag: heroPhotoTag + index.toString(),
+                                  child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                          onTap: () {
+                                            Map<String, dynamic> data = {
+                                              "urls": photoList[index].urls,
+                                              "index": index,
+                                              "temp_file_url":
+                                                  ImageCacheManager()
+                                                      .getFileFromMemory(
+                                                          photoList[index]
+                                                              .urls
+                                                              .small)
+                                                      .file
+                                                      .path,
+                                              "hero_tag": heroPhotoTag +
+                                                  index.toString()
+                                            };
+                                            Navigator.pushNamed(
+                                                context, detailRoute,
+                                                arguments: data);
+                                          },
+                                          child: CachedNetworkImage(
+                                            imageUrl:
+                                                photoList[index].urls.small,
+                                            cacheManager: ImageCacheManager(),
+                                            fit: BoxFit.cover,
+                                          )))),
+                            );
+                          }, childCount: photoList.length),
+                          gridDelegate:
+                              new SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2)),
+                      new SliverToBoxAdapter(
+                        child: showFooter ? new Footer() : Container(),
+                      )
+                    ],
+                  ));
   }
 
   @override
@@ -182,13 +218,13 @@ class Error extends StatelessWidget {
             errorMessage,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.lightGreen,
+              color: Colors.black,
               fontSize: 18,
             ),
           ),
           SizedBox(height: 8),
           RaisedButton(
-            color: Colors.lightGreen,
+            color: Colors.black,
             child: Text('Retry', style: TextStyle(color: Colors.white)),
             onPressed: onRetryPressed,
           )
@@ -203,7 +239,7 @@ class Footer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
         child: new CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.lightGreen)));
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.black)));
   }
 }
 
@@ -222,13 +258,13 @@ class Loading extends StatelessWidget {
             loadingMessage,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.lightGreen,
+              color: Colors.black,
               fontSize: 24,
             ),
           ),
           SizedBox(height: 24),
           CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.lightGreen),
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
           ),
         ],
       ),

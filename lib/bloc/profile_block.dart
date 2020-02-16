@@ -21,8 +21,8 @@ class ProfileBloc {
     _fireStoreRepository = CloudFireStoreRepository();
   }
 
-  fetchMyImages() async {
-    profileSink.add(ApiResponse.loading('Fetching Profile'));
+  Future<bool> fetchMyImages() async {
+    profileSink.add(ApiResponse.loading(true, ""));
 
     try {
       QuerySnapshot querySnapshot = await _fireStoreRepository.getMyImages();
@@ -37,8 +37,10 @@ class ProfileBloc {
       });
       profileSink.add(ApiResponse.completed(feeds));
     } catch (e) {
-      profileSink.add(ApiResponse.error("Error fetching feeds"));
+      profileSink
+          .add(ApiResponse.error(true, "Share DeepSeed to showcase here."));
     }
+    return true;
   }
 
   dispose() {

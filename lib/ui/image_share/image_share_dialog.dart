@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:deep_seed/bloc/image_share_bloc.dart';
 import 'package:deep_seed/model/Feed.dart';
 import 'package:deep_seed/network/ApiResponse.dart';
+import 'package:deep_seed/ui/image_detail/image_editor.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -12,7 +13,7 @@ typedef void OnImageShareListener(String path);
 
 class ImageShareDialog extends StatefulWidget {
   final bool initialValue;
-  final Uint8List imageBytes;
+  final Future<Uint8List> imageBytes;
   final String imageRatio;
   final OnImageShareListener onImageShareListener;
 
@@ -26,7 +27,7 @@ class ImageShareDialog extends StatefulWidget {
   State<StatefulWidget> createState() {
     return ImageShareState(
         initialValue: this.initialValue,
-        imageBytes: this.imageBytes,
+        imageBytesFuture: this.imageBytes,
         onImageShareListener: this.onImageShareListener);
   }
 }
@@ -34,19 +35,27 @@ class ImageShareDialog extends StatefulWidget {
 class ImageShareState extends State<ImageShareDialog> {
   bool initialValue;
   bool showProgress = false;
+  bool showLoading = true;
   final OnImageShareListener onImageShareListener;
-  final Uint8List imageBytes;
+  final Future<Uint8List> imageBytesFuture;
+  Uint8List imgBytes;
   String filePath = "";
   String fileName = "";
   String currentUserId = "";
   ImageShareBloc _imageShareBloc;
 
   ImageShareState(
-      {this.initialValue, this.imageBytes, this.onImageShareListener});
+      {this.initialValue, this.imageBytesFuture, this.onImageShareListener});
   @override
   void initState() {
     super.initState();
     _imageShareBloc = ImageShareBloc();
+    imageBytesFuture.then((value) {
+      setState(() {
+        imgBytes = value;
+        showLoading = false;
+      });
+    });
     _imageShareBloc.authenticationListStream.listen((event) {
       if (event.status == Status.LOADING) {
         setState(() {
@@ -112,11 +121,44 @@ class ImageShareState extends State<ImageShareDialog> {
               Material(
                   borderRadius: BorderRadius.circular(8),
                   child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    Padding(
-                        padding: EdgeInsets.all(16),
-                        child: ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.memory(imageBytes))),
+                    new LayoutBuilder(builder:
+                        (BuildContext context, BoxConstraints constraints) {
+                      double width = constraints.maxWidth;
+
+                      double height;
+                      if (widget.imageRatio == ImageRatio.Instagram.name) {
+                        height = width * ImageRatio.Instagram.ratio;
+                      } else if (widget.imageRatio ==
+                          ImageRatio.Facebook.name) {
+                        height = width * ImageRatio.Facebook.ratio;
+                      }
+
+                      return showLoading
+                          ? Container(
+                              width: width,
+                              height: height,
+                              child: Align(
+                                  alignment: Alignment.center,
+                                  child: SizedBox(
+                                      width: 32,
+                                      height: 32,
+                                      child: CircularProgressIndicator(
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                                Colors.black),
+                                      ))))
+                          : Container(
+                              width: width,
+                              height: height,
+                              child: Padding(
+                                  padding: EdgeInsets.all(16),
+                                  child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.memory(
+                                        imgBytes,
+                                        gaplessPlayback: true,
+                                      ))));
+                    }),
                     Padding(
                         padding: EdgeInsets.all(16),
                         child: InkWell(
@@ -149,7 +191,7 @@ class ImageShareState extends State<ImageShareDialog> {
                     ),
                     FlatButton(
                         onPressed: () {
-                          _imageShareBloc.getSharePhoto(imageBytes);
+                          _imageShareBloc.getSharePhoto(imgBytes);
                         },
                         child: Align(
                             alignment: Alignment.center,

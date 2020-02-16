@@ -49,35 +49,35 @@ class ImageShareBloc {
   }
 
   signIn() async {
-    authenticationListSink.add(ApiResponse.loading("Signing in"));
+    authenticationListSink.add(ApiResponse.loading(true, "Signing in"));
     try {
       AuthResult authResult = await _authenticationRepository.signIn();
       authenticationListSink.add(ApiResponse.completed(authResult.user));
     } catch (e) {
-      authenticationListSink.add(ApiResponse.error(e.toString()));
+      authenticationListSink.add(ApiResponse.error(true, e.toString()));
       print(e);
     }
   }
 
   getUser() async {
-    authenticationListSink.add(ApiResponse.loading("Getting user"));
+    authenticationListSink.add(ApiResponse.loading(true, "Getting user"));
     try {
       FirebaseUser user = await _authenticationRepository.getCurrentUserId();
       authenticationListSink.add(ApiResponse.completed(user));
     } catch (e) {
-      authenticationListSink.add(ApiResponse.error(e.toString()));
+      authenticationListSink.add(ApiResponse.error(true, e.toString()));
       print(e);
     }
   }
 
   uploadPhoto(String uid, String imagePath, String imageName) async {
-    storageTaskSink.add(ApiResponse.loading("Uploading photo"));
+    storageTaskSink.add(ApiResponse.loading(true, "Uploading photo"));
     try {
       StorageTaskSnapshot snapshot = await _firebaseStorageRepository
           .uploadFile(uid, imagePath, imageName);
       storageTaskSink.add(ApiResponse.completed(snapshot));
     } catch (e) {
-      storageTaskSink.add(ApiResponse.error(e.toString()));
+      storageTaskSink.add(ApiResponse.error(true, e.toString()));
       print(e);
     }
   }

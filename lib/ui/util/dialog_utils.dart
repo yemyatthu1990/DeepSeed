@@ -1,7 +1,9 @@
 import 'dart:typed_data';
 import 'dart:ui';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:deep_seed/model/poem.dart';
 import 'package:deep_seed/ui/image_share/image_share_dialog.dart';
+import 'package:deep_seed/ui/util/poem_picker.dart';
 import 'package:deep_seed/view/StateAwareSlider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -13,31 +15,27 @@ class DialogUtils {
       BuildContext context,
       double currentFontSize,
       OnFontSizeChangeListener onFontSizeChangeListener) async {
+    var options = List<Widget>();
+    options.add(StateAwareSlider(
+        currentFontSize: currentFontSize,
+        onFontSizeChangeListener: onFontSizeChangeListener));
+    Font.values.forEach((element) {
+      options.add(SimpleDialogOption(
+        onPressed: () {
+          Navigator.pop(context, element);
+        },
+        child: new Text(
+          element.name,
+          style: TextStyle(fontFamily: element.family),
+        ),
+      ));
+    });
     return await showDialog<Font>(
         context: context,
         builder: (BuildContext context) {
           return SimpleDialog(
             title: const Text('Fonts'),
-            children: <Widget>[
-              StateAwareSlider(
-                  currentFontSize: currentFontSize,
-                  onFontSizeChangeListener: onFontSizeChangeListener),
-              SimpleDialogOption(
-                onPressed: () {
-                  Navigator.pop(context, Font.CHERRY);
-                },
-                child: new Text("• " + Font.CHERRY.name),
-              ),
-              SimpleDialogOption(
-                onPressed: () {
-                  Navigator.pop(context, Font.PADAUK_GHOST);
-                },
-                child: new Text(
-                  "•" + Font.PADAUK_GHOST.name,
-                  style: TextStyle(fontFamily: Font.PADAUK_GHOST.family),
-                ),
-              )
-            ],
+            children: options,
           );
         });
   }
@@ -72,9 +70,36 @@ class DialogUtils {
         });
   }
 
+  static Future<bool> showReportDialog(BuildContext context) async {
+    return await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Select a color"),
+            content: SingleChildScrollView(
+              child: Text("Are you sure you want to report this?"),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                child: const Text("Cancel"),
+                onPressed: () {
+                  Navigator.pop(context, false);
+                },
+              ),
+              FlatButton(
+                child: const Text("Report"),
+                onPressed: () {
+                  Navigator.pop(context, true);
+                },
+              )
+            ],
+          );
+        });
+  }
+
   static Future<String> showImageShareDialog(
     BuildContext context,
-    Uint8List imageBytes,
+    Future<Uint8List> imageBytes,
     String imageRatio,
   ) async {
     return await showDialog<String>(
@@ -92,68 +117,64 @@ class DialogUtils {
   }
 
   static Future<Poem> showPoemPickerDialog(
-      BuildContext context, List<Poem> poems) async {
-    BoxDecoration decoration = BoxDecoration(
-        border: Border.all(
-            width: 1.0, style: BorderStyle.solid, color: Colors.grey),
-        borderRadius: BorderRadius.all(Radius.circular(5.0)));
-    List<Widget> childWidgets = new List();
-    poems.forEach((poem) {
-      Container container = Container(
-        padding: const EdgeInsets.all(10.0),
-        decoration: decoration,
-        child: IntrinsicHeight(
-            child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Expanded(child: Text(poem.body)),
-            Text(poem.author),
-          ],
-        )),
-      );
-
-      childWidgets.add(new SimpleDialogOption(
-        onPressed: () {
-          Navigator.pop(context, poem);
-        },
-        child: container,
-      ));
-    });
+      BuildContext context, Stream<QuerySnapshot> snapshots) async {
     return await showDialog<Poem>(
         context: context,
         builder: (BuildContext context) {
-          return SimpleDialog(
-            children: childWidgets,
-          );
+          return PoemPicker(snapshots: snapshots);
         });
   }
 }
 
-enum Font { CHERRY, PADAUK_GHOST }
+enum Font {
+  CHERRY,
+  PADAUK_GHOST,
+  PAUK_LAY,
+  PHET_SOT,
+  PHIK_SEL,
+  PONE_NYET,
+  SABAE,
+  SAGAR,
+  SANPYA,
+  TAGU,
+  THURIYA,
+  WASO,
+  YINMAR
+}
 
 extension FontExtension on Font {
   String get name {
-    switch (this) {
-      case Font.CHERRY:
-        return "Cherry​\t\t\tကံကိုဆွဲ၍မှုန်း​သီခြယ်";
-        break;
-      case Font.PADAUK_GHOST:
-        return "Padauk Ghost\t\t\tကံကိုဆွဲ၍မှုန်း​သီခြယ်";
-        break;
-    }
-    return "";
+    return this.family + "​\t\t\tကံကိုဆွဲ၍မှုန်း​သီခြယ်";
   }
 
   String get family {
     switch (this) {
       case Font.CHERRY:
         return "Cherry";
-        break;
       case Font.PADAUK_GHOST:
         return "Padauk Ghost";
-        break;
+      case Font.PAUK_LAY:
+        return "Pauk Lay";
+      case Font.PHET_SOT:
+        return "Phet Sot";
+      case Font.PHIK_SEL:
+        return "Phik Sel";
+      case Font.PONE_NYET:
+        return "Pone Nyet";
+      case Font.SABAE:
+        return "Sabae";
+      case Font.SAGAR:
+        return "Sagar";
+      case Font.SANPYA:
+        return "San Pya";
+      case Font.TAGU:
+        return "Tagu";
+      case Font.THURIYA:
+        return "Thuriya";
+      case Font.WASO:
+        return "Waso";
+      case Font.YINMAR:
+        return "Yinmar";
     }
     return "";
   }

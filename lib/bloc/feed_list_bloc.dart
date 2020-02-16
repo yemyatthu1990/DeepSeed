@@ -5,6 +5,8 @@ import 'package:deep_seed/model/Feed.dart';
 import 'package:deep_seed/network/ApiResponse.dart';
 import 'package:deep_seed/repository/could_fire_store_repository.dart';
 
+typedef OnReportFinished();
+
 class FeedListBloc {
   DocumentSnapshot lastDocumentSnapshot;
   bool feedListLoading = false;
@@ -22,17 +24,21 @@ class FeedListBloc {
     _feedListController = StreamController<ApiResponse<List<Feed>>>();
     _fireStoreRepository = CloudFireStoreRepository();
   }
+  report(String downloadUrl, OnReportFinished onReportFinished) async {
+    _fireStoreRepository
+        .reportImage(downloadUrl)
+        .whenComplete(() => {onReportFinished()});
+  }
 
-  fetchFeedList() async {
+  Future<bool> fetchFeedList({bool refresh = false}) async {
     //first list
-    if (feedListLoading) return;
+    if (feedListLoading) return false;
     feedListLoading = true;
-    if (lastDocumentSnapshot == null) {
-      feedListSink.add(ApiResponse.loading('Fetching Feed'));
-    }
+    feedListSink.add(ApiResponse.loading(lastDocumentSnapshot == null, ''));
+
     try {
-      QuerySnapshot querySnapshot =
-          await _fireStoreRepository.getListOfImages(lastDocumentSnapshot);
+      QuerySnapshot querySnapshot = await _fireStoreRepository
+          .getListOfImages(refresh ? null : lastDocumentSnapshot);
       List<Feed> feeds = List();
       querySnapshot.documents.forEach((document) {
         Feed feed = new Feed();
@@ -47,11 +53,11 @@ class FeedListBloc {
       feedListSink.add(ApiResponse.completed(feeds));
       feedListLoading = false;
     } catch (e) {
-      if (lastDocumentSnapshot == null) {
-        feedListSink.add(ApiResponse.error("Error fetching feeds"));
-      }
+      feedListSink
+          .add(ApiResponse.error(lastDocumentSnapshot == null, "Feeds empty"));
       feedListLoading = false;
     }
+    return true;
   }
 
   dispose() {

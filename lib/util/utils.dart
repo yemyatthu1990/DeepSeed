@@ -16,7 +16,6 @@ class Utils {
 
     int b = (double.parse('0.' + sin(sum + 3).toString().substring(6)) * 256)
         .floor();
-    print("r" + r.toString() + "g" + g.toString() + "b" + b.toString());
     return {"r": r, "g": g, "b": b};
   }
 

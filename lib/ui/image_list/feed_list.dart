@@ -1,15 +1,23 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:deep_seed/bloc/PhotoBloc.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:deep_seed/bloc/feed_list_bloc.dart';
-import 'package:deep_seed/constants.dart';
+import 'package:flutter/material.dart';
 import 'package:deep_seed/model/Feed.dart';
-import 'package:deep_seed/model/model.dart';
+
 import 'package:deep_seed/network/ApiResponse.dart';
 import 'package:deep_seed/network/image_cache_manager.dart';
 import 'package:deep_seed/ui/image_detail/image_editor.dart';
+import 'package:deep_seed/ui/util/dialog_utils.dart';
 import 'package:deep_seed/util/utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pull_to_refresh_notification/pull_to_refresh_notification.dart'
+    as prefresh;
 
 class FeedListScreen extends StatefulWidget {
   _FeedListScreenState _feedListScreenState;
@@ -29,11 +37,15 @@ class _PhotoInfiniteInterface {
 
 class _FeedListScreenState extends State<FeedListScreen>
     implements _PhotoInfiniteInterface {
+  bool showFooter = false;
+  bool showError = false;
+  bool showLoading = false;
   _FeedListScreenState();
   FeedListBloc _bloc;
   List<Feed> feedList = new List<Feed>();
   Status status;
   String message;
+  bool isRefreshing = false;
   @override
   void initState() {
     super.initState();
@@ -42,9 +54,27 @@ class _FeedListScreenState extends State<FeedListScreen>
       setState(() {
         status = event.status;
         if (status == Status.COMPLETED) {
-          feedList.addAll(event.data);
-        } else if (status == Status.LOADING || status == Status.ERROR) {
-          message = event.message;
+          showLoading = false;
+          showFooter = !(event.data == null || event.data.length == 0);
+          if (event.data == null) return;
+          if (isRefreshing) {
+            isRefreshing = false;
+            feedList = event.data;
+          } else {
+            feedList.addAll(event.data);
+          }
+        } else if (status == Status.LOADING) {
+          if (event.show) {
+            showLoading = true;
+            message = event.message;
+          }
+        } else if (status == Status.ERROR) {
+          if (event.show) {
+            showError = true;
+            message = event.message;
+          }
+          showLoading = false;
+          showFooter = false;
         }
       });
     });
@@ -85,126 +115,236 @@ class _FeedListScreenState extends State<FeedListScreen>
       }
     }
   }*/
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+      new GlobalKey<RefreshIndicatorState>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Theme.of(context).dialogBackgroundColor,
-        body: CustomScrollView(
-          controller: _buildScrollController(),
-          slivers: <Widget>[
-            new SliverList(
-                delegate: new SliverChildBuilderDelegate(
-                    (BuildContext buildContext, int index) {
-              double imageHeight;
-              Feed feed = feedList[index];
-              Map<String, int> rgb = Utils.randomColor(feed.userId);
-              if (feed.imageRatio == ImageRatio.Facebook.name) {
-                imageHeight = MediaQuery.of(context).size.width *
-                    ImageRatio.Facebook.ratio;
-              } else {
-                imageHeight = (MediaQuery.of(context).size.width - 48) *
-                    ImageRatio.Instagram.ratio;
-              }
-              return Container(
-                  margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                  decoration: BoxDecoration(
-                      border:
-                          Border.all(color: Theme.of(context).backgroundColor)),
-                  child: Container(
-                      padding: EdgeInsets.all(8),
-                      color: Colors.white,
-                      child: Column(
-                        children: [
-                          Container(
-                              margin: EdgeInsets.only(bottom: 8),
-                              child: Row(
-                                children: <Widget>[
-                                  CircleAvatar(
-                                      child:
-                                          Text(feed.userId[1] + feed.userId[2]),
-                                      backgroundColor: Color.fromRGBO(
-                                          rgb["r"], rgb["g"], rgb["b"], 1)),
-                                  Padding(
-                                      padding: EdgeInsets.only(left: 16),
-                                      child: Text(
-                                          Utils.readTimestamp(feed.timeStamp),
-                                          style: TextStyle(
-                                              color: Theme.of(context)
-                                                  .primaryColorDark,
-                                              fontSize: 12)))
-                                ],
-                              )),
-                          Container(
-                              width: MediaQuery.of(context).size.width,
-                              height: imageHeight,
-                              child: InkWell(
-                                  onTap: () {},
-                                  child: CachedNetworkImage(
-                                    imageUrl: feed.downloadUrl,
-                                    cacheManager: ImageCacheManager(),
-                                    fit: BoxFit.cover,
+        body: showError
+            ? Error(
+                key: GlobalKey(),
+                errorMessage: message,
+                onRetryPressed: () {
+                  _bloc.fetchFeedList();
+                })
+            : showLoading
+                ? Loading(
+                    key: GlobalKey(debugLabel: "Loading"),
+                    loadingMessage: message,
+                  )
+                : prefresh.PullToRefreshNotification(
+                    color: Colors.blue,
+                    onRefresh: () {
+                      isRefreshing = true;
+                      return _bloc.fetchFeedList(refresh: true);
+                    },
+                    maxDragOffset: 40,
+                    armedDragUpCancel: false,
+                    key: GlobalKey(),
+                    child: CustomScrollView(
+                        physics:
+                            prefresh.AlwaysScrollableClampingScrollPhysics(),
+                        controller: _buildScrollController(),
+                        slivers: <Widget>[
+                          SliverAppBar(
+
+                              ///Properties of app bar
+                              backgroundColor:
+                                  Theme.of(context).dialogBackgroundColor,
+                              floating: false,
+                              pinned: true,
+                              centerTitle: false,
+                              expandedHeight: 100.0,
+
+                              ///Properties of the App Bar when it is expanded
+                              flexibleSpace: FlexibleSpaceBar(
+                                  centerTitle: true,
+                                  title: Text(
+                                    "Feed",
+                                    style: TextStyle(
+                                      color: Colors.black87,
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ))),
-                          Padding(
-                              padding:
-                                  EdgeInsets.only(left: 16, right: 16, top: 8),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  FlatButton(
-                                      onPressed: () {},
-                                      child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          mainAxisSize: MainAxisSize.max,
-                                          children: [
-                                            Icon(Icons.flag,
-                                                size: 20,
-                                                color: Theme.of(context)
-                                                    .primaryColorDark),
-                                            SizedBox(
-                                              width: 8,
-                                            ),
-                                            Text(
-                                              "Report",
-                                              style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .primaryColorDark),
-                                            ),
-                                          ])),
-                                  FlatButton(
-                                      onPressed: () {},
-                                      child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          mainAxisSize: MainAxisSize.max,
-                                          children: [
-                                            Icon(Icons.share,
-                                                size: 20,
-                                                color: Theme.of(context)
-                                                    .primaryColorDark),
-                                            SizedBox(
-                                              width: 8,
-                                            ),
-                                            Text(
-                                              "Share",
-                                              style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .primaryColorDark),
-                                            ),
-                                          ])),
-                                ],
-                              ))
-                        ],
-                      )));
-            }, childCount: feedList.length)),
-            new SliverToBoxAdapter(
-              child: new Footer(),
-            )
-          ],
-        ));
+                          prefresh.PullToRefreshContainer(
+                              buildPulltoRefreshHeader),
+                          new SliverList(
+                              delegate: new SliverChildBuilderDelegate(
+                                  (BuildContext buildContext, int index) {
+                            double imageHeight;
+                            Feed feed = feedList[index];
+                            Map<String, int> rgb =
+                                Utils.randomColor(feed.userId);
+                            if (feed.imageRatio == ImageRatio.Facebook.name) {
+                              imageHeight = MediaQuery.of(context).size.width *
+                                  ImageRatio.Facebook.ratio;
+                            } else {
+                              imageHeight =
+                                  (MediaQuery.of(context).size.width - 48) *
+                                      ImageRatio.Instagram.ratio;
+                            }
+                            return Container(
+                                margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                        color:
+                                            Theme.of(context).backgroundColor)),
+                                child: Container(
+                                    padding: EdgeInsets.all(8),
+                                    color: Colors.white,
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                            margin: EdgeInsets.only(bottom: 8),
+                                            child: Row(
+                                              children: <Widget>[
+                                                CircleAvatar(
+                                                    child: Text(feed.userId[1] +
+                                                        feed.userId[2]),
+                                                    backgroundColor:
+                                                        Color.fromRGBO(
+                                                            rgb["r"],
+                                                            rgb["g"],
+                                                            rgb["b"],
+                                                            1)),
+                                                Padding(
+                                                    padding: EdgeInsets.only(
+                                                        left: 16),
+                                                    child: Text(
+                                                        Utils.readTimestamp(feed
+                                                            .timeStamp),
+                                                        style: TextStyle(
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .primaryColorDark,
+                                                            fontSize: 12)))
+                                              ],
+                                            )),
+                                        Container(
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
+                                            height: imageHeight,
+                                            child: InkWell(
+                                                onTap: () {},
+                                                child: CachedNetworkImage(
+                                                  imageUrl: feed.downloadUrl,
+                                                  cacheManager:
+                                                      ImageCacheManager(),
+                                                  fit: BoxFit.cover,
+                                                ))),
+                                        Padding(
+                                            padding: EdgeInsets.only(
+                                                left: 16, right: 16, top: 8),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.max,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: <Widget>[
+                                                FlatButton(
+                                                    onPressed: () {
+                                                      DialogUtils
+                                                              .showReportDialog(
+                                                                  context)
+                                                          .then((report) {
+                                                        if (report == null ||
+                                                            report == false) {
+                                                          return;
+                                                        } else {
+                                                          _bloc.report(
+                                                              feed.downloadUrl,
+                                                              () {
+                                                            Fluttertoast.showToast(
+                                                                msg:
+                                                                    "Sucessfuly reported.");
+                                                          });
+                                                        }
+                                                      });
+                                                    }, //
+                                                    child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceEvenly,
+                                                        mainAxisSize:
+                                                            MainAxisSize.max,
+                                                        children: [
+                                                          Icon(Icons.flag,
+                                                              size: 20,
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .primaryColorDark),
+                                                          SizedBox(
+                                                            width: 8,
+                                                          ),
+                                                          Text(
+                                                            "Report",
+                                                            style: TextStyle(
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .primaryColorDark),
+                                                          ),
+                                                        ])),
+                                                FlatButton(
+                                                    onPressed: () {
+                                                      ImageCacheManager()
+                                                          .getFileFromMemory(
+                                                              feed.downloadUrl)
+                                                          .file
+                                                          .readAsBytes()
+                                                          .then((value) async {
+                                                        String fileName = Timestamp
+                                                                    .now()
+                                                                .millisecondsSinceEpoch
+                                                                .toString() +
+                                                            ".jpg";
+                                                        final tempDir =
+                                                            await getTemporaryDirectory();
+                                                        final file = await new File(
+                                                                '${tempDir.path}/$fileName')
+                                                            .create();
+                                                        file.writeAsBytes(
+                                                            value);
+                                                        return fileName;
+                                                      }).then((fileName) =>
+                                                              Utils.shareImage(
+                                                                  fileName));
+                                                    },
+                                                    child: Row(
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceEvenly,
+                                                        mainAxisSize:
+                                                            MainAxisSize.max,
+                                                        children: [
+                                                          Icon(Icons.share,
+                                                              size: 20,
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .primaryColorDark),
+                                                          SizedBox(
+                                                            width: 8,
+                                                          ),
+                                                          Text(
+                                                            "Share",
+                                                            style: TextStyle(
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .primaryColorDark),
+                                                          ),
+                                                        ])),
+                                              ],
+                                            ))
+                                      ],
+                                    )));
+                          }, childCount: feedList.length)),
+                          new SliverToBoxAdapter(
+                            child: showFooter ? new Footer() : Container(),
+                          )
+                        ])));
   }
 
   @override
@@ -216,6 +356,54 @@ class _FeedListScreenState extends State<FeedListScreen>
   @override
   void onScroll() {
     _bloc.fetchFeedList();
+  }
+
+  Widget buildPulltoRefreshHeader(
+      prefresh.PullToRefreshScrollNotificationInfo info) {
+    var offset = info?.dragOffset ?? 0.0;
+    var mode = info?.mode;
+    Widget refreshWiget = Container();
+    //it should more than 18, so that RefreshProgressIndicator can be shown fully
+    if (info?.refreshWiget != null &&
+        offset > 18.0 &&
+        mode != prefresh.RefreshIndicatorMode.error) {
+      refreshWiget = info.refreshWiget;
+    }
+
+    Widget child = null;
+    if (mode == prefresh.RefreshIndicatorMode.error) {
+      child = GestureDetector(
+          onTap: () {
+            // refreshNotification;
+            info?.pullToRefreshNotificationState?.show();
+          },
+          child: Container(
+            color: Colors.grey,
+            alignment: Alignment.bottomCenter,
+            height: offset,
+            width: double.infinity,
+            //padding: EdgeInsets.only(top: offset),
+            child: Container(
+              padding: EdgeInsets.only(left: 5.0),
+              alignment: Alignment.center,
+              child: Text(
+                mode?.toString() + "  click to retry" ?? "",
+                style: TextStyle(fontSize: 12.0, inherit: false),
+              ),
+            ),
+          ));
+    } else {
+      child = Container(
+          color: Theme.of(context).dialogBackgroundColor,
+          alignment: Alignment.bottomCenter,
+          height: offset,
+          width: double.infinity,
+          child: refreshWiget);
+    }
+
+    return SliverToBoxAdapter(
+      child: child,
+    );
   }
 }
 
@@ -229,26 +417,36 @@ class Error extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            errorMessage,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.lightGreen,
-              fontSize: 18,
-            ),
+    return Stack(
+      children: <Widget>[
+        Container(
+          height: 112,
+          child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Text(
+                "My DeepSeed",
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 28.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              )),
+        ),
+        Text(
+          errorMessage,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 18,
           ),
-          SizedBox(height: 8),
-          RaisedButton(
-            color: Colors.lightGreen,
-            child: Text('Retry', style: TextStyle(color: Colors.white)),
-            onPressed: onRetryPressed,
-          )
-        ],
-      ),
+        ),
+        SizedBox(height: 8),
+        RaisedButton(
+          color: Colors.black,
+          child: Text('Reload', style: TextStyle(color: Colors.white)),
+          onPressed: onRetryPressed,
+        )
+      ],
     );
   }
 }
@@ -258,7 +456,7 @@ class Footer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
         child: new CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.lightGreen)));
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.black)));
   }
 }
 
@@ -269,24 +467,34 @@ class Loading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text(
-            loadingMessage,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: Colors.lightGreen,
-              fontSize: 24,
-            ),
+    return Stack(
+      children: <Widget>[
+        Container(
+          height: 112,
+          child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Text(
+                "Feed",
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 28.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              )),
+        ),
+        Text(
+          loadingMessage,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 24,
           ),
-          SizedBox(height: 24),
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.lightGreen),
-          ),
-        ],
-      ),
+        ),
+        SizedBox(height: 24),
+        CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+        ),
+      ],
     );
   }
 }

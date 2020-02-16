@@ -87,13 +87,14 @@ class _BottomBarState extends State<BottomBarScreen> {
               child: Padding(
                   padding: EdgeInsets.only(top: 32, bottom: 32),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     mainAxisSize: MainAxisSize.max,
                     children: <Widget>[
                       InkWell(
                           onTap: () {
                             ImagePicker.pickImage(source: ImageSource.camera)
                                 .then((value) {
+                              if (value == null) return;
                               Map<String, dynamic> data = {
                                 "file_url": value.path,
                                 "hero_tag": heroFavoriteTag + "_temp"
@@ -102,22 +103,30 @@ class _BottomBarState extends State<BottomBarScreen> {
                                   arguments: data);
                             });
                           },
-                          child: Padding(
-                              padding: EdgeInsets.only(right: 16),
-                              child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.camera,
-                                      size: 56,
-                                      color: Colors.red,
-                                    ),
-                                    Text("Camera")
-                                  ]))),
+                          child:
+                              Column(mainAxisSize: MainAxisSize.min, children: [
+                            Container(
+                              width: 56,
+                              height: 56,
+                              decoration: new BoxDecoration(
+                                color: Colors.black,
+                                shape: BoxShape.circle,
+                              ),
+                              child: new Icon(
+                                Icons.camera_alt,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Text("Camera")
+                          ])),
                       InkWell(
                           onTap: () {
                             ImagePicker.pickImage(source: ImageSource.gallery)
                                 .then((value) {
+                              if (value == null) return;
                               Map<String, dynamic> data = {
                                 "file_url": value.path,
                                 "hero_tag": heroFavoriteTag + "_temp"
@@ -126,25 +135,25 @@ class _BottomBarState extends State<BottomBarScreen> {
                                   arguments: data);
                             });
                           },
-                          child: Padding(
-                              padding: EdgeInsets.only(left: 16),
-                              child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      width: 56,
-                                      height: 56,
-                                      decoration: new BoxDecoration(
-                                        color: Colors.green,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: new Icon(
-                                        Icons.photo_album,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    Text("Gallery")
-                                  ])))
+                          child:
+                              Column(mainAxisSize: MainAxisSize.min, children: [
+                            Container(
+                              width: 56,
+                              height: 56,
+                              decoration: new BoxDecoration(
+                                color: Colors.black,
+                                shape: BoxShape.circle,
+                              ),
+                              child: new Icon(
+                                Icons.photo_album,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Text("Gallery")
+                          ]))
                     ],
                   )),
             ),
@@ -200,9 +209,11 @@ class _BottomBarState extends State<BottomBarScreen> {
 
   Widget _buildBackground() {
     return Scaffold(
-      appBar: AppBar(
-          backgroundColor: Theme.of(context).secondaryHeaderColor,
-          title: _buildAppbarTitle(currentIndex)),
+      appBar: (currentIndex == 0)
+          ? AppBar(
+              backgroundColor: Theme.of(context).secondaryHeaderColor,
+              title: _buildAppbarTitle(currentIndex))
+          : null,
       body: _buildBody(currentIndex),
       floatingActionButton: _buildFloatingActionButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,

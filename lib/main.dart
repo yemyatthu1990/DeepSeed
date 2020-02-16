@@ -8,6 +8,7 @@ import 'package:deep_seed/util/Analytics.dart';
 import 'package:deep_seed/util/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/rendering.dart';
 
 void main() {
   // Set `enableInDevMode` to true to see reports while in debug mode
