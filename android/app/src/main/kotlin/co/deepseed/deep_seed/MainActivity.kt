@@ -1,11 +1,14 @@
 package co.deepseed.deep_seed
 
+import android.annotation.TargetApi
 import android.app.Activity
 import android.app.Application.ActivityLifecycleCallbacks
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.PixelFormat
 import android.graphics.Rect
+import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.os.Handler
 import android.os.PersistableBundle
@@ -35,10 +38,10 @@ class MainActivity: FlutterActivity(), StreamHandler,
   var isKeyboardVisible: Boolean = false
   var eventSink: EventSink? = null
   var stream: EventChannel? = null
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     GeneratedPluginRegistrant.registerWith(this)
-
     MethodChannel(flutterView,"channel:co.deepseed.deep_seed/share").setMethodCallHandler { methodCall, _ ->
         if (methodCall.method == "shareFile") {
             shareFile(methodCall.arguments as String)

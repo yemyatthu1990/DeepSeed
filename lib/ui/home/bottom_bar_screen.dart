@@ -1,8 +1,14 @@
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:deep_seed/model/Feed.dart';
+import 'package:deep_seed/ui/favorite/favorite_list.dart';
+import 'package:deep_seed/ui/image_list/feed_list.dart';
 import 'package:deep_seed/ui/image_list/image_list.dart';
+import 'package:deep_seed/ui/profile/profile_list.dart';
 import 'package:deep_seed/ui/util/dialog_utils.dart';
 import 'package:deep_seed/util/Analytics.dart';
+import 'package:deep_seed/view/search/search_bar_controller.dart';
+import 'package:deep_seed/view/search/search_bar_style.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -23,23 +29,28 @@ class BottomBarScreen extends StatefulWidget {
   // always marked "final".
 
   final String title;
+  final List<Widget> _children = [
+    PhotoListScreen(key: PageStorageKey("PhotoList"), query: ""),
+    FeedListScreen(key: PageStorageKey("FeedList")),
+    FavoriteListScreen(key: PageStorageKey("Favorite")),
+    ProfileListScreen(key: PageStorageKey("Profile"))
+  ];
 
   @override
-  _BottomBarState createState() => _BottomBarState();
+  _BottomBarState createState() => _BottomBarState(children: _children);
 }
 
 class _BottomBarState extends State<BottomBarScreen> {
   int currentIndex;
-  final List<Widget> _children = [
-    PhotoListScreen(),
-    PhotoListScreen(),
-    PhotoListScreen(),
-  ];
+  String query = "";
+  final PageStorageBucket bucket = PageStorageBucket();
+  final List<Widget> children;
+  _BottomBarState({this.children});
   @override
   void initState() {
     super.initState();
-    currentIndex = 0;
     Analytics().logAppOpen();
+    currentIndex = 0;
   }
 
   void changePage(int index) {
@@ -50,71 +61,7 @@ class _BottomBarState extends State<BottomBarScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).secondaryHeaderColor,
-        title: Text("Deep Seed"),
-      ),
-      body: _children[0],
-      floatingActionButton: _buildFloatingActionButton(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      bottomNavigationBar: BubbleBottomBar(
-        hasNotch: true,
-        fabLocation: BubbleBottomBarFabLocation.end,
-        opacity: .2,
-        currentIndex: currentIndex,
-        onTap: changePage,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-        //border radius doesn't work when the notch is enabled.
-        elevation: 8,
-        items: <BubbleBottomBarItem>[
-          BubbleBottomBarItem(
-              backgroundColor: Colors.red,
-              icon: Icon(
-                Icons.dashboard,
-                color: Colors.black,
-              ),
-              activeIcon: Icon(
-                Icons.dashboard,
-                color: Colors.red,
-              ),
-              title: Text("Home")),
-          BubbleBottomBarItem(
-              backgroundColor: Colors.deepPurple,
-              icon: Icon(
-                Icons.access_time,
-                color: Colors.black,
-              ),
-              activeIcon: Icon(
-                Icons.access_time,
-                color: Colors.deepPurple,
-              ),
-              title: Text("Logs")),
-          BubbleBottomBarItem(
-              backgroundColor: Colors.indigo,
-              icon: Icon(
-                Icons.folder_open,
-                color: Colors.black,
-              ),
-              activeIcon: Icon(
-                Icons.folder_open,
-                color: Colors.indigo,
-              ),
-              title: Text("Folders")),
-          BubbleBottomBarItem(
-              backgroundColor: Colors.green,
-              icon: Icon(
-                Icons.menu,
-                color: Colors.black,
-              ),
-              activeIcon: Icon(
-                Icons.menu,
-                color: Colors.green,
-              ),
-              title: Text("Menu"))
-        ],
-      ),
-    );
+    return _buildCompleteList();
   }
 
   Widget _buildFloatingActionButton() {
@@ -146,12 +93,13 @@ class _BottomBarState extends State<BottomBarScreen> {
                       InkWell(
                           onTap: () {
                             ImagePicker.pickImage(source: ImageSource.camera)
-                                .then((value){
-                                  Map<String, dynamic> data = {
-                                "file_url": value.path
+                                .then((value) {
+                              Map<String, dynamic> data = {
+                                "file_url": value.path,
+                                "hero_tag": heroFavoriteTag + "_temp"
                               };
-                                  Navigator.pushNamed(context, detailRoute,
-                                      arguments: data);
+                              Navigator.pushNamed(context, detailRoute,
+                                  arguments: data);
                             });
                           },
                           child: Padding(
@@ -171,31 +119,30 @@ class _BottomBarState extends State<BottomBarScreen> {
                             ImagePicker.pickImage(source: ImageSource.gallery)
                                 .then((value) {
                               Map<String, dynamic> data = {
-                                "file_url": value.path
+                                "file_url": value.path,
+                                "hero_tag": heroFavoriteTag + "_temp"
                               };
-                                  Navigator.pushNamed(context, detailRoute,
-                                      arguments: data);
-                            }
-                            );
+                              Navigator.pushNamed(context, detailRoute,
+                                  arguments: data);
+                            });
                           },
                           child: Padding(
                               padding: EdgeInsets.only(left: 16),
                               child: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-
-                                         Container(
-                                          width: 56,
-                                          height: 56,
-                                          decoration: new BoxDecoration(
-                                            color: Colors.green,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: new Icon(
-                                            Icons.photo_album,
-                                            color: Colors.white,
-                                          ),
-                                        ),
+                                    Container(
+                                      width: 56,
+                                      height: 56,
+                                      decoration: new BoxDecoration(
+                                        color: Colors.green,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: new Icon(
+                                        Icons.photo_album,
+                                        color: Colors.white,
+                                      ),
+                                    ),
                                     Text("Gallery")
                                   ])))
                     ],
@@ -203,5 +150,118 @@ class _BottomBarState extends State<BottomBarScreen> {
             ),
           );
         });
+  }
+
+  Widget _buildAppbarTitle(int index) {
+    if (index == 0) {
+      return Padding(
+          padding: EdgeInsets.only(left: 20, right: 20),
+          child: SearchBar(
+              onSearchQueryChanged: (query) {
+                // Only first tab has search screen
+                if (currentIndex == 0) {
+                  setState(() {
+                    (children[0] as PhotoListScreen).setQuery(query);
+                  });
+                }
+              },
+              onSuggestionShow: (show) {},
+              icon: Icon(Icons.search),
+              hintText: "Love, hate, relationship ...",
+              hintStyle: TextStyle(fontSize: 16),
+              textStyle: TextStyle(fontSize: 16),
+              cancellationWidget: Icon(
+                Icons.close,
+                color: Colors.grey,
+              ),
+              searchBarStyle: SearchBarStyle(
+                  backgroundColor: Theme.of(context).backgroundColor,
+                  borderRadius: BorderRadius.circular(8)),
+              searchBarPadding: EdgeInsets.only(left: 0, right: 0)));
+    } else {
+      switch (index) {
+        case 1:
+          return Text("Feed");
+        case 2:
+          return Text("Favorite");
+        case 3:
+          return Text("Profile");
+      }
+    }
+  }
+
+  Widget _buildBody(int index) {
+    return IndexedStack(index: index, children: children);
+  }
+
+  Widget _buildCompleteList() {
+    return _buildBackground();
+  }
+
+  Widget _buildBackground() {
+    return Scaffold(
+      appBar: AppBar(
+          backgroundColor: Theme.of(context).secondaryHeaderColor,
+          title: _buildAppbarTitle(currentIndex)),
+      body: _buildBody(currentIndex),
+      floatingActionButton: _buildFloatingActionButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      bottomNavigationBar: BubbleBottomBar(
+        hasNotch: true,
+        fabLocation: BubbleBottomBarFabLocation.end,
+        opacity: .2,
+        currentIndex: currentIndex,
+        onTap: changePage,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        //border radius doesn't work when the notch is enabled.
+        elevation: 8,
+        items: <BubbleBottomBarItem>[
+          BubbleBottomBarItem(
+              backgroundColor: Colors.red,
+              icon: Icon(
+                Icons.home,
+                color: Colors.black,
+              ),
+              activeIcon: Icon(
+                Icons.home,
+                color: Colors.red,
+              ),
+              title: Text("Home")),
+          BubbleBottomBarItem(
+              backgroundColor: Colors.deepPurple,
+              icon: Icon(
+                Icons.rss_feed,
+                color: Colors.black,
+              ),
+              activeIcon: Icon(
+                Icons.rss_feed,
+                color: Colors.deepPurple,
+              ),
+              title: Text("Feed")),
+          BubbleBottomBarItem(
+              backgroundColor: Colors.indigo,
+              icon: Icon(
+                Icons.favorite,
+                color: Colors.black,
+              ),
+              activeIcon: Icon(
+                Icons.favorite,
+                color: Colors.indigo,
+              ),
+              title: Text("Favorite")),
+          BubbleBottomBarItem(
+              backgroundColor: Colors.green,
+              icon: Icon(
+                Icons.person,
+                color: Colors.black,
+              ),
+              activeIcon: Icon(
+                Icons.person,
+                color: Colors.green,
+              ),
+              title: Text("Profile"))
+        ],
+      ),
+    );
   }
 }

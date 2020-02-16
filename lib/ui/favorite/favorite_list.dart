@@ -1,81 +1,52 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:deep_seed/bloc/PhotoBloc.dart';
+import 'package:deep_seed/bloc/favorite_list_bloc.dart';
 import 'package:deep_seed/constants.dart';
 import 'package:deep_seed/model/model.dart';
 import 'package:deep_seed/network/ApiResponse.dart';
 import 'package:deep_seed/network/image_cache_manager.dart';
+import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
-class PhotoListScreen extends StatefulWidget {
-  String query;
-  _PhotoListScreenState _photoListScreenState;
+class FavoriteListScreen extends StatefulWidget {
+  _FavoriteListScreenState _favoriteListScreenState;
   final Key key;
-  void setQuery(String query) {
-    this.query = query;
-    _photoListScreenState.setQuery(this.query);
-  }
 
-  PhotoListScreen({this.key, this.query}) : super(key: key);
+  FavoriteListScreen({this.key}) : super(key: key);
 
   @override
-  _PhotoListScreenState createState() {
-    _photoListScreenState = _PhotoListScreenState(query: this.query);
-    return _photoListScreenState;
+  _FavoriteListScreenState createState() {
+    return _FavoriteListScreenState();
   }
 }
 
-class _PhotoInfiniteInterface {
-  void onScroll() {}
-}
+class _FavoriteListScreenState extends State<FavoriteListScreen> {
+  _FavoriteListScreenState();
+  FavoriteListBloc _bloc;
 
-class _PhotoListScreenState extends State<PhotoListScreen>
-    implements _PhotoInfiniteInterface {
-  String query;
-  void setQuery(String query) {
-    this.query = query;
-    this._pageNo = 0;
-    _bloc.fetchPhotoList(this._pageNo, this.query);
-  }
-
-  _PhotoListScreenState({this.query});
-  PhotoBloc _bloc;
-  int _pageNo = 1;
-  List<Photo> photoList = new List<Photo>();
+  List<Urls> favoriteList = new List<Urls>();
   Status status;
   String message;
   @override
   void initState() {
     super.initState();
-    _bloc = PhotoBloc();
-    _bloc.photoListStream.listen((event) {
+    _bloc = FavoriteListBloc();
+    _bloc.favoriteListStream.listen((event) {
       setState(() {
         status = event.status;
         if (status == Status.COMPLETED) {
-          if (_pageNo == 0) {
-            photoList.clear();
+          if (event.data != null) {
+            favoriteList = event.data;
           }
-
-          photoList.addAll(event.data);
-          print("clearing and adding photo");
         } else if (status == Status.LOADING || status == Status.ERROR) {
           message = event.message;
         }
       });
     });
-    _bloc.fetchPhotoList(_pageNo, query);
-  }
-
-  ScrollController _buildScrollController() {
-    ScrollController _scrollController = new ScrollController();
-    _scrollController.addListener(() {
-      final maxScroll = _scrollController.position.maxScrollExtent;
-      final currentScroll = _scrollController.position.pixels;
-      if (maxScroll == currentScroll) {
-        onScroll();
-      }
-    });
-    return _scrollController;
+    _bloc.fetchFavoriteList();
   }
 
   /* Widget _buildPhotoList() {
@@ -105,8 +76,7 @@ class _PhotoListScreenState extends State<PhotoListScreen>
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Theme.of(context).dialogBackgroundColor,
-        body: CustomScrollView(
-          controller: _buildScrollController(),
+        body: new CustomScrollView(
           slivers: <Widget>[
             new SliverGrid(
                 delegate: new SliverChildBuilderDelegate(
@@ -114,36 +84,35 @@ class _PhotoListScreenState extends State<PhotoListScreen>
                   return Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Hero(
-                        tag: heroPhotoTag + index.toString(),
+                        tag: heroFavoriteTag + index.toString(),
                         child: Material(
                             color: Colors.transparent,
                             child: InkWell(
                                 onTap: () {
                                   Map<String, dynamic> data = {
-                                    "urls": photoList[index].urls,
+                                    "urls": favoriteList[index],
                                     "index": index,
                                     "temp_file_url": ImageCacheManager()
                                         .getFileFromMemory(
-                                            photoList[index].urls.small)
+                                            favoriteList[index].small)
                                         .file
                                         .path,
-                                    "hero_tag": heroPhotoTag + index.toString()
+                                    "hero_tag":
+                                        heroFavoriteTag + index.toString()
                                   };
                                   Navigator.pushNamed(context, detailRoute,
                                       arguments: data);
                                 },
                                 child: CachedNetworkImage(
-                                  imageUrl: photoList[index].urls.small,
+                                  useOldImageOnUrlChange: true,
+                                  imageUrl: favoriteList[index].small,
                                   cacheManager: ImageCacheManager(),
                                   fit: BoxFit.cover,
                                 )))),
                   );
-                }, childCount: photoList.length),
+                }, childCount: favoriteList.length),
                 gridDelegate: new SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2)),
-            new SliverToBoxAdapter(
-              child: new Footer(),
-            )
+                    crossAxisCount: 2))
           ],
         ));
   }
@@ -152,15 +121,6 @@ class _PhotoListScreenState extends State<PhotoListScreen>
   void dispose() {
     _bloc.dispose();
     super.dispose();
-  }
-
-  @override
-  void onScroll() {
-    int _actualPageNo = photoList.length ~/ 10 + 1;
-
-    if (_pageNo == _actualPageNo) return;
-    _pageNo = _actualPageNo;
-    _bloc.fetchPhotoList(_pageNo, query);
   }
 }
 

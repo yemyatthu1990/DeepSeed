@@ -1,34 +1,39 @@
 import 'dart:typed_data';
 import 'dart:ui';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:deep_seed/model/poem.dart';
+import 'package:deep_seed/ui/image_share/image_share_dialog.dart';
+import 'package:deep_seed/view/StateAwareSlider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/block_picker.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:flutter_colorpicker/material_picker.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+
+typedef OnFontSizeChangeListener(double fontSize);
 
 class DialogUtils {
-  static Future<Font> showFontChooser(BuildContext context) async {
+  static Future<Font> showFontChooser(
+      BuildContext context,
+      double currentFontSize,
+      OnFontSizeChangeListener onFontSizeChangeListener) async {
     return await showDialog<Font>(
         context: context,
         builder: (BuildContext context) {
           return SimpleDialog(
-            title: const Text('Select fonts'),
+            title: const Text('Fonts'),
             children: <Widget>[
+              StateAwareSlider(
+                  currentFontSize: currentFontSize,
+                  onFontSizeChangeListener: onFontSizeChangeListener),
               SimpleDialogOption(
                 onPressed: () {
                   Navigator.pop(context, Font.CHERRY);
                 },
-                child: new Text(Font.CHERRY.name),
+                child: new Text("• " + Font.CHERRY.name),
               ),
               SimpleDialogOption(
                 onPressed: () {
                   Navigator.pop(context, Font.PADAUK_GHOST);
                 },
                 child: new Text(
-                  Font.PADAUK_GHOST.name,
+                  "•" + Font.PADAUK_GHOST.name,
                   style: TextStyle(fontFamily: Font.PADAUK_GHOST.family),
                 ),
               )
@@ -67,23 +72,21 @@ class DialogUtils {
         });
   }
 
-  static Future<ImageShare> showImageShareDialog(
-      BuildContext context, Uint8List imageBytes) async {
-    return await showDialog<ImageShare>(
+  static Future<String> showImageShareDialog(
+    BuildContext context,
+    Uint8List imageBytes,
+    String imageRatio,
+  ) async {
+    return await showDialog<String>(
         context: context,
         builder: (BuildContext context) {
-          return AlertDialog(
-            content: Image.memory(imageBytes),
-            actions: <Widget>[
-              IconButton(
-                icon: Icon(
-                  Icons.share
-                ),
-                onPressed: () {
-                  Navigator.pop(context, ImageShare.SHARE);
-                },
-              )
-            ],
+          return ImageShareDialog(
+            initialValue: true,
+            onImageShareListener: (path) {
+              Navigator.pop(context, path);
+            },
+            imageBytes: imageBytes,
+            imageRatio: imageRatio,
           );
         });
   }
@@ -127,8 +130,6 @@ class DialogUtils {
         });
   }
 }
-
-enum ImageShare { DOWNLOAD, SHARE }
 
 enum Font { CHERRY, PADAUK_GHOST }
 

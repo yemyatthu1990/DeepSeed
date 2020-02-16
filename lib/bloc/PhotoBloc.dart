@@ -20,10 +20,10 @@ class PhotoBloc {
     _photoRepository = PhotoRepository();
   }
 
-  fetchPhotoList(int pageNo) async {
+  fetchPhotoList(int pageNo, String query) async {
     photoListSink.add(ApiResponse.loading('Fetching Popular Movies'));
     try {
-      List<Photo> photos = await _photoRepository.fetchPhotoList(pageNo);
+      List<Photo> photos = await _photoRepository.fetchPhotoList(pageNo, query);
       photoListSink.add(ApiResponse.completed(photos));
     } catch (e) {
       photoListSink.add(ApiResponse.error(e.toString()));

@@ -28,10 +28,16 @@ dependencies:
   flutter_colorpicker: any
   firebase_crashlytics: ^0.1.2+5
   firebase_analytics: ^5.0.11
+  firebase_auth: ^0.15.4
   cloud_firestore: ^0.13.1+1
+  firebase_storage: ^3.1.1
   image_picker: ^0.6.3+1
   fluttertoast: ^3.1.3
-  palette_generator: any
+  matrix_gesture_detector: ^0.1.0
+  shared_preferences: ^0.5.6+1
+  event_bus: ^1.1.1
+  intl: any
+
   
   flutter:
     sdk: flutter
