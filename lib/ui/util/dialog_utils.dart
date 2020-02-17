@@ -6,7 +6,8 @@ import 'package:deep_seed/ui/image_share/image_share_dialog.dart';
 import 'package:deep_seed/ui/util/poem_picker.dart';
 import 'package:deep_seed/view/StateAwareSlider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+
+import 'block_picker.dart';
 
 typedef OnFontSizeChangeListener(double fontSize);
 
@@ -24,10 +25,10 @@ class DialogUtils {
         onPressed: () {
           Navigator.pop(context, element);
         },
-        child: new Text(
+        child: Padding( padding: EdgeInsets.only(top: 4, bottom: 4),child:new Text(
           element.name,
           style: TextStyle(fontFamily: element.family),
-        ),
+        )),
       ));
     });
     return await showDialog<Font>(
@@ -49,15 +50,14 @@ class DialogUtils {
           return AlertDialog(
             title: Text("Select a color"),
             content: SingleChildScrollView(
-              child: ColorPicker(
+              child: Column( children: [BlockPicker(
+                alphaValue: currentColor.alpha.toDouble(),
                 pickerColor: currentColor,
                 onColorChanged: (color) {
                   pickedColor = color;
                 },
-                displayThumbColor: true,
-                enableLabel: false,
               ),
-            ),
+            ])),
             actions: <Widget>[
               FlatButton(
                 child: const Text("Ok"),

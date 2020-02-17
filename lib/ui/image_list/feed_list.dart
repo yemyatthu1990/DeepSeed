@@ -54,8 +54,8 @@ class _FeedListScreenState extends State<FeedListScreen>
     super.initState();
     adMobViews.clear();
     for (int i=0;i<3;i++) {
-      adMobViews.add( NativeAdmobBannerView(
-      /*    adUnitID: "ca-app-pub-7811418762973637/4266376782",*/
+      adMobViews.add(Container() /*NativeAdmobBannerView(
+      *//*    adUnitID: "ca-app-pub-7811418762973637/4266376782",*//*
       adUnitID: "ca-app-pub-3940256099942544/2247696110",
           style: BannerStyle.light, // enum dark or light
           showMedia: false, // whether to show media view or not
@@ -63,7 +63,7 @@ class _FeedListScreenState extends State<FeedListScreen>
           onCreate: (controller) {
 
           },
-        ));
+        )*/);
     }
 
     _bloc = FeedListBloc();

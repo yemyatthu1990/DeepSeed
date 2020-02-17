@@ -25,7 +25,6 @@ dependencies:
   flutter_cache_manager: ^1.1.3
   sqflite: ^1.2.0
   infinite_widgets: ^1.0.1
-  flutter_colorpicker: any
   firebase_crashlytics: ^0.1.2+5
   firebase_analytics: ^5.0.11
   firebase_auth: ^0.15.4
@@ -71,6 +70,8 @@ flutter:
   #  - images/a_dot_burr.jpeg
   #  - images/a_dot_ham.jpeg
 
+  assets:
+    - graphics/transparent_circle.svg
 
   fonts:
   - family: Sabae

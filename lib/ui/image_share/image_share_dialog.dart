@@ -196,8 +196,8 @@ class ImageShareState extends State<ImageShareDialog> {
                         child: Align(
                             alignment: Alignment.center,
                             child: Text(
-                              "Share",
-                              style: TextStyle(color: Colors.black),
+                              "OK",
+                              style: TextStyle(color: Colors.black87, fontSize: 18),
                             ))),
                   ]))
             ]))));

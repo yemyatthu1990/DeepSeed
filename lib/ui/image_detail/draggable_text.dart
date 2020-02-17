@@ -49,7 +49,7 @@ class DraggableTextState extends State<DraggableText> {
   double fontSize = 18;
   String value = "";
   Font currentFont = Font.SABAE;
-  Color currentColor = Color(0x80A1887F);
+  Color currentColor = Colors.black;
   void setMaxXY(double maxX, double maxY) {
     this.maxY = maxY;
     this.maxX = maxX;
@@ -85,7 +85,7 @@ class DraggableTextState extends State<DraggableText> {
 
   @override
   void initState() {
-    offset = Offset(0, maxY / 2);
+    offset = Offset(0, maxY / 4);
     super.initState();
   }
 
@@ -113,13 +113,29 @@ class DraggableTextState extends State<DraggableText> {
             child: Container(
                 color: currentColor,
                 child: Padding(
-                  child: Text(value,
+                  child: TextField(
+
+                      controller: value.length > 0
+                          ? TextEditingController.fromValue(TextEditingValue(
+                              text: value,
+                              selection: TextSelection.collapsed(
+                                  offset: value.length)))
+                          : null,
+                      focusNode: null,
+                      keyboardType: TextInputType.visiblePassword,
+                      maxLines: 100,
+                      minLines: 1,
+                      decoration: InputDecoration(border: InputBorder.none),
                       style: TextStyle(
+                        height: 2,
                           color: Colors.white,
                           fontSize: fontSize,
                           fontFamily: currentFont.family),
-                      textAlign: TextAlign.center),
-                  padding: EdgeInsets.all(24),
+                      textAlign: TextAlign.center,
+                      enableSuggestions: false,
+                      autocorrect: false,
+                      autofocus: true),
+                  padding: EdgeInsets.only(left: 16, right: 16),
                 ))));
   }
 

@@ -6,6 +6,7 @@ import 'package:deep_seed/ui/home/bottom_bar_screen.dart';
 import 'package:deep_seed/ui/image_detail/image_editor.dart';
 import 'package:deep_seed/util/Analytics.dart';
 import 'package:deep_seed/util/utils.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/rendering.dart';
@@ -48,6 +49,15 @@ class MyApp extends StatelessWidget {
                 // or simply save your changes to "hot reload" in a Flutter IDE).
                 // Notice that the counter didn't reset back to zero; the application
                 // is not restarted.
+               cupertinoOverrideTheme: CupertinoThemeData(
+                 primaryColor: Colors.white
+                 ),
+
+
+
+
+    // for others(Android, Fuchsia)
+                cursorColor: Colors.white,
                 primarySwatch: Colors.grey),
             home: Scaffold(
               body: BottomBarScreen(),
