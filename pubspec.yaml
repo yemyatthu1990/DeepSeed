@@ -39,6 +39,7 @@ dependencies:
   intl: any
   pull_to_refresh_notification: any
 
+
   
   flutter:
     sdk: flutter

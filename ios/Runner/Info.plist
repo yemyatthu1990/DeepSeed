@@ -45,5 +45,9 @@
 	<string>DeepSeed need photo library usage to access your photo</string>
 	<key>NSCameraUsageDescription</key>
 	<string>DeepSeed need camera usage to take picture for you></string>
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-7811418762973637~6821222087</string>
+	<key>io.flutter.embedded_views_preview</key>
+	<true/>
 </dict>
 </plist>

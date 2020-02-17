@@ -1,5 +1,6 @@
 package co.deepseed.deep_seed
 
+import NativeAdmobBannerViewFactory
 import android.annotation.TargetApi
 import android.app.Activity
 import android.app.Application.ActivityLifecycleCallbacks
@@ -23,7 +24,9 @@ import io.flutter.app.FlutterActivity
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.EventChannel.EventSink
 import io.flutter.plugin.common.EventChannel.StreamHandler
+import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import io.flutter.plugin.platform.PlatformViewRegistry
 import io.flutter.plugins.GeneratedPluginRegistrant
 import io.flutter.view.FlutterView
 import java.io.File
@@ -41,12 +44,26 @@ class MainActivity: FlutterActivity(), StreamHandler,
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
     GeneratedPluginRegistrant.registerWith(this)
+    registrarFor("")
+            .platformViewRegistry().registerViewFactory(
+                    "native_admob_banner_view",NativeAdmobBannerViewFactory(flutterView))
     MethodChannel(flutterView,"channel:co.deepseed.deep_seed/share").setMethodCallHandler { methodCall, _ ->
         if (methodCall.method == "shareFile") {
             shareFile(methodCall.arguments as String)
         }
     }
+    val channel = MethodChannel(flutterView, "flutter_native_admob")
+      channel.setMethodCallHandler{ methodCall, result ->
+
+        result.notImplemented()
+      }
+
+
+
+
+
 
   /*  stream = EventChannel(flutterView, "channel:co.deepseed.deep_seed/keyboard_visibility")
     stream?.setStreamHandler(this)*/

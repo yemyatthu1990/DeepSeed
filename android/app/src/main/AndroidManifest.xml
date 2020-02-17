@@ -9,6 +9,10 @@
         android:name="io.flutter.app.FlutterApplication"
         android:label="deep_seed"
         android:icon="@mipmap/ic_launcher">
+
+             <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-7811418762973637~8392296384"/>
         <provider
     android:name="androidx.core.content.FileProvider"
     android:authorities="co.deepseed.deep_seed"
@@ -17,6 +21,7 @@
     <meta-data
         android:name="android.support.FILE_PROVIDER_PATHS"
         android:resource="@xml/file_paths" />
+
 </provider>
         <activity
             android:name=".MainActivity"

@@ -10,13 +10,13 @@ class CloudFireStoreRepository {
       return await fireStore
           .collection("images")
           .orderBy("timestamp", descending: true)
-          .limit(25)
+          .limit(5)
           .getDocuments(source: Source.serverAndCache);
     } else {
       return await fireStore
           .collection("images")
           .orderBy("timestamp", descending: true)
-          .limit(25)
+          .limit(5)
           .startAfterDocument(snapshot)
           .getDocuments(source: Source.serverAndCache);
     }
