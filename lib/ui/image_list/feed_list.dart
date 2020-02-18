@@ -31,7 +31,7 @@ class FeedListScreen extends StatefulWidget {
     return _feedListScreenState;
   }
 }
-class AdMob{}
+
 class _PhotoInfiniteInterface {
   void onScroll() {}
 }
@@ -49,22 +49,30 @@ class _FeedListScreenState extends State<FeedListScreen>
   bool isRefreshing = false;
   var adMobViews = new List<Widget>();
   var adMobCount = 0;
+final  Widget adMobView =  NativeAdmobBannerView(
+        //   adUnitID: "ca-app-pub-7811418762973637/4266376782",
+        adUnitID: "ca-app-pub-3940256099942544/2247696110",
+        // enum dark or light
+        showMedia: false,
+        // whether to show media view or not
+        contentPadding: const EdgeInsets.all(10),
+        // content padding
+      );
+
+  /* Future.delayed(Duration(milliseconds: 500),(){
+     setState(() {
+       adMobView = adMob;
+     });
+   });*/
+
   @override
   void initState() {
     super.initState();
     adMobViews.clear();
-    for (int i=0;i<3;i++) {
-      adMobViews.add(Container() /*NativeAdmobBannerView(
-      *//*    adUnitID: "ca-app-pub-7811418762973637/4266376782",*//*
-      adUnitID: "ca-app-pub-3940256099942544/2247696110",
-          style: BannerStyle.light, // enum dark or light
-          showMedia: false, // whether to show media view or not
-          contentPadding: EdgeInsets.all(10), // content padding
-          onCreate: (controller) {
 
-          },
-        )*/);
-    }
+
+
+
 
     _bloc = FeedListBloc();
     _bloc.feedListStream.listen((event) {
@@ -76,18 +84,16 @@ class _FeedListScreenState extends State<FeedListScreen>
           if (event.data == null) return;
           if (isRefreshing) {
             isRefreshing = false;
-            var totalList = new List();
+            var totalList = new List<dynamic>();
             adMobCount = 1;
             totalList.addAll(event.data);
-            totalList.add(AdMob());
-
-            feedList = event.data;
+            feedList = totalList;
           } else {
             feedList.addAll(event.data);
-            if (adMobCount < adMobViews.length) {
+            /*if (adMobCount < adMobViews.length) {
               adMobCount = adMobCount + 1;
-              feedList.add(AdMob());
-            }
+
+            }*/
           }
         } else if (status == Status.LOADING) {
           if (event.show) {
@@ -202,7 +208,7 @@ class _FeedListScreenState extends State<FeedListScreen>
                                   (BuildContext buildContext, int index) {
 
                             dynamic item = feedList[index];
-                            if (item is Feed) {
+
                               double imageHeight;
                               Feed feed = item;
                               Map<String, int> rgb =
@@ -391,8 +397,11 @@ class _FeedListScreenState extends State<FeedListScreen>
                                               ))
                                         ],
                                       )));
-                            } else {
-                              return Container(
+
+                          }, childCount: feedList.length)),
+
+                          new SliverToBoxAdapter(
+                            child: Container(
                                   margin: const EdgeInsets.fromLTRB(
                                       16, 8, 16, 8),
                                   decoration: BoxDecoration(
@@ -400,9 +409,8 @@ class _FeedListScreenState extends State<FeedListScreen>
                                           color:
                                           Theme
                                               .of(context)
-                                              .backgroundColor)), child: adMobViews[index%5]);
-                            }
-                          }, childCount: feedList.length)),
+                                              .backgroundColor)), child: adMobView!=null? adMobView: Container())
+                          ),
                           new SliverToBoxAdapter(
                             child: showFooter ? new Footer() : Container(),
                           )

@@ -78,6 +78,10 @@ class NativeAdmobBannerView(
         println("onAdFailedToLoad errorCode = $errorCode")
       }
 
+      override fun onAdLoaded() {
+        super.onAdLoaded()
+        print("onAdLoaded")
+      }
     }).build()
 
     adLoader.loadAd(AdRequest.Builder().build())

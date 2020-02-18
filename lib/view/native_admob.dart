@@ -21,14 +21,12 @@ class NativeAdmobBannerView extends StatefulWidget {
   final NativeAdmobBannerViewCreatedCallback onCreate;
 
   NativeAdmobBannerView({
-    Key key,
     @required this.adUnitID,
     this.style = BannerStyle.dark,
     this.showMedia = true,
     this.contentPadding,
     this.onCreate,
-  })  : assert(adUnitID.isNotEmpty),
-        super(key: key);
+  })  : assert(adUnitID.isNotEmpty);
 
   @override
   _NativeAdmobBannerViewState createState() => _NativeAdmobBannerViewState();

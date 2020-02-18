@@ -94,6 +94,10 @@ class MainActivity: FlutterActivity(), StreamHandler,
     startActivity(finalIntent)
   }
 
+  private fun loadAds() {
+
+  }
+
    override fun onListen(
     p0: Any?,
     eventSink: EventSink?

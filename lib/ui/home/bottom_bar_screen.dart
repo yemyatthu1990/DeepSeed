@@ -9,9 +9,11 @@ import 'package:deep_seed/ui/util/dialog_utils.dart';
 import 'package:deep_seed/util/Analytics.dart';
 import 'package:deep_seed/view/search/search_bar_controller.dart';
 import 'package:deep_seed/view/search/search_bar_style.dart';
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../constants.dart';
@@ -65,8 +67,48 @@ class _BottomBarState extends State<BottomBarScreen> {
   }
 
   Widget _buildFloatingActionButton() {
+    RewardedVideoAd.instance.load(adUnitId: RewardedVideoAd.testAdUnitId,targetingInfo: MobileAdTargetingInfo(
+      childDirected: false,keywords: ["Relationship","Myanmar","Facebook"],testDevices: ["ACAE09A477A413124B79B28E3DD6641D"]
+
+    ));
+    RewardedVideoAd.instance.listener = (adEvent, {rewardAmount, rewardType}) {
+      print(adEvent);
+      switch(adEvent) {
+        case RewardedVideoAdEvent.loaded:
+          // TODO: Handle this case.
+          break;
+        case RewardedVideoAdEvent.failedToLoad:
+          // TODO: Handle this case.
+          break;
+        case RewardedVideoAdEvent.opened:
+          // TODO: Handle this case.
+          break;
+        case RewardedVideoAdEvent.leftApplication:
+          // TODO: Handle this case.
+          break;
+        case RewardedVideoAdEvent.closed:
+
+          // TODO: Handle this case.
+          break;
+        case RewardedVideoAdEvent.rewarded:
+
+          Fluttertoast.showToast(msg: "you get rewarded boss!");
+          Future.delayed(Duration(milliseconds: 5000), () {
+            RewardedVideoAd.instance.destroy();
+          });
+          break;
+        case RewardedVideoAdEvent.started:
+          // TODO: Handle this case.
+          break;
+        case RewardedVideoAdEvent.completed:
+          // TODO: Handle this case.
+          break;
+      }
+    };
     return FloatingActionButton(
-      onPressed: _showModalSheet,
+      onPressed: () {
+        RewardedVideoAd.instance.show();
+      },
       backgroundColor: Colors.white,
       child: Icon(
         Icons.add,
