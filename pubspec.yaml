@@ -39,6 +39,7 @@ dependencies:
   firebase_admob:
     path: ./firebase_admob
   pull_to_refresh_notification: any
+  progress_indicators: ^0.1.4
 
 
   

@@ -67,48 +67,10 @@ class _BottomBarState extends State<BottomBarScreen> {
   }
 
   Widget _buildFloatingActionButton() {
-    RewardedVideoAd.instance.load(adUnitId: RewardedVideoAd.testAdUnitId,targetingInfo: MobileAdTargetingInfo(
-      childDirected: false,keywords: ["Relationship","Myanmar","Facebook"],testDevices: ["ACAE09A477A413124B79B28E3DD6641D"]
 
-    ));
-    RewardedVideoAd.instance.listener = (adEvent, {rewardAmount, rewardType}) {
-      print(adEvent);
-      switch(adEvent) {
-        case RewardedVideoAdEvent.loaded:
-          // TODO: Handle this case.
-          break;
-        case RewardedVideoAdEvent.failedToLoad:
-          // TODO: Handle this case.
-          break;
-        case RewardedVideoAdEvent.opened:
-          // TODO: Handle this case.
-          break;
-        case RewardedVideoAdEvent.leftApplication:
-          // TODO: Handle this case.
-          break;
-        case RewardedVideoAdEvent.closed:
-
-          // TODO: Handle this case.
-          break;
-        case RewardedVideoAdEvent.rewarded:
-
-          Fluttertoast.showToast(msg: "you get rewarded boss!");
-          Future.delayed(Duration(milliseconds: 5000), () {
-            RewardedVideoAd.instance.destroy();
-          });
-          break;
-        case RewardedVideoAdEvent.started:
-          // TODO: Handle this case.
-          break;
-        case RewardedVideoAdEvent.completed:
-          // TODO: Handle this case.
-          break;
-      }
-    };
     return FloatingActionButton(
-      onPressed: () {
-        RewardedVideoAd.instance.show();
-      },
+      onPressed: () => _showModalSheet(),
+
       backgroundColor: Colors.white,
       child: Icon(
         Icons.add,

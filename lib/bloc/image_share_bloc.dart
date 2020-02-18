@@ -8,9 +8,11 @@ import 'package:deep_seed/network/ApiResponse.dart';
 import 'package:deep_seed/repository/authentication_repository.dart';
 import 'package:deep_seed/repository/could_fire_store_repository.dart';
 import 'package:deep_seed/repository/firebase_storage_repository.dart';
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/testing.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -38,7 +40,6 @@ class ImageShareBloc {
       _photoFilePathController.stream;
   StreamSink<Map<String, String>> get photoFilePathSink =>
       _photoFilePathController.sink;
-
   ImageShareBloc() {
     _authenticationController = StreamController<ApiResponse<FirebaseUser>>();
     _authenticationRepository = AuthenticationRepository();
@@ -46,6 +47,10 @@ class ImageShareBloc {
     _storageController = StreamController<ApiResponse<StorageTaskSnapshot>>();
     _firebaseStorageRepository = FirebaseStorageRepository();
     _photoFilePathController = StreamController<Map<String, String>>();
+     RewardedVideoAd.instance.load(adUnitId: RewardedVideoAd.testAdUnitId,targetingInfo: MobileAdTargetingInfo(
+      childDirected: false,keywords: ["Relationship","Myanmar","Facebook"],testDevices: ["ACAE09A477A413124B79B28E3DD6641D"]
+
+    ));
   }
 
   signIn() async {
