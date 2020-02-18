@@ -65,6 +65,8 @@ class PoemPickerState extends State<PoemPicker> {
       ));
     });
     return SimpleDialog(
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(8.0))),
       children: showLoading
           ? [
               Center(

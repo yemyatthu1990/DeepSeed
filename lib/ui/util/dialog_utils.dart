@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:deep_seed/model/poem.dart';
 import 'package:deep_seed/ui/image_share/image_share_dialog.dart';
 import 'package:deep_seed/ui/util/poem_picker.dart';
+import 'package:deep_seed/view/ColorChanger.dart';
 import 'package:deep_seed/view/StateAwareSlider.dart';
 import 'package:flutter/material.dart';
 
@@ -25,48 +26,36 @@ class DialogUtils {
         onPressed: () {
           Navigator.pop(context, element);
         },
-        child: Padding( padding: EdgeInsets.only(top: 4, bottom: 4),child:new Text(
-          element.name,
-          style: TextStyle(fontFamily: element.family),
-        )),
+        child: Padding(
+            padding: EdgeInsets.only(top: 4, bottom: 4),
+            child: new Text(
+              element.name,
+              style: TextStyle(fontFamily: element.family),
+            )),
       ));
     });
     return await showDialog<Font>(
         context: context,
         builder: (BuildContext context) {
           return SimpleDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0))),
             title: const Text('Fonts'),
             children: options,
           );
         });
   }
 
-  static Future<Color> showColorChooser(
-      Color currentColor, BuildContext context) async {
-    Color pickedColor;
-    return await showDialog<Color>(
+  static Future<List<Color>> showColorChooser(
+      Color currentColor, Color currentFontColor, BuildContext context) async {
+    return await showDialog<List<Color>>(
         context: context,
         builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text("Select a color"),
-            content: SingleChildScrollView(
-              child: Column( children: [BlockPicker(
-                alphaValue: currentColor.alpha.toDouble(),
-                pickerColor: currentColor,
-                onColorChanged: (color) {
-                  pickedColor = color;
-                },
-              ),
-            ])),
-            actions: <Widget>[
-              FlatButton(
-                child: const Text("Ok"),
-                onPressed: () {
-                  Navigator.pop(context, pickedColor);
-                },
-              )
-            ],
-          );
+          return ColorChanger(
+              currentColor: currentColor,
+              currentFontColor: currentFontColor,
+              onColorPicked: (bgColor, fontColor) =>
+                  Navigator.pop(context, [bgColor, fontColor]));
         });
   }
 
@@ -75,6 +64,8 @@ class DialogUtils {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0))),
             title: Text("Select a color"),
             content: SingleChildScrollView(
               child: Text("Are you sure you want to report this?"),

@@ -29,15 +29,21 @@ class BottomBarScreen extends StatefulWidget {
   // always marked "final".
 
   final String title;
-  final List<Widget> _children = [
-    PhotoListScreen(key: PageStorageKey("PhotoList"), query: ""),
-    FeedListScreen(key: PageStorageKey("FeedList")),
-    FavoriteListScreen(key: PageStorageKey("Favorite")),
-    ProfileListScreen(key: PageStorageKey("Profile"))
-  ];
+  final ValueNotifier<bool> notifier = ValueNotifier(false);
+
+  List<Widget> _children;
 
   @override
-  _BottomBarState createState() => _BottomBarState(children: _children);
+  _BottomBarState createState() {
+    _children = [
+      PhotoListScreen(
+          key: PageStorageKey("PhotoList"), query: "", notifier: notifier),
+      FeedListScreen(key: PageStorageKey("FeedList")),
+      FavoriteListScreen(key: PageStorageKey("Favorite")),
+      ProfileListScreen(key: PageStorageKey("Profile"))
+    ];
+    return _BottomBarState(children: _children);
+  }
 }
 
 class _BottomBarState extends State<BottomBarScreen> {
@@ -49,6 +55,19 @@ class _BottomBarState extends State<BottomBarScreen> {
   @override
   void initState() {
     super.initState();
+    widget.notifier.addListener(() {
+      if (widget.notifier.value == true) {
+        setState(() {
+          Future.delayed(Duration(milliseconds: 500), () {
+            setState(() {
+              currentIndex = 1;
+              (children[1] as FeedListScreen).refresh();
+              (children[3] as ProfileListScreen).refres h();
+            });
+          });
+        });
+      }
+    });
     Analytics().logAppOpen();
     currentIndex = 0;
   }
@@ -99,8 +118,24 @@ class _BottomBarState extends State<BottomBarScreen> {
                                 "file_url": value.path,
                                 "hero_tag": heroFavoriteTag + "_temp"
                               };
+                              Navigator.pop(context, true);
                               Navigator.pushNamed(context, detailRoute,
-                                  arguments: data);
+                                      arguments: data)
+                                  .then((value) {
+                                if (value != null && value == 1) {
+                                  setState(() {
+                                    currentIndex = 1;
+                                  });
+                                  Future.delayed(Duration(milliseconds: 500),
+                                      () {
+                                    setState(() {
+                                      (children[1] as FeedListScreen).refresh();
+                                      (children[3] as ProfileListScreen)
+                                          .refresh();
+                                    });
+                                  });
+                                }
+                              });
                             });
                           },
                           child:
@@ -132,7 +167,22 @@ class _BottomBarState extends State<BottomBarScreen> {
                                 "hero_tag": heroFavoriteTag + "_temp"
                               };
                               Navigator.pushNamed(context, detailRoute,
-                                  arguments: data);
+                                      arguments: data)
+                                  .then((value) {
+                                if (value != null && value == 1) {
+                                  setState(() {
+                                    currentIndex = 1;
+                                  });
+                                  Future.delayed(Duration(milliseconds: 500),
+                                      () {
+                                    setState(() {
+                                      (children[1] as FeedListScreen).refresh();
+                                      (children[3] as ProfileListScreen)
+                                          .refresh();
+                                    });
+                                  });
+                                }
+                              });
                             });
                           },
                           child:

@@ -20,11 +20,11 @@ class Utils {
     return {"r": r, "g": g, "b": b};
   }
 
-  static shareImage(String path) async {
+  static Future<List> shareImage(String path) async {
     try {
       final channel =
           const MethodChannel('channel:co.deepseed.deep_seed/share');
-      channel.invokeMethod('shareFile', path);
+      return channel.invokeListMethod('shareFile', path);
     } catch (e) {
       print('Share error: $e');
     }

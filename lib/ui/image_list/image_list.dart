@@ -11,12 +11,13 @@ class PhotoListScreen extends StatefulWidget {
   String query;
   _PhotoListScreenState _photoListScreenState;
   final Key key;
+  final ValueNotifier<bool> notifier;
   void setQuery(String query) {
     this.query = query;
     _photoListScreenState.setQuery(this.query);
   }
 
-  PhotoListScreen({this.key, this.query}) : super(key: key);
+  PhotoListScreen({this.key, this.query, this.notifier}) : super(key: key);
 
   @override
   _PhotoListScreenState createState() {
@@ -163,8 +164,16 @@ class _PhotoListScreenState extends State<PhotoListScreen>
                                                   index.toString()
                                             };
                                             Navigator.pushNamed(
-                                                context, detailRoute,
-                                                arguments: data);
+                                                    context, detailRoute,
+                                                    arguments: data)
+                                                .then((value) => {
+                                                      if (value != null &&
+                                                          value == 1)
+                                                        {
+                                                          widget.notifier
+                                                              .value = true
+                                                        }
+                                                    });
                                           },
                                           child: CachedNetworkImage(
                                             imageUrl:

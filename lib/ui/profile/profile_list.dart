@@ -17,11 +17,17 @@ import 'package:pull_to_refresh_notification/pull_to_refresh_notification.dart'
 
 class ProfileListScreen extends StatefulWidget {
   final Key key;
+  _ProfileListScreenState _profileListScreenState;
   ProfileListScreen({this.key}) : super(key: key);
+
+  void refresh() {
+    _profileListScreenState.refresh();
+  }
 
   @override
   _ProfileListScreenState createState() {
-    return _ProfileListScreenState();
+    _profileListScreenState = _ProfileListScreenState();
+    return _profileListScreenState;
   }
 }
 
@@ -33,6 +39,13 @@ class _ProfileListScreenState extends State<ProfileListScreen> {
   List<Feed> profileList = new List<Feed>();
   Status status;
   String message;
+  final GlobalKey<prefresh.PullToRefreshNotificationState>
+      _refreshIndicatorKey =
+      new GlobalKey<prefresh.PullToRefreshNotificationState>();
+  void refresh() {
+    _refreshIndicatorKey.currentState.show(notificationDragOffset: 40);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -109,7 +122,7 @@ class _ProfileListScreenState extends State<ProfileListScreen> {
                     },
                     maxDragOffset: 40,
                     armedDragUpCancel: false,
-                    key: GlobalKey(),
+                    key: _refreshIndicatorKey,
                     child: new CustomScrollView(
                       slivers: <Widget>[
                         SliverAppBar(

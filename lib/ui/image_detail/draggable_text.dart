@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:deep_seed/ui/util/dialog_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix_gesture_detector/matrix_gesture_detector.dart';
@@ -24,8 +26,8 @@ class DraggableText extends StatefulWidget {
     _draggableTextState.setText(value);
   }
 
-  void setColor(Color color) {
-    _draggableTextState.setColor(color);
+  void setColor(List<Color> colors) {
+    _draggableTextState.setColor(colors);
   }
 
   void setOffSet(Offset offset) {
@@ -33,7 +35,7 @@ class DraggableText extends StatefulWidget {
   }
 
   Color getColor() => _draggableTextState.currentColor;
-
+  Color getFontColor() => _draggableTextState.currentFontColor;
   double getHeight() => _draggableTextState.context.size.height;
 
   @override
@@ -49,7 +51,8 @@ class DraggableTextState extends State<DraggableText> {
   double fontSize = 18;
   String value = "";
   Font currentFont = Font.SABAE;
-  Color currentColor = Colors.black;
+  Color currentColor = Colors.black38;
+  Color currentFontColor = Colors.white;
   void setMaxXY(double maxX, double maxY) {
     this.maxY = maxY;
     this.maxX = maxX;
@@ -67,9 +70,10 @@ class DraggableTextState extends State<DraggableText> {
     });
   }
 
-  void setColor(Color color) {
+  void setColor(List<Color> colors) {
     setState(() {
-      currentColor = color;
+      currentColor = colors[0];
+      currentFontColor = colors[1];
     });
   }
 
@@ -114,25 +118,24 @@ class DraggableTextState extends State<DraggableText> {
                 color: currentColor,
                 child: Padding(
                   child: TextField(
-
                       controller: value.length > 0
                           ? TextEditingController.fromValue(TextEditingValue(
                               text: value,
                               selection: TextSelection.collapsed(
                                   offset: value.length)))
                           : null,
-                      focusNode: null,
-                      keyboardType: TextInputType.visiblePassword,
+                      keyboardType: TextInputType.text,
                       maxLines: 100,
                       minLines: 1,
                       decoration: InputDecoration(border: InputBorder.none),
                       style: TextStyle(
-                        height: 2,
-                          color: Colors.white,
+                          height: 2,
+                          color: currentFontColor,
                           fontSize: fontSize,
                           fontFamily: currentFont.family),
                       textAlign: TextAlign.center,
                       enableSuggestions: false,
+                      selectionHeightStyle: BoxHeightStyle.strut,
                       autocorrect: false,
                       autofocus: true),
                   padding: EdgeInsets.only(left: 16, right: 16),
