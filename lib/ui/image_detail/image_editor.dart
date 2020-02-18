@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'dart:ui' as ui;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:deep_seed/main.dart';
 import 'package:deep_seed/model/model.dart';
 import 'package:deep_seed/model/poem.dart';
 import 'package:deep_seed/network/image_cache_manager.dart';
@@ -12,11 +13,15 @@ import 'package:deep_seed/ui/image_detail/draggable_text.dart';
 import 'package:deep_seed/ui/util/dialog_utils.dart';
 import 'package:deep_seed/util/preference_utils.dart';
 import 'package:deep_seed/util/utils.dart';
+import 'package:deep_seed/view/chat_bubble_triangle.dart';
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:progress_indicators/progress_indicators.dart';
 
 class ImageEditor extends StatefulWidget {
   final Urls photoUrls;
@@ -85,7 +90,8 @@ class ImageEditorState extends State<ImageEditor> {
   IconData favoriteIcon = Icons.favorite_border;
   GlobalKey captureKey = GlobalKey();
   ImageEditorState(this.photoUrls, this.index, this.tempFileUrl, this.fileUrl);
-
+  double imageHeight = 0;
+  bool showAdsLoading = false;
   @override
   Widget build(BuildContext context) {
     Image image = Image.file(new File(fileUrl),
@@ -96,6 +102,7 @@ class ImageEditorState extends State<ImageEditor> {
             : MediaQuery.of(context).size.width * imageRatio.ratio,
         fit: BoxFit.cover);
     draggableText.setMaxXY(0, image.height);
+    imageHeight = image.height;
     if (isFavorite) {
       favoriteIcon = Icons.favorite;
     } else {
@@ -152,8 +159,103 @@ class ImageEditorState extends State<ImageEditor> {
                       children: <Widget>[
                         Hero(tag: widget.heroTag, child: image),
                         draggableText,
+                        if (WaterMark.show)
+                          Positioned(
+                              top: image.height - 16,
+                              left: image.width - 80,
+                              child: Container(
+                                  padding: EdgeInsets.only(left: 8, right: 8),
+                                  decoration: BoxDecoration(
+                                      color: Colors.white38,
+                                      borderRadius: BorderRadius.only(
+                                          topLeft: Radius.circular(8.0))),
+                                  child: Text("deepseed.co",
+                                      style: TextStyle(
+                                          fontSize: 12,
+                                          fontFamily: Font.SAGAR.family,
+                                          fontStyle: FontStyle.italic,
+                                          color: Colors.black54)))),
                       ],
                     )),
+                if (WaterMark.show)
+                  Positioned(
+                      top: imageRatio == ImageRatio.Instagram
+                          ? image.height
+                          : image.height - 10,
+                      right: imageRatio == ImageRatio.Instagram ? 16 : 68,
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CustomPaint(
+                          painter: ChatBubbleTriangle(
+                              direction: imageRatio == ImageRatio.Instagram
+                                  ? DIRECTION.TOP
+                                  : DIRECTION.RIGHT),
+                        ),
+                      )),
+                if (WaterMark.show)
+                  Positioned(
+                      top: imageRatio == ImageRatio.Instagram
+                          ? image.height + 10
+                          : image.height - 40,
+                      right: imageRatio == ImageRatio.Instagram ? 0 : 96,
+                      child: InkWell(
+                          onTap: () {
+                            showAdsLoading = true;
+                            RewardedVideoAd.instance.load(
+                                adUnitId: RewardedVideoAd.testAdUnitId,
+                                targetingInfo: MobileAdTargetingInfo());
+                            RewardedVideoAd.instance.listener =
+                                (adEvent, {rewardAmount, rewardType}) {
+                              print(adEvent);
+                              if (adEvent == RewardedVideoAdEvent.loaded) {
+                                if (showAdsLoading) {
+                                  setState(() {
+                                    showAdsLoading = false;
+                                  });
+                                }
+                                RewardedVideoAd.instance.show();
+                              } else if (adEvent ==
+                                  RewardedVideoAdEvent.rewarded) {
+                                Fluttertoast.showToast(
+                                    msg: "Closing Video automatically...");
+                                Future.delayed(Duration(milliseconds: 3000),
+                                    () {
+                                  setState(() {
+                                    WaterMark.show = false;
+                                  });
+                                  RewardedVideoAd.instance.destroy();
+                                  Fluttertoast.showToast(
+                                      msg:
+                                          "Thank you! Watermark will be removed for this app session.");
+                                });
+                              } else {
+                                if (showAdsLoading)
+                                  setState(() {
+                                    showAdsLoading = false;
+                                  });
+                              }
+                            };
+                          },
+                          child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: Color(0xFFEEEEEE),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(50)),
+                              ),
+                              child: Padding(
+                                  padding: EdgeInsets.all(20),
+                                  child: showAdsLoading
+                                      ? JumpingDotsProgressIndicator(
+                                          fontSize: 20.0,
+                                        )
+                                      : Text(
+                                          "Remove Watermark for FREE?",
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.black87,
+                                          ),
+                                        ))))),
                 SafeArea(
                     child: Align(
                         alignment: Alignment.bottomCenter, child: _bottomBar()))
@@ -329,7 +431,7 @@ class ImageEditorState extends State<ImageEditor> {
   Widget _bottomBar() {
     return Container(
       child: Padding(
-          padding: const EdgeInsets.fromLTRB(32, 8, 32, 8),
+          padding: const EdgeInsets.fromLTRB(32, 8, 32, 0),
           child: Material(
               color: Theme.of(context).dialogBackgroundColor,
               child: Row(

@@ -9,9 +9,11 @@ import 'package:deep_seed/ui/util/dialog_utils.dart';
 import 'package:deep_seed/util/Analytics.dart';
 import 'package:deep_seed/view/search/search_bar_controller.dart';
 import 'package:deep_seed/view/search/search_bar_style.dart';
+import 'package:firebase_admob/firebase_admob.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../constants.dart';
@@ -62,7 +64,7 @@ class _BottomBarState extends State<BottomBarScreen> {
             setState(() {
               currentIndex = 1;
               (children[1] as FeedListScreen).refresh();
-              (children[3] as ProfileListScreen).refres h();
+              (children[3] as ProfileListScreen).refresh();
             });
           });
         });
@@ -85,7 +87,7 @@ class _BottomBarState extends State<BottomBarScreen> {
 
   Widget _buildFloatingActionButton() {
     return FloatingActionButton(
-      onPressed: _showModalSheet,
+      onPressed: () => _showModalSheet(),
       backgroundColor: Colors.white,
       child: Icon(
         Icons.add,

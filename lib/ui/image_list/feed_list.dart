@@ -35,8 +35,6 @@ class FeedListScreen extends StatefulWidget {
   }
 }
 
-class AdMob {}
-
 class _PhotoInfiniteInterface {
   void onScroll() {}
 }
@@ -54,6 +52,7 @@ class _FeedListScreenState extends State<FeedListScreen>
   bool isRefreshing = false;
   var adMobViews = new List<Widget>();
   var adMobCount = 0;
+
   void refresh() {
     _refreshIndicatorKey.currentState.show(notificationDragOffset: 40);
   }
@@ -61,21 +60,6 @@ class _FeedListScreenState extends State<FeedListScreen>
   @override
   void initState() {
     super.initState();
-    adMobViews.clear();
-    for (int i = 0; i < 3; i++) {
-      adMobViews.add(
-          Container() /*NativeAdmobBannerView(
-      */ /*    adUnitID: "ca-app-pub-7811418762973637/4266376782",*/ /*
-      adUnitID: "ca-app-pub-3940256099942544/2247696110",
-          style: BannerStyle.light, // enum dark or light
-          showMedia: false, // whether to show media view or not
-          contentPadding: EdgeInsets.all(10), // content padding
-          onCreate: (controller) {
-
-          },
-        )*/
-          );
-    }
 
     _bloc = FeedListBloc();
     _bloc.feedListStream.listen((event) {
@@ -87,16 +71,12 @@ class _FeedListScreenState extends State<FeedListScreen>
           if (event.data == null) return;
           if (isRefreshing) {
             isRefreshing = false;
+
             List<Feed> totalList = new List();
-            adMobCount = 1;
             totalList.addAll(event.data);
             feedList = totalList;
           } else {
             feedList.addAll(event.data);
-            if (adMobCount < adMobViews.length) {
-              adMobCount = adMobCount + 1;
-              //feedList.add(AdMob());
-            }
           }
         } else if (status == Status.LOADING) {
           if (event.show) {
@@ -210,8 +190,6 @@ class _FeedListScreenState extends State<FeedListScreen>
                           new SliverList(
                               delegate: new SliverChildBuilderDelegate(
                                   (BuildContext buildContext, int index) {
-                            /*dynamic item = feedList[index];*/
-                            /*if (item is Feed) {*/
                             double imageHeight;
                             Feed feed = feedList[index];
                             Map<String, int> rgb =
@@ -310,11 +288,13 @@ class _FeedListScreenState extends State<FeedListScreen>
                                                         mainAxisSize:
                                                             MainAxisSize.max,
                                                         children: [
-                                                          Icon(Icons.flag,
-                                                              size: 20,
-                                                              color: Theme.of(
-                                                                      context)
-                                                                  .primaryColorDark),
+                                                          Icon(
+                                                            Icons.flag,
+                                                            size: 20,
+                                                            color: Theme.of(
+                                                                    context)
+                                                                .primaryColorDark,
+                                                          ),
                                                           SizedBox(
                                                             width: 8,
                                                           ),
@@ -378,15 +358,6 @@ class _FeedListScreenState extends State<FeedListScreen>
                                             ))
                                       ],
                                     )));
-                            //   } /*else {
-                            return Container(
-                                margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color:
-                                            Theme.of(context).backgroundColor)),
-                                child: adMobViews[index % 5]);
-                            //}   /
                           }, childCount: feedList.length)),
                           new SliverToBoxAdapter(
                             child: showFooter ? new Footer() : Container(),
