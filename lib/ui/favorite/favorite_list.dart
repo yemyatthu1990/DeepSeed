@@ -24,7 +24,8 @@ class FavoriteListScreen extends StatefulWidget {
 
   @override
   _FavoriteListScreenState createState() {
-    return _FavoriteListScreenState();
+    _favoriteListScreenState = _FavoriteListScreenState();
+    return _favoriteListScreenState;
   }
 }
 

@@ -62,7 +62,8 @@ FLTRewardedVideoAdStatus _rewardedStatus;
       presentFromRootViewController:[FLTRewardedVideoAdWrapper rootViewController]];
 }
 - (void)destroy {
-
+    [[[FLTRewardedVideoAdWrapper rootViewController] presentedViewController]
+     dismissViewControllerAnimated:TRUE completion:NULL];
 }
 
 - (NSString *)description {

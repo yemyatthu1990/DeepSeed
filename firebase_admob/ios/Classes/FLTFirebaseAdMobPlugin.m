@@ -232,6 +232,11 @@
   result([NSNumber numberWithBool:YES]);
 }
 
+- (void)callDestroyRewardedVideoAd:(FlutterMethodCall *)call result:(FlutterResult)result {
+    [self.rewardedWrapper destroy];
+    result([NSNumber numberWithBool:YES]);
+}
+
 - (void)callDisposeAd:(NSNumber *)mobileAdId
                  call:(FlutterMethodCall *)call
                result:(FlutterResult)result {
@@ -257,10 +262,16 @@
     return;
   }
 
+  if ([call.method isEqualToString:@"destroyRewardedVideoAd"]) {
+      [self callDestroyRewardedVideoAd:call result:result];
+      return;
+  }
   if ([call.method isEqualToString:@"showRewardedVideoAd"]) {
     [self callShowRewardedVideoAd:call result:result];
     return;
   }
+    
+
 
   NSNumber *mobileAdId = (NSNumber *)call.arguments[@"id"];
   if (mobileAdId == nil) {

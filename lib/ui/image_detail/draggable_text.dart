@@ -124,7 +124,7 @@ class DraggableTextState extends State<DraggableText> {
                               selection: TextSelection.collapsed(
                                   offset: value.length)))
                           : null,
-                      keyboardType: TextInputType.text,
+                      keyboardType: TextInputType.multiline,
                       maxLines: 100,
                       minLines: 1,
                       decoration: InputDecoration(border: InputBorder.none),
