@@ -238,6 +238,7 @@ class _SearchBarState extends State<SearchBar>
                           onChanged: _onTextChanged,
                           style: widget.textStyle,
                           focusNode: _focusNode,
+                          cursorColor: Colors.black,
                           decoration: InputDecoration(
                             icon: widget.icon,
                             border: InputBorder.none,

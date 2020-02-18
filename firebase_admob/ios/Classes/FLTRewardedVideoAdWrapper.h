@@ -17,4 +17,5 @@ typedef enum : NSUInteger {
 - (FLTRewardedVideoAdStatus)status;
 - (void)loadWithAdUnitId:(NSString *)adUnitId targetingInfo:(NSDictionary *)targetingInfo;
 - (void)show;
+- (void)destroy;
 @end

@@ -11,6 +11,7 @@ import 'package:deep_seed/model/poem.dart';
 import 'package:deep_seed/network/image_cache_manager.dart';
 import 'package:deep_seed/ui/image_detail/draggable_text.dart';
 import 'package:deep_seed/ui/util/dialog_utils.dart';
+import 'package:deep_seed/util/jumping_dots.dart';
 import 'package:deep_seed/util/preference_utils.dart';
 import 'package:deep_seed/util/utils.dart';
 import 'package:deep_seed/view/chat_bubble_triangle.dart';
@@ -21,7 +22,6 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:progress_indicators/progress_indicators.dart';
 
 class ImageEditor extends StatefulWidget {
   final Urls photoUrls;
@@ -121,6 +121,7 @@ class ImageEditorState extends State<ImageEditor> {
                 actions: <Widget>[
                   InkWell(
                       onTap: () {
+                        refreshValue = 2;
                         setState(() {
                           isFavorite = !isFavorite;
                         });
@@ -199,63 +200,67 @@ class ImageEditorState extends State<ImageEditor> {
                           ? image.height + 10
                           : image.height - 40,
                       right: imageRatio == ImageRatio.Instagram ? 0 : 96,
-                      child: InkWell(
-                          onTap: () {
-                            showAdsLoading = true;
-                            RewardedVideoAd.instance.load(
-                                adUnitId: RewardedVideoAd.testAdUnitId,
-                                targetingInfo: MobileAdTargetingInfo());
-                            RewardedVideoAd.instance.listener =
-                                (adEvent, {rewardAmount, rewardType}) {
-                              print(adEvent);
-                              if (adEvent == RewardedVideoAdEvent.loaded) {
-                                if (showAdsLoading) {
-                                  setState(() {
-                                    showAdsLoading = false;
-                                  });
-                                }
-                                RewardedVideoAd.instance.show();
-                              } else if (adEvent ==
-                                  RewardedVideoAdEvent.rewarded) {
-                                Fluttertoast.showToast(
-                                    msg: "Closing Video automatically...");
-                                Future.delayed(Duration(milliseconds: 3000),
-                                    () {
-                                  setState(() {
-                                    WaterMark.show = false;
-                                  });
-                                  RewardedVideoAd.instance.destroy();
-                                  Fluttertoast.showToast(
-                                      msg:
-                                          "Thank you! Watermark will be removed for this app session.");
+                      child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: Color(0xFFEEEEEE),
+                            borderRadius: BorderRadius.all(Radius.circular(50)),
+                          ),
+                          child: InkWell(
+                              onTap: () {
+                                setState(() {
+                                  showAdsLoading = true;
                                 });
-                              } else {
-                                if (showAdsLoading)
-                                  setState(() {
-                                    showAdsLoading = false;
-                                  });
-                              }
-                            };
-                          },
-                          child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: Color(0xFFEEEEEE),
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(50)),
-                              ),
-                              child: Padding(
-                                  padding: EdgeInsets.all(20),
-                                  child: showAdsLoading
-                                      ? JumpingDotsProgressIndicator(
-                                          fontSize: 20.0,
-                                        )
-                                      : Text(
-                                          "Remove Watermark for FREE?",
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.black87,
-                                          ),
-                                        ))))),
+
+                                RewardedVideoAd.instance.load(
+                                    adUnitId: RewardedVideoAd.testAdUnitId,
+                                    targetingInfo: MobileAdTargetingInfo());
+                                RewardedVideoAd.instance.listener =
+                                    (adEvent, {rewardAmount, rewardType}) {
+                                  print(adEvent);
+                                  if (adEvent == RewardedVideoAdEvent.loaded) {
+                                    if (showAdsLoading) {
+                                      setState(() {
+                                        showAdsLoading = false;
+                                      });
+                                    }
+                                    RewardedVideoAd.instance.show();
+                                  } else if (adEvent ==
+                                      RewardedVideoAdEvent.rewarded) {
+                                    Fluttertoast.showToast(
+                                        msg: "Closing Video automatically...");
+                                    Future.delayed(Duration(milliseconds: 3000),
+                                        () {
+                                      setState(() {
+                                        WaterMark.show = false;
+                                      });
+                                      RewardedVideoAd.instance.destroy();
+                                      Fluttertoast.showToast(
+                                          msg:
+                                              "Thank you! Watermark will be removed for this session.");
+                                    });
+                                  } else {
+                                    if (showAdsLoading)
+                                      setState(() {
+                                        showAdsLoading = false;
+                                      });
+                                  }
+                                };
+                              },
+                              child: showAdsLoading
+                                  ? SizedBox(
+                                      width: 228,
+                                      child: JumpingDotsProgressIndicator(
+                                        fontSize: 30.0,
+                                      ))
+                                  : Padding(
+                                      padding: EdgeInsets.all(20),
+                                      child: Text(
+                                        "Remove Watermark for FREE?",
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: Colors.black87,
+                                        ),
+                                      ))))),
                 SafeArea(
                     child: Align(
                         alignment: Alignment.bottomCenter, child: _bottomBar()))

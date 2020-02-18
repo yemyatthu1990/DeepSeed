@@ -4,4 +4,5 @@ class Feed {
   String downloadUrl;
   String imageRatio;
   int reportCount = 0;
+  int clapCount = 0;
 }

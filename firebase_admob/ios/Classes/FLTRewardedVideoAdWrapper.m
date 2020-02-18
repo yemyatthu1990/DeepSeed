@@ -61,6 +61,9 @@ FLTRewardedVideoAdStatus _rewardedStatus;
   [[GADRewardBasedVideoAd sharedInstance]
       presentFromRootViewController:[FLTRewardedVideoAdWrapper rootViewController]];
 }
+- (void)destroy {
+
+}
 
 - (NSString *)description {
   NSString *statusString =

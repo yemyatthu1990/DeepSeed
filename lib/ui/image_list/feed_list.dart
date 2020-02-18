@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -14,9 +15,11 @@ import 'package:deep_seed/ui/image_detail/image_editor.dart';
 import 'package:deep_seed/ui/util/dialog_utils.dart';
 import 'package:deep_seed/util/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:popup_menu/popup_menu.dart';
 import 'package:pull_to_refresh_notification/pull_to_refresh_notification.dart'
     as prefresh;
 
@@ -52,15 +55,20 @@ class _FeedListScreenState extends State<FeedListScreen>
   bool isRefreshing = false;
   var adMobViews = new List<Widget>();
   var adMobCount = 0;
+  PopupMenu popupMenu;
 
   void refresh() {
+    if (showError == true)
+      setState(() {
+        showError = false;
+        showLoading = false;
+      });
     _refreshIndicatorKey.currentState.show(notificationDragOffset: 40);
   }
 
   @override
   void initState() {
     super.initState();
-
     _bloc = FeedListBloc();
     _bloc.feedListStream.listen((event) {
       setState(() {
@@ -133,6 +141,17 @@ class _FeedListScreenState extends State<FeedListScreen>
   final GlobalKey<prefresh.PullToRefreshNotificationState>
       _refreshIndicatorKey =
       new GlobalKey<prefresh.PullToRefreshNotificationState>();
+
+  Future<dynamic> _showPopupMenu(RelativeRect rect, Feed feed) async {
+    return await showMenu(
+      context: context,
+      position: rect,
+      items: [
+        PopupMenuItem(value: feed, child: Text("Report")),
+      ],
+      elevation: 8.0,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -236,7 +255,49 @@ class _FeedListScreenState extends State<FeedListScreen>
                                                             color: Theme.of(
                                                                     context)
                                                                 .primaryColorDark,
-                                                            fontSize: 12)))
+                                                            fontSize: 12))),
+                                                Expanded(child: Container()),
+                                                InkWell(
+                                                    onTapDown: (detail) {
+                                                      Future<dynamic>
+                                                          awaitFeed =
+                                                          _showPopupMenu(
+                                                              RelativeRect.fromLTRB(
+                                                                  detail
+                                                                      .globalPosition
+                                                                      .dx,
+                                                                  detail
+                                                                      .globalPosition
+                                                                      .dy,
+                                                                  0,
+                                                                  0),
+                                                              feed);
+                                                      awaitFeed.then((value) {
+                                                        print(value);
+                                                        if (value is Feed) {
+                                                          _bloc.report(
+                                                              value.downloadUrl,
+                                                              () {
+                                                            Fluttertoast.showToast(
+                                                                msg:
+                                                                    "Successfully reported");
+                                                          });
+                                                        }
+                                                      });
+                                                    },
+                                                    onTap: () {
+                                                      log("Tap");
+                                                    },
+                                                    child: Padding(
+                                                        padding:
+                                                            EdgeInsets.all(4),
+                                                        child: Icon(
+                                                          Icons.more_vert,
+                                                          size: 20,
+                                                          color: Theme.of(
+                                                                  context)
+                                                              .primaryColorDark,
+                                                        )))
                                               ],
                                             )),
                                         Container(
@@ -263,7 +324,18 @@ class _FeedListScreenState extends State<FeedListScreen>
                                               children: <Widget>[
                                                 FlatButton(
                                                     onPressed: () {
-                                                      DialogUtils
+                                                      setState(() {
+                                                        feed.clapCount = feed
+                                                                    .clapCount ==
+                                                                null
+                                                            ? 0
+                                                            : feed.clapCount +
+                                                                1;
+                                                      });
+                                                      _bloc.upvoteImage(
+                                                          feed.downloadUrl,
+                                                          () => {});
+                                                      /*   DialogUtils
                                                               .showReportDialog(
                                                                   context)
                                                           .then((report) {
@@ -279,7 +351,7 @@ class _FeedListScreenState extends State<FeedListScreen>
                                                                     "Sucessfuly reported.");
                                                           });
                                                         }
-                                                      });
+                                                      });*/
                                                     }, //
                                                     child: Row(
                                                         mainAxisAlignment:
@@ -288,18 +360,34 @@ class _FeedListScreenState extends State<FeedListScreen>
                                                         mainAxisSize:
                                                             MainAxisSize.max,
                                                         children: [
-                                                          Icon(
-                                                            Icons.flag,
-                                                            size: 20,
+                                                          SvgPicture.asset(
+                                                            "graphics/clap.svg",
+                                                            width: 20,
+                                                            height: 20,
                                                             color: Theme.of(
                                                                     context)
                                                                 .primaryColorDark,
                                                           ),
+                                                          if ((feed.clapCount ==
+                                                                      null
+                                                                  ? 0
+                                                                  : feed
+                                                                      .clapCount) >
+                                                              0)
+                                                            Text(
+                                                              feed.clapCount
+                                                                  .toString(),
+                                                              style: TextStyle(
+                                                                  fontSize: 12,
+                                                                  color: Theme.of(
+                                                                          context)
+                                                                      .primaryColorDark),
+                                                            ),
                                                           SizedBox(
                                                             width: 8,
                                                           ),
                                                           Text(
-                                                            "Report",
+                                                            "Clap",
                                                             style: TextStyle(
                                                                 color: Theme.of(
                                                                         context)

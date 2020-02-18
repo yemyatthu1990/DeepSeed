@@ -6,6 +6,7 @@ import 'package:deep_seed/network/ApiResponse.dart';
 import 'package:deep_seed/repository/could_fire_store_repository.dart';
 
 typedef OnReportFinished();
+typedef OnUpvoteFinished();
 
 class FeedListBloc {
   DocumentSnapshot lastDocumentSnapshot;
@@ -30,6 +31,12 @@ class FeedListBloc {
         .whenComplete(() => {onReportFinished()});
   }
 
+  upvoteImage(String downloadUrl, OnUpvoteFinished onUpvoteFinished) async {
+    _fireStoreRepository
+        .upvoteImage(downloadUrl)
+        .whenComplete(() => {onUpvoteFinished()});
+  }
+
   Future<bool> fetchFeedList({bool refresh = false}) async {
     //first list
     if (feedListLoading) return false;
@@ -46,6 +53,7 @@ class FeedListBloc {
         feed.downloadUrl = document["download_url"];
         feed.imageRatio = document["image_ratio"];
         feed.timeStamp = document["timestamp"];
+        feed.clapCount = document["clap_count"];
         feeds.add(feed);
       });
       lastDocumentSnapshot =

@@ -168,7 +168,8 @@ class _PhotoListScreenState extends State<PhotoListScreen>
                                                     arguments: data)
                                                 .then((value) => {
                                                       if (value != null &&
-                                                          value == 1)
+                                                          (value == 1 ||
+                                                              value == 2))
                                                         {
                                                           widget.notifier
                                                               .value = true

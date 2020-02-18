@@ -62,9 +62,9 @@ class _BottomBarState extends State<BottomBarScreen> {
         setState(() {
           Future.delayed(Duration(milliseconds: 500), () {
             setState(() {
-              currentIndex = 1;
               (children[1] as FeedListScreen).refresh();
               (children[3] as ProfileListScreen).refresh();
+              (children[2] as FavoriteListScreen).refresh();
             });
           });
         });
@@ -168,6 +168,7 @@ class _BottomBarState extends State<BottomBarScreen> {
                                 "file_url": value.path,
                                 "hero_tag": heroFavoriteTag + "_temp"
                               };
+                              Navigator.pop(context, true);
                               Navigator.pushNamed(context, detailRoute,
                                       arguments: data)
                                   .then((value) {

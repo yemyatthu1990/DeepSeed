@@ -16,6 +16,9 @@ import 'package:pull_to_refresh_notification/pull_to_refresh_notification.dart'
 class FavoriteListScreen extends StatefulWidget {
   _FavoriteListScreenState _favoriteListScreenState;
   final Key key;
+  void refresh() {
+    _favoriteListScreenState.refresh();
+  }
 
   FavoriteListScreen({this.key}) : super(key: key);
 
@@ -33,6 +36,20 @@ class _FavoriteListScreenState extends State<FavoriteListScreen> {
   List<Urls> favoriteList = new List<Urls>();
   Status status;
   String message;
+
+  final GlobalKey<prefresh.PullToRefreshNotificationState>
+      _refreshIndicatorKey =
+      new GlobalKey<prefresh.PullToRefreshNotificationState>();
+  void refresh() {
+    if (showError == true) {
+      setState(() {
+        showError = false;
+        showLoading = false;
+      });
+    }
+    _refreshIndicatorKey.currentState.show(notificationDragOffset: 40);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -109,7 +126,7 @@ class _FavoriteListScreenState extends State<FavoriteListScreen> {
                     },
                     maxDragOffset: 40,
                     armedDragUpCancel: false,
-                    key: GlobalKey(),
+                    key: _refreshIndicatorKey,
                     child: new CustomScrollView(
                       slivers: <Widget>[
                         SliverAppBar(
