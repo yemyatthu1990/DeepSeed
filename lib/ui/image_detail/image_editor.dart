@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class ImageEditor extends StatefulWidget {
@@ -29,9 +30,11 @@ class ImageEditor extends StatefulWidget {
   final String tempFileUrl;
   final String fileUrl;
   final String heroTag;
+  final String photographerName;
+  final String photographerUrl;
 
   ImageEditor(
-      this.photoUrls, this.index, this.tempFileUrl, this.fileUrl, this.heroTag);
+      this.photoUrls, this.photographerName,this.photographerUrl, this.index, this.tempFileUrl, this.fileUrl, this.heroTag);
   @override
   State<StatefulWidget> createState() {
     return ImageEditorState(photoUrls, index, tempFileUrl, this.fileUrl);
@@ -178,6 +181,24 @@ class ImageEditorState extends State<ImageEditor> {
                                           color: Colors.black54)))),
                       ],
                     )),
+                Positioned(
+                      top: image.height + 8,
+                    left: 8,
+                    child: Html(
+                      data: """
+                      Photo by 
+                      <a href=${widget.photographerUrl}?utm_source=DeepSeed&utm_medium=referral>${widget.photographerName}</a> 
+                      on 
+                      <a href=https://unsplash.com/?utm_source=DeepSeed&utm_medium=referral">Unsplash</a>
+                      """,
+
+                      defaultTextStyle: TextStyle(fontFamily: 'serif', fontSize: 12),
+                      linkStyle: const TextStyle(
+                        color: Colors.orangeAccent,
+                      ),onLinkTap: (url){
+
+                    }
+                      ,)),
                 if (WaterMark.show)
                   Positioned(
                       top: imageRatio == ImageRatio.Instagram

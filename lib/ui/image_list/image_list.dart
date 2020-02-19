@@ -151,6 +151,8 @@ class _PhotoListScreenState extends State<PhotoListScreen>
                                           onTap: () {
                                             Map<String, dynamic> data = {
                                               "urls": photoList[index].urls,
+                                              "photographer_name": photoList[index].user.name,
+                                              "photographer_url": photoList[index].user.portfolioUrl,
                                               "index": index,
                                               "temp_file_url":
                                                   ImageCacheManager()
