@@ -135,7 +135,6 @@ class DraggableTextState extends State<DraggableText> {
                           fontFamily: currentFont.family),
                       textAlign: TextAlign.center,
                       enableSuggestions: false,
-                      selectionHeightStyle: BoxHeightStyle.strut,
                       autocorrect: false,
                       autofocus: true),
                   padding: EdgeInsets.only(left: 16, right: 16),
