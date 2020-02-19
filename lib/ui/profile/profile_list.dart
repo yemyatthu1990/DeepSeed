@@ -43,12 +43,17 @@ class _ProfileListScreenState extends State<ProfileListScreen> {
       _refreshIndicatorKey =
       new GlobalKey<prefresh.PullToRefreshNotificationState>();
   void refresh() {
-    if (showError == true)
+    if (showError == true) {
       setState(() {
         showError = false;
         showLoading = false;
       });
-    _refreshIndicatorKey.currentState.show(notificationDragOffset: 40);
+      Future.delayed(Duration(seconds: 2), () {
+        _refreshIndicatorKey.currentState.show(notificationDragOffset: 40);
+      });
+    } else {
+      _refreshIndicatorKey.currentState.show(notificationDragOffset: 40);
+    }
   }
 
   @override

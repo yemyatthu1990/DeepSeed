@@ -47,8 +47,12 @@ class _FavoriteListScreenState extends State<FavoriteListScreen> {
         showError = false;
         showLoading = false;
       });
+      Future.delayed(Duration(seconds: 2), () {
+        _refreshIndicatorKey.currentState.show(notificationDragOffset: 40);
+      });
+    } else {
+      _refreshIndicatorKey.currentState.show(notificationDragOffset: 40);
     }
-    _refreshIndicatorKey.currentState.show(notificationDragOffset: 40);
   }
 
   @override

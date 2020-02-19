@@ -34,8 +34,8 @@ class ImageEditor extends StatefulWidget {
   final String photographerName;
   final String username;
 
-  ImageEditor(
-      this.photoUrls, this.photographerName,this.username, this.index, this.tempFileUrl, this.fileUrl, this.heroTag);
+  ImageEditor(this.photoUrls, this.photographerName, this.username, this.index,
+      this.tempFileUrl, this.fileUrl, this.heroTag);
   @override
   State<StatefulWidget> createState() {
     return ImageEditorState(photoUrls, index, tempFileUrl, this.fileUrl);
@@ -125,7 +125,7 @@ class ImageEditorState extends State<ImageEditor> {
                 actions: <Widget>[
                   InkWell(
                       onTap: () {
-                        refreshValue = 2;
+                        refreshValue = 1;
                         setState(() {
                           isFavorite = !isFavorite;
                         });
@@ -164,7 +164,7 @@ class ImageEditorState extends State<ImageEditor> {
                       children: <Widget>[
                         Hero(tag: widget.heroTag, child: image),
                         draggableText,
-                        if (WaterMark.show)
+                        if (RemoteConfigKey.showWaterMark)
                           Positioned(
                               top: image.height - 16,
                               left: image.width - 80,
@@ -182,32 +182,32 @@ class ImageEditorState extends State<ImageEditor> {
                                           color: Colors.black54)))),
                       ],
                     )),
-                if (widget.photographerName!=null && widget.username!= null)
+                if (widget.photographerName != null && widget.username != null)
                   Positioned(
                       top: image.height + 8,
-                    left: 8,
-                    child: Html(
-                      data: """
+                      left: 8,
+                      child: Html(
+                        data: """
                       Photo by 
                       <a href=https://unsplash.com/@${widget.username}?utm_source=DeepSeed&utm_medium=referral>${widget.photographerName}</a> 
                       on 
-                      <a href=https://unsplash.com/?utm_source=DeepSeed&utm_medium=referral">Unsplash</a>
+                      <a href=https://unsplash.com?utm_source=DeepSeed&utm_medium=referral>Unsplash</a>
                       """,
-
-                      defaultTextStyle: TextStyle(fontFamily: 'serif', fontSize: 12),
-                      linkStyle: const TextStyle(
-                        color: Colors.orangeAccent,
-                      ),onLinkTap: (url){
-                      canLaunch(url)
-                          .then((can) {
-                            if(can) {
+                        defaultTextStyle:
+                            TextStyle(fontFamily: 'serif', fontSize: 12),
+                        linkStyle: const TextStyle(
+                          color: Colors.orangeAccent,
+                        ),
+                        onLinkTap: (url) {
+                          print(url);
+                          canLaunch(url).then((can) {
+                            if (can) {
                               launch(url);
                             }
-                      }
-                      );
-                    }
-                    ,)),
-                if (WaterMark.show)
+                          });
+                        },
+                      )),
+                if (RemoteConfigKey.showWaterMark)
                   Positioned(
                       top: imageRatio == ImageRatio.Instagram
                           ? image.height
@@ -223,12 +223,12 @@ class ImageEditorState extends State<ImageEditor> {
                                   : DIRECTION.RIGHT),
                         ),
                       )),
-                if (WaterMark.show)
+                if (RemoteConfigKey.showWaterMark)
                   Positioned(
                       top: imageRatio == ImageRatio.Instagram
-                          ? image.height + 10
-                          : image.height - 40,
-                      right: imageRatio == ImageRatio.Instagram ? 0 : 96,
+                          ? image.height + 30
+                          : image.height - 60,
+                      right: imageRatio == ImageRatio.Instagram ? 0 : 108,
                       child: DecoratedBox(
                           decoration: BoxDecoration(
                             color: Color(0xFFEEEEEE),
@@ -239,10 +239,16 @@ class ImageEditorState extends State<ImageEditor> {
                                 setState(() {
                                   showAdsLoading = true;
                                 });
-
+                                String adUnitId = Platform.isAndroid
+                                    ? "ca-app-pub-7811418762973637/6923904688"
+                                    : "ca-app-pub-7811418762973637/9829888176";
                                 RewardedVideoAd.instance.load(
-                                    adUnitId: RewardedVideoAd.testAdUnitId,
-                                    targetingInfo: MobileAdTargetingInfo());
+                                    adUnitId: adUnitId,
+                                    targetingInfo: MobileAdTargetingInfo(
+                                        testDevices: [
+                                          "kGADSimulatorID",
+                                          "3F97607562BF91239F6A61ED252FE5A8"
+                                        ]));
                                 RewardedVideoAd.instance.listener =
                                     (adEvent, {rewardAmount, rewardType}) {
                                   print(adEvent);
@@ -260,7 +266,7 @@ class ImageEditorState extends State<ImageEditor> {
                                     Future.delayed(Duration(milliseconds: 3000),
                                         () {
                                       setState(() {
-                                        WaterMark.show = false;
+                                        RemoteConfigKey.showWaterMark = false;
                                       });
                                       RewardedVideoAd.instance.destroy();
                                       Fluttertoast.showToast(

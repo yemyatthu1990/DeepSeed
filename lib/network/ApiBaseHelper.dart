@@ -7,21 +7,11 @@ import 'exceptions.dart';
 
 class ApiBaseHelper {
   static const String _baseUrl = "https://api.unsplash.com/";
-  static RemoteConfig remoteConfig;
-  static Future<RemoteConfig> initializeRemoteConfig() async{
-    if(remoteConfig == null) {
-      remoteConfig = await RemoteConfig.instance;
-      await remoteConfig.fetch(expiration: const Duration(hours: 2));
-      await remoteConfig.activateFetched();
-    }
-    return remoteConfig;
-  }
 
-  Future<dynamic> get( String url, {String baseUrl = _baseUrl}) async {
+  Future<dynamic> get(String url, {String baseUrl = _baseUrl}) async {
     var responseJson;
     try {
-      final response = await http.get(baseUrl + url, headers: {
-      });
+      final response = await http.get(baseUrl + url, headers: {});
       print(response.body);
       print(response.headers);
       print(response.request);

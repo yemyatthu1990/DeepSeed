@@ -1,8 +1,6 @@
-
 import 'package:firebase_analytics/firebase_analytics.dart';
 
-class Analytics{
-
+class Analytics {
   static Analytics _instance;
   FirebaseAnalytics analytics;
 
@@ -13,11 +11,12 @@ class Analytics{
     return _instance;
   }
 
-  Analytics._(){
+  Analytics._() {
     analytics = FirebaseAnalytics();
   }
 
-  Future<void> sendAnalyticsEvent(String eventName, Map<String, dynamic> payload) async {
+  Future<void> sendAnalyticsEvent(
+      String eventName, Map<String, dynamic> payload) async {
     await analytics.logEvent(
       name: eventName,
       parameters: payload,
@@ -35,8 +34,9 @@ class Analytics{
     await analytics.logAppOpen();
   }
 
-  Future<void> logShare(String contentType, String itemId, String method) async {
-    await analytics.logShare(contentType: contentType, itemId: itemId, method: method);
+  Future<void> logShare(
+      String contentType, String itemId, String method) async {
+    await analytics.logShare(
+        contentType: contentType, itemId: itemId, method: method);
   }
-
 }

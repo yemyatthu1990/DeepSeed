@@ -45,12 +45,6 @@ class ImageShareBloc {
     _storageController = StreamController<ApiResponse<StorageTaskSnapshot>>();
     _firebaseStorageRepository = FirebaseStorageRepository();
     _photoFilePathController = StreamController<Map<String, String>>();
-    RewardedVideoAd.instance.load(
-        adUnitId: RewardedVideoAd.testAdUnitId,
-        targetingInfo: MobileAdTargetingInfo(
-            childDirected: false,
-            keywords: ["Relationship", "Myanmar", "Facebook"],
-            testDevices: ["ACAE09A477A413124B79B28E3DD6641D"]));
   }
 
   signIn() async {

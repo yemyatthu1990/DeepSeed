@@ -23,9 +23,12 @@ import 'package:popup_menu/popup_menu.dart';
 import 'package:pull_to_refresh_notification/pull_to_refresh_notification.dart'
     as prefresh;
 
+import '../../main.dart';
+
 class FeedListScreen extends StatefulWidget {
   _FeedListScreenState _feedListScreenState;
   final Key key;
+
   FeedListScreen({this.key}) : super(key: key);
   void refresh() {
     _feedListScreenState.refresh();
@@ -58,17 +61,23 @@ class _FeedListScreenState extends State<FeedListScreen>
   PopupMenu popupMenu;
 
   void refresh() {
-    if (showError == true)
+    if (showError == true) {
       setState(() {
         showError = false;
         showLoading = false;
       });
-    _refreshIndicatorKey.currentState.show(notificationDragOffset: 40);
+      Future.delayed(Duration(seconds: 2), () {
+        _refreshIndicatorKey.currentState.show(notificationDragOffset: 40);
+      });
+    } else {
+      _refreshIndicatorKey.currentState.show(notificationDragOffset: 40);
+    }
   }
 
   @override
   void initState() {
     super.initState();
+
     _bloc = FeedListBloc();
     _bloc.feedListStream.listen((event) {
       setState(() {
@@ -412,7 +421,7 @@ class _FeedListScreenState extends State<FeedListScreen>
                                                         final file = await new File(
                                                                 '${tempDir.path}/$fileName')
                                                             .create();
-                                                        file.writeAsBytes(
+                                                        file.writeAsBytesSync(
                                                             value);
                                                         return fileName;
                                                       }).then((fileName) =>

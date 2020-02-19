@@ -7,17 +7,24 @@ import 'package:deep_seed/network/image_cache_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
+import '../../main.dart';
+
+typedef OnRefreshValueChanged(bool value);
+
 class PhotoListScreen extends StatefulWidget {
   String query;
   _PhotoListScreenState _photoListScreenState;
   final Key key;
-  final ValueNotifier<bool> notifier;
+  final OnRefreshValueChanged onRefreshValueChanged;
+
+  bool initializationFinished = false;
   void setQuery(String query) {
     this.query = query;
     _photoListScreenState.setQuery(this.query);
   }
 
-  PhotoListScreen({this.key, this.query, this.notifier}) : super(key: key);
+  PhotoListScreen({this.key, this.query, this.onRefreshValueChanged})
+      : super(key: key);
 
   @override
   _PhotoListScreenState createState() {
@@ -51,6 +58,13 @@ class _PhotoListScreenState extends State<PhotoListScreen>
   @override
   void initState() {
     super.initState();
+    if (widget.initializationFinished == false) {
+      initializeRemoteConfig().then((value) {
+        _bloc.fetchPhotoList(_pageNo, query);
+
+        widget.initializationFinished = true;
+      });
+    }
     _bloc = PhotoBloc();
     _bloc.photoListStream.listen((event) {
       setState(() {
@@ -80,7 +94,6 @@ class _PhotoListScreenState extends State<PhotoListScreen>
         }
       });
     });
-    _bloc.fetchPhotoList(_pageNo, query);
   }
 
   ScrollController _buildScrollController() {
@@ -149,11 +162,17 @@ class _PhotoListScreenState extends State<PhotoListScreen>
                                       color: Colors.transparent,
                                       child: InkWell(
                                           onTap: () {
-                                            _bloc.sendDownoadEvent(photoList[index].links.downloadLocation);
+                                            _bloc.sendDownoadEvent(
+                                                photoList[index]
+                                                    .links
+                                                    .downloadLocation);
                                             Map<String, dynamic> data = {
                                               "urls": photoList[index].urls,
-                                              "photographer_name": photoList[index].user.name,
-                                              "username": photoList[index].user.username,
+                                              "photographer_name":
+                                                  photoList[index].user.name,
+                                              "username": photoList[index]
+                                                  .user
+                                                  .username,
                                               "index": index,
                                               "temp_file_url":
                                                   ImageCacheManager()
@@ -169,15 +188,15 @@ class _PhotoListScreenState extends State<PhotoListScreen>
                                             Navigator.pushNamed(
                                                     context, detailRoute,
                                                     arguments: data)
-                                                .then((value) => {
-                                                      if (value != null &&
-                                                          (value == 1 ||
-                                                              value == 2))
-                                                        {
-                                                          widget.notifier
-                                                              .value = true
-                                                        }
-                                                    });
+                                                .then((value) {
+                                              if (value != null && value == 1) {
+                                                print("here");
+                                                print(widget
+                                                    .onRefreshValueChanged);
+                                                widget.onRefreshValueChanged(
+                                                    true);
+                                              }
+                                            });
                                           },
                                           child: CachedNetworkImage(
                                             imageUrl:

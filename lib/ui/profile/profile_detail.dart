@@ -72,7 +72,7 @@ class ProfileDetailDialog extends StatelessWidget {
                                             final file = await new File(
                                                     '${tempDir.path}/$fileName')
                                                 .create();
-                                            file.writeAsBytes(value);
+                                            file.writeAsBytesSync(value);
                                             return fileName;
                                           }).then((fileName) =>
                                                   Utils.shareImage(fileName));

@@ -1,5 +1,6 @@
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:deep_seed/main.dart';
 import 'package:deep_seed/model/Feed.dart';
 import 'package:deep_seed/network/ApiBaseHelper.dart';
 import 'package:deep_seed/ui/favorite/favorite_list.dart';
@@ -32,20 +33,27 @@ class BottomBarScreen extends StatefulWidget {
   // always marked "final".
 
   final String title;
-  final ValueNotifier<bool> notifier = ValueNotifier(false);
 
   List<Widget> _children;
-
+  ValueNotifier<bool> valueNotifier = ValueNotifier(false);
+  Function onRefreshValueChanged;
+  _BottomBarState _bottomBarState;
   @override
   _BottomBarState createState() {
     _children = [
       PhotoListScreen(
-          key: PageStorageKey("PhotoList"), query: "", notifier: notifier),
+        key: PageStorageKey("PhotoList"),
+        query: "",
+        onRefreshValueChanged: (value) {
+          if (value) _bottomBarState.refreshAllTab();
+        },
+      ),
       FeedListScreen(key: PageStorageKey("FeedList")),
       FavoriteListScreen(key: PageStorageKey("Favorite")),
       ProfileListScreen(key: PageStorageKey("Profile"))
     ];
-    return _BottomBarState(children: _children);
+    _bottomBarState = _BottomBarState(children: _children);
+    return _bottomBarState;
   }
 }
 
@@ -54,24 +62,22 @@ class _BottomBarState extends State<BottomBarScreen> {
   String query = "";
   final PageStorageBucket bucket = PageStorageBucket();
   final List<Widget> children;
+
+  void refreshAllTab() {
+    Future.delayed(Duration(milliseconds: 500), () {
+      setState(() {
+        (children[1] as FeedListScreen).refresh();
+        (children[3] as ProfileListScreen).refresh();
+        (children[2] as FavoriteListScreen).refresh();
+      });
+    });
+  }
+
   _BottomBarState({this.children});
   @override
   void initState() {
     super.initState();
-    ApiBaseHelper.initializeRemoteConfig();
-    widget.notifier.addListener(() {
-      if (widget.notifier.value == true) {
-        setState(() {
-          Future.delayed(Duration(milliseconds: 500), () {
-            setState(() {
-              (children[1] as FeedListScreen).refresh();
-              (children[3] as ProfileListScreen).refresh();
-              (children[2] as FavoriteListScreen).refresh();
-            });
-          });
-        });
-      }
-    });
+
     Analytics().logAppOpen();
     currentIndex = 0;
   }
