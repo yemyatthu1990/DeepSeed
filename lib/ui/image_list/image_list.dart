@@ -152,7 +152,7 @@ class _PhotoListScreenState extends State<PhotoListScreen>
                                             Map<String, dynamic> data = {
                                               "urls": photoList[index].urls,
                                               "photographer_name": photoList[index].user.name,
-                                              "photographer_url": photoList[index].user.portfolioUrl,
+                                              "username": photoList[index].user.username,
                                               "index": index,
                                               "temp_file_url":
                                                   ImageCacheManager()

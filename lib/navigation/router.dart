@@ -13,7 +13,7 @@ class Router {
         var data = settings.arguments as Map<String, dynamic>;
 
         return MaterialPageRoute(
-            builder: (_) => ImageEditor(data["urls"],data["photographer_name"],data["photographer_url"], data["index"],
+            builder: (_) => ImageEditor(data["urls"],data["photographer_name"],data["username"], data["index"],
                 data["temp_file_url"], data["file_url"], data["hero_tag"]));
 
       case profileDetailRoute:

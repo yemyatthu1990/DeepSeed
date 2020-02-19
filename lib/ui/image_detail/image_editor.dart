@@ -23,6 +23,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ImageEditor extends StatefulWidget {
   final Urls photoUrls;
@@ -31,10 +32,10 @@ class ImageEditor extends StatefulWidget {
   final String fileUrl;
   final String heroTag;
   final String photographerName;
-  final String photographerUrl;
+  final String username;
 
   ImageEditor(
-      this.photoUrls, this.photographerName,this.photographerUrl, this.index, this.tempFileUrl, this.fileUrl, this.heroTag);
+      this.photoUrls, this.photographerName,this.username, this.index, this.tempFileUrl, this.fileUrl, this.heroTag);
   @override
   State<StatefulWidget> createState() {
     return ImageEditorState(photoUrls, index, tempFileUrl, this.fileUrl);
@@ -181,13 +182,14 @@ class ImageEditorState extends State<ImageEditor> {
                                           color: Colors.black54)))),
                       ],
                     )),
-                Positioned(
+                if (widget.photographerName!=null && widget.username!= null)
+                  Positioned(
                       top: image.height + 8,
                     left: 8,
                     child: Html(
                       data: """
                       Photo by 
-                      <a href=${widget.photographerUrl}?utm_source=DeepSeed&utm_medium=referral>${widget.photographerName}</a> 
+                      <a href=https://unsplash.com/@${widget.username}?utm_source=DeepSeed&utm_medium=referral>${widget.photographerName}</a> 
                       on 
                       <a href=https://unsplash.com/?utm_source=DeepSeed&utm_medium=referral">Unsplash</a>
                       """,
@@ -196,9 +198,15 @@ class ImageEditorState extends State<ImageEditor> {
                       linkStyle: const TextStyle(
                         color: Colors.orangeAccent,
                       ),onLinkTap: (url){
-
+                      canLaunch(url)
+                          .then((can) {
+                            if(can) {
+                              launch(url);
+                            }
+                      }
+                      );
                     }
-                      ,)),
+                    ,)),
                 if (WaterMark.show)
                   Positioned(
                       top: imageRatio == ImageRatio.Instagram
