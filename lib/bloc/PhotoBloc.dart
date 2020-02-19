@@ -31,6 +31,9 @@ class PhotoBloc {
     }
   }
 
+  sendDownoadEvent(String url) {
+    _photoRepository.sendDownloadLocationEvent(url);
+  }
   dispose() {
     _photoListController?.close();
   }

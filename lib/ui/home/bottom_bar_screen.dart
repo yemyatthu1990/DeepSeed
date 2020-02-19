@@ -1,6 +1,7 @@
 import 'package:bubble_bottom_bar/bubble_bottom_bar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:deep_seed/model/Feed.dart';
+import 'package:deep_seed/network/ApiBaseHelper.dart';
 import 'package:deep_seed/ui/favorite/favorite_list.dart';
 import 'package:deep_seed/ui/image_list/feed_list.dart';
 import 'package:deep_seed/ui/image_list/image_list.dart';
@@ -57,6 +58,7 @@ class _BottomBarState extends State<BottomBarScreen> {
   @override
   void initState() {
     super.initState();
+    ApiBaseHelper.initializeRemoteConfig();
     widget.notifier.addListener(() {
       if (widget.notifier.value == true) {
         setState(() {

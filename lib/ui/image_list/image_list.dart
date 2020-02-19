@@ -149,6 +149,7 @@ class _PhotoListScreenState extends State<PhotoListScreen>
                                       color: Colors.transparent,
                                       child: InkWell(
                                           onTap: () {
+                                            _bloc.sendDownoadEvent(photoList[index].links.downloadLocation);
                                             Map<String, dynamic> data = {
                                               "urls": photoList[index].urls,
                                               "photographer_name": photoList[index].user.name,

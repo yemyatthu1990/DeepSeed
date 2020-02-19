@@ -1,18 +1,26 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:http/http.dart' as http;
 
 import 'exceptions.dart';
 
 class ApiBaseHelper {
-  final String _baseUrl = "https://api.unsplash.com/";
+  static const String _baseUrl = "https://api.unsplash.com/";
+  static RemoteConfig remoteConfig;
+  static Future<RemoteConfig> initializeRemoteConfig() async{
+    if(remoteConfig == null) {
+      remoteConfig = await RemoteConfig.instance;
+      await remoteConfig.fetch(expiration: const Duration(hours: 2));
+      await remoteConfig.activateFetched();
+    }
+    return remoteConfig;
+  }
 
-  Future<dynamic> get(String url) async {
+  Future<dynamic> get( String url, {String baseUrl = _baseUrl}) async {
     var responseJson;
     try {
-      final response = await http.get(_baseUrl + url, headers: {
-        HttpHeaders.authorizationHeader:
-            "Client_ID d47eb5e2d163fc2a6b047108bd3b201bfcd8129a9aaa92cd7dac0777f8fd762a"
+      final response = await http.get(baseUrl + url, headers: {
       });
       print(response.body);
       print(response.headers);
