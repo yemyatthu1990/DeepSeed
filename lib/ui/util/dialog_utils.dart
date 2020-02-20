@@ -6,7 +6,9 @@ import 'package:deep_seed/ui/image_share/image_share_dialog.dart';
 import 'package:deep_seed/ui/util/poem_picker.dart';
 import 'package:deep_seed/view/ColorChanger.dart';
 import 'package:deep_seed/view/StateAwareSlider.dart';
+import 'package:deep_seed/view/about_me_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:package_info/package_info.dart';
 
 import 'block_picker.dart';
 
@@ -59,6 +61,22 @@ class DialogUtils {
         });
   }
 
+  static void showAboutMe(BuildContext context) async{
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+     await showDialog<void>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8.0))),
+            contentPadding: EdgeInsets.all(0),
+            content: SingleChildScrollView(
+                child: AboutMeDialog(info: packageInfo)
+              ));
+        });
+  }
+
   static Future<bool> showReportDialog(BuildContext context) async {
     return await showDialog<bool>(
         context: context,
@@ -66,7 +84,7 @@ class DialogUtils {
           return AlertDialog(
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8.0))),
-            title: Text("Select a color"),
+            title: Text("Report photo?"),
             content: SingleChildScrollView(
               child: Text("Are you sure you want to report this?"),
             ),

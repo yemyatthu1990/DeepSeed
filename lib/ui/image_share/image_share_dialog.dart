@@ -194,11 +194,11 @@ class ImageShareState extends State<ImageShareDialog> {
                           _imageShareBloc.getSharePhoto(imgBytes);
                         },
                         child: Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              "OK",
-                              style: TextStyle(color: Colors.black87, fontSize: 18),
-                            ))),
+                              alignment: Alignment.center,
+                                child: Text(
+                                  "OK",
+                                  style: TextStyle(color: Colors.black87, fontSize: 18),
+                                ))),
                   ]))
             ]))));
   }

@@ -8,6 +8,7 @@ import 'package:deep_seed/model/model.dart';
 import 'package:deep_seed/network/ApiResponse.dart';
 import 'package:deep_seed/network/image_cache_manager.dart';
 import 'package:event_bus/event_bus.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:pull_to_refresh_notification/pull_to_refresh_notification.dart'
@@ -72,7 +73,7 @@ class _FavoriteListScreenState extends State<FavoriteListScreen> {
             favoriteList = event.data;
           }
         } else if (status == Status.LOADING) {
-          showLoading = true;
+          showLoading = event.show;
           showError = false;
           message = event.message;
         } else if (status == Status.ERROR) {
@@ -82,7 +83,7 @@ class _FavoriteListScreenState extends State<FavoriteListScreen> {
         }
       });
     });
-    _bloc.fetchFavoriteList();
+    _bloc.fetchFavoriteList(false);
   }
 
   /* Widget _buildPhotoList() {
@@ -112,22 +113,10 @@ class _FavoriteListScreenState extends State<FavoriteListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Theme.of(context).dialogBackgroundColor,
-        body: showError
-            ? Error(
-                key: GlobalKey(),
-                errorMessage: message,
-                onRetryPressed: () {
-                  _bloc.fetchFavoriteList();
-                })
-            : showLoading
-                ? Loading(
-                    key: GlobalKey(debugLabel: "Loading"),
-                    loadingMessage: message,
-                  )
-                : prefresh.PullToRefreshNotification(
+        body:prefresh.PullToRefreshNotification(
                     color: Colors.blue,
                     onRefresh: () {
-                      return _bloc.fetchFavoriteList();
+                      return _bloc.fetchFavoriteList(true);
                     },
                     maxDragOffset: 40,
                     armedDragUpCancel: false,
@@ -165,7 +154,19 @@ class _FavoriteListScreenState extends State<FavoriteListScreen> {
                         ),
                         prefresh.PullToRefreshContainer(
                             buildPulltoRefreshHeader),
-                        new SliverGrid(
+                         showError
+            ? new SliverToBoxAdapter(child:Error(
+                key: GlobalKey(),
+                errorMessage: message,
+                onRetryPressed: () {
+                  _bloc.fetchFavoriteList(false);
+                }))
+            : showLoading
+                ? SliverToBoxAdapter(child: Loading(
+                    key: GlobalKey(debugLabel: "Loading"),
+                    loadingMessage: message,
+                  ))
+                : new SliverGrid(
                             delegate: new SliverChildBuilderDelegate(
                                 (BuildContext buildContext, int index) {
                               return Padding(
@@ -274,25 +275,14 @@ class Error extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Container(
+    height: MediaQuery.of(context).size.height,
+        child:Stack(
       children: <Widget>[
-        Container(
-          height: 112,
-          child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Text(
-                "Favorite",
-                style: TextStyle(
-                  color: Colors.black87,
-                  fontSize: 28.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              )),
-        ),
         Align(
             alignment: Alignment.center,
             child: Padding(
-                padding: EdgeInsets.all(40),
+                padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height/2-60, left: 40, right: 40),
                 child: Text(
                   errorMessage,
                   textAlign: TextAlign.center,
@@ -302,7 +292,7 @@ class Error extends StatelessWidget {
                       fontWeight: FontWeight.bold),
                 )))
       ],
-    );
+    ));
   }
 }
 
@@ -322,34 +312,18 @@ class Loading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Container(
+      height: MediaQuery.of(context).size.height,
+        child:Stack(
       children: <Widget>[
-        Container(
-          height: 112,
-          child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Text(
-                "Favorite",
-                style: TextStyle(
-                  color: Colors.black87,
-                  fontSize: 28.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              )),
-        ),
-        Text(
-          loadingMessage,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 24,
-          ),
-        ),
-        SizedBox(height: 24),
-        CircularProgressIndicator(
+        Align(
+          alignment: Alignment.center,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height/2-60),
+            child: CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
-        ),
+        ))),
       ],
-    );
+    ));
   }
 }

@@ -9,6 +9,7 @@ import 'package:deep_seed/model/Feed.dart';
 import 'package:deep_seed/model/model.dart';
 import 'package:deep_seed/network/ApiResponse.dart';
 import 'package:deep_seed/network/image_cache_manager.dart';
+import 'package:deep_seed/ui/util/dialog_utils.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -73,7 +74,7 @@ class _ProfileListScreenState extends State<ProfileListScreen> {
             profileList = event.data;
           }
         } else if (status == Status.LOADING) {
-          showLoading = true;
+          showLoading = event.show;
           showError = false;
           message = event.message;
         } else if (status == Status.ERROR) {
@@ -83,7 +84,7 @@ class _ProfileListScreenState extends State<ProfileListScreen> {
         }
       });
     });
-    _bloc.fetchMyImages();
+    _bloc.fetchMyImages(false);
   }
 
   /* Widget _buildPhotoList() {
@@ -113,22 +114,10 @@ class _ProfileListScreenState extends State<ProfileListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Theme.of(context).dialogBackgroundColor,
-        body: showError
-            ? Error(
-                key: GlobalKey(),
-                errorMessage: message,
-                onRetryPressed: () {
-                  _bloc.fetchMyImages();
-                })
-            : showLoading
-                ? Loading(
-                    key: GlobalKey(debugLabel: "Loading"),
-                    loadingMessage: message,
-                  )
-                : prefresh.PullToRefreshNotification(
+        body: prefresh.PullToRefreshNotification(
                     color: Colors.blue,
                     onRefresh: () {
-                      return _bloc.fetchMyImages();
+                      return _bloc.fetchMyImages(true);
                     },
                     maxDragOffset: 40,
                     armedDragUpCancel: false,
@@ -143,7 +132,17 @@ class _ProfileListScreenState extends State<ProfileListScreen> {
                           pinned: true,
                           centerTitle: false,
                           expandedHeight: 100.0,
-
+                          actions: <Widget>[
+                            IconButton(
+                              onPressed: (){
+                                DialogUtils.showAboutMe(context);
+                              },
+                              icon:Icon(
+                                Icons.settings,
+                                color: Colors.black87,
+                              )
+                            )
+                          ],
                           ///Properties of the App Bar when it is expanded
                           flexibleSpace: FlexibleSpaceBar(
                             centerTitle: true,
@@ -169,6 +168,19 @@ class _ProfileListScreenState extends State<ProfileListScreen> {
                         ),
                         prefresh.PullToRefreshContainer(
                             buildPulltoRefreshHeader),
+                         showError
+            ?  SliverToBoxAdapter( child:Error(
+                key: GlobalKey(),
+                errorMessage: message,
+                onRetryPressed: () {
+                  _bloc.fetchMyImages(true);
+                }))
+            : showLoading
+                ?  SliverToBoxAdapter( child:Loading(
+                    key: GlobalKey(debugLabel: "Loading"),
+                    loadingMessage: message,
+                  ))
+                :
                         new SliverGrid(
                             delegate: new SliverChildBuilderDelegate(
                                 (BuildContext buildContext, int index) {
@@ -275,34 +287,24 @@ class Error extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(children: <Widget>[
-      Container(
-        height: 112,
-        child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Text(
-              "My DeepSeed",
-              style: TextStyle(
-                color: Colors.black87,
-                fontSize: 28.0,
-                fontWeight: FontWeight.bold,
-              ),
-            )),
-      ),
-      Align(
-        alignment: Alignment.center,
-        child: Padding(
-            padding: EdgeInsets.all(40),
-            child: Text(
-              errorMessage,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold),
-            )),
-      )
-    ]);
+    return Container(
+    height: MediaQuery.of(context).size.height,
+        child:Stack(
+      children: <Widget>[
+        Align(
+            alignment: Alignment.center,
+            child: Padding(
+                padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height/2-60),
+                child: Text(
+                  errorMessage,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold),
+                )))
+      ],
+    ));
   }
 }
 
@@ -311,7 +313,7 @@ class Footer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
         child: new CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.lightGreen)));
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.black)));
   }
 }
 
@@ -322,28 +324,18 @@ class Loading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Container(
+      height: MediaQuery.of(context).size.height,
+        child:Stack(
       children: <Widget>[
-        Container(
-          height: 112,
-          child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Text(
-                "My DeepSeed",
-                style: TextStyle(
-                  color: Colors.black87,
-                  fontSize: 28.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              )),
-        ),
         Align(
           alignment: Alignment.center,
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
-          ),
-        )
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height/2-60, left: 40, right: 40),
+            child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+        ))),
       ],
-    );
+    ));
   }
 }

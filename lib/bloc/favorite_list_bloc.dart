@@ -16,8 +16,8 @@ class FavoriteListBloc {
     _favoriteListController = StreamController<ApiResponse<List<Urls>>>();
   }
 
-  Future<bool> fetchFavoriteList() async {
-    favoriteListSink.add(ApiResponse.loading(true, ''));
+  Future<bool> fetchFavoriteList(bool isRefreshing) async {
+    favoriteListSink.add(ApiResponse.loading(!isRefreshing, ''));
     try {
       List<Urls> favorites = await PreferenceUtils.getFavorites();
       favoriteListSink.add(ApiResponse.completed(favorites));

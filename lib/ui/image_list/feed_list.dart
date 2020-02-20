@@ -166,19 +166,7 @@ class _FeedListScreenState extends State<FeedListScreen>
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Theme.of(context).dialogBackgroundColor,
-        body: showError
-            ? Error(
-                key: GlobalKey(),
-                errorMessage: message,
-                onRetryPressed: () {
-                  _bloc.fetchFeedList();
-                })
-            : showLoading
-                ? Loading(
-                    key: GlobalKey(debugLabel: "Loading"),
-                    loadingMessage: message,
-                  )
-                : prefresh.PullToRefreshNotification(
+        body: prefresh.PullToRefreshNotification(
                     color: Colors.blue,
                     onRefresh: () {
                       isRefreshing = true;
@@ -215,7 +203,17 @@ class _FeedListScreenState extends State<FeedListScreen>
                                   ))),
                           prefresh.PullToRefreshContainer(
                               buildPulltoRefreshHeader),
-                          new SliverList(
+                           showError
+            ? SliverToBoxAdapter(child: Error(
+                key: GlobalKey(),
+                errorMessage: message,
+                onRetryPressed: () {
+                  _bloc.fetchFeedList();
+                })):showLoading? SliverToBoxAdapter(
+                child: Loading(
+                    key: GlobalKey(debugLabel: "Loading"),
+                    loadingMessage: message,
+                  )) :new SliverList(
                               delegate: new SliverChildBuilderDelegate(
                                   (BuildContext buildContext, int index) {
                             double imageHeight;
@@ -532,37 +530,24 @@ class Error extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Container(
+    height: MediaQuery.of(context).size.height,
+        child:Stack(
       children: <Widget>[
-        Container(
-          height: 112,
-          child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Text(
-                "My DeepSeed",
-                style: TextStyle(
-                  color: Colors.black87,
-                  fontSize: 28.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              )),
-        ),
-        Text(
-          errorMessage,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-          ),
-        ),
-        SizedBox(height: 8),
-        RaisedButton(
-          color: Colors.black,
-          child: Text('Reload', style: TextStyle(color: Colors.white)),
-          onPressed: onRetryPressed,
-        )
+        Align(
+            alignment: Alignment.center,
+            child: Padding(
+                padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height/2-60, left: 40, right: 40),
+                child: Text(
+                  errorMessage,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold),
+                )))
       ],
-    );
+    ));
   }
 }
 
@@ -582,34 +567,18 @@ class Loading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
+    return Container(
+      height: MediaQuery.of(context).size.height,
+        child:Stack(
       children: <Widget>[
-        Container(
-          height: 112,
-          child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Text(
-                "Feed",
-                style: TextStyle(
-                  color: Colors.black87,
-                  fontSize: 28.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              )),
-        ),
-        Text(
-          loadingMessage,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 24,
-          ),
-        ),
-        SizedBox(height: 24),
-        CircularProgressIndicator(
+        Align(
+          alignment: Alignment.center,
+        child: Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height/2-60),
+            child: CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
-        ),
+        ))),
       ],
-    );
+    ));
   }
 }

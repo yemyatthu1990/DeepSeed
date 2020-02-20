@@ -21,8 +21,8 @@ class ProfileBloc {
     _fireStoreRepository = CloudFireStoreRepository();
   }
 
-  Future<bool> fetchMyImages() async {
-    profileSink.add(ApiResponse.loading(true, ""));
+  Future<bool> fetchMyImages(bool isRefreshing) async {
+    profileSink.add(ApiResponse.loading(!isRefreshing, ""));
 
     try {
       QuerySnapshot querySnapshot = await _fireStoreRepository.getMyImages();

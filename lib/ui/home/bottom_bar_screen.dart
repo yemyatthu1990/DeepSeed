@@ -64,7 +64,7 @@ class _BottomBarState extends State<BottomBarScreen> {
   final List<Widget> children;
 
   void refreshAllTab() {
-    Future.delayed(Duration(milliseconds: 500), () {
+    Future.delayed(Duration(milliseconds: 200), () {
       setState(() {
         (children[1] as FeedListScreen).refresh();
         (children[3] as ProfileListScreen).refresh();
