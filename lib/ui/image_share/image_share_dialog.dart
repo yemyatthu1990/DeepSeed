@@ -185,6 +185,8 @@ class ImageShareState extends State<ImageShareDialog> {
                     Padding(
                         padding: EdgeInsets.only(left: 62, right: 16),
                         child: Html(
+                          defaultTextStyle:
+                              TextStyle(color: Colors.grey, fontSize: 12),
                           data: """
                       By selecting this, you agree to DeepSeed's 
                       <a href=https://terms.deepseed.co>Terms and Conditons</a>

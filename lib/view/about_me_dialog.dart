@@ -75,8 +75,7 @@ class AboutMeDialog extends StatelessWidget {
                       children: <Widget>[
                         FlatButton(
                             onPressed: () {
-                              String url =
-                                  "https://www.freeprivacypolicy.com/privacy/view/78bd337999a8a866047e995e8be544eb";
+                              String url = "https://terms.deepseed.co";
                               canLaunch(url).then((value) {
                                 if (value) {
                                   launch(url);
