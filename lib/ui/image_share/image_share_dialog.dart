@@ -5,6 +5,7 @@ import 'package:deep_seed/bloc/image_share_bloc.dart';
 import 'package:deep_seed/model/Feed.dart';
 import 'package:deep_seed/network/ApiResponse.dart';
 import 'package:deep_seed/ui/image_detail/image_editor.dart';
+import 'package:deep_seed/util/Analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -191,14 +192,16 @@ class ImageShareState extends State<ImageShareDialog> {
                     ),
                     FlatButton(
                         onPressed: () {
+                          Analytics().logShareImage(initialValue);
                           _imageShareBloc.getSharePhoto(imgBytes);
                         },
                         child: Align(
-                              alignment: Alignment.center,
-                                child: Text(
-                                  "OK",
-                                  style: TextStyle(color: Colors.black87, fontSize: 18),
-                                ))),
+                            alignment: Alignment.center,
+                            child: Text(
+                              "OK",
+                              style: TextStyle(
+                                  color: Colors.black87, fontSize: 18),
+                            ))),
                   ]))
             ]))));
   }

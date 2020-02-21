@@ -31,9 +31,10 @@ class FeedListBloc {
         .whenComplete(() => {onReportFinished()});
   }
 
-  upvoteImage(String downloadUrl, OnUpvoteFinished onUpvoteFinished) async {
+  upvoteImage(String downloadUrl, OnUpvoteFinished onUpvoteFinished,
+      int upvoteCount) async {
     _fireStoreRepository
-        .upvoteImage(downloadUrl)
+        .upvoteImage(downloadUrl, upvoteCount)
         .whenComplete(() => {onUpvoteFinished()});
   }
 

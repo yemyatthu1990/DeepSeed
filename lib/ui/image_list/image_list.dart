@@ -190,9 +190,6 @@ class _PhotoListScreenState extends State<PhotoListScreen>
                                                     arguments: data)
                                                 .then((value) {
                                               if (value != null && value == 1) {
-                                                print("here");
-                                                print(widget
-                                                    .onRefreshValueChanged);
                                                 widget.onRefreshValueChanged(
                                                     true);
                                               }

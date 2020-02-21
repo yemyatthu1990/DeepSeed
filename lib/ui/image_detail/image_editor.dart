@@ -11,6 +11,7 @@ import 'package:deep_seed/model/poem.dart';
 import 'package:deep_seed/network/image_cache_manager.dart';
 import 'package:deep_seed/ui/image_detail/draggable_text.dart';
 import 'package:deep_seed/ui/util/dialog_utils.dart';
+import 'package:deep_seed/util/Analytics.dart';
 import 'package:deep_seed/util/jumping_dots.dart';
 import 'package:deep_seed/util/preference_utils.dart';
 import 'package:deep_seed/util/utils.dart';
@@ -191,7 +192,7 @@ class ImageEditorState extends State<ImageEditor> {
                       Photo by 
                       <a href=https://unsplash.com/@${widget.username}?utm_source=DeepSeed&utm_medium=referral>${widget.photographerName}</a> 
                       on 
-                      <a href=https://unsplash.com?utm_source=DeepSeed&utm_medium=referral>Unsplash</a>
+                      <a href=https://unsplash.com/?utm_source=DeepSeed&utm_medium=referral>Unsplash</a>
                       """,
                         defaultTextStyle:
                             TextStyle(fontFamily: 'serif', fontSize: 12),
@@ -199,7 +200,6 @@ class ImageEditorState extends State<ImageEditor> {
                           color: Colors.orangeAccent,
                         ),
                         onLinkTap: (url) {
-                          print(url);
                           canLaunch(url).then((can) {
                             if (can) {
                               launch(url);
@@ -320,6 +320,7 @@ class ImageEditorState extends State<ImageEditor> {
                                     children: <Widget>[
                                       InkWell(
                                           onTap: () {
+                                            Analytics().logFontOpened();
                                             FocusScope.of(context)
                                                 .requestFocus(new FocusNode());
                                             DialogUtils.showFontChooser(context,
@@ -342,6 +343,7 @@ class ImageEditorState extends State<ImageEditor> {
                                                   Icons.font_download))),
                                       InkWell(
                                           onTap: () {
+                                            Analytics().logColorOpened();
                                             FocusScope.of(context)
                                                 .requestFocus(new FocusNode());
                                             DialogUtils.showColorChooser(
@@ -361,6 +363,7 @@ class ImageEditorState extends State<ImageEditor> {
                                                   Icons.color_lens))),
                                       InkWell(
                                           onTap: () {
+                                            Analytics().logRatioChanged();
                                             FocusScope.of(context)
                                                 .requestFocus(new FocusNode());
                                             setState(() {
@@ -388,6 +391,7 @@ class ImageEditorState extends State<ImageEditor> {
                                                   Icons.aspect_ratio))),
                                       InkWell(
                                           onTap: () {
+                                            Analytics().logPoemOpened();
                                             FocusScope.of(context)
                                                 .requestFocus(new FocusNode());
                                             DialogUtils.showPoemPickerDialog(
@@ -479,6 +483,7 @@ class ImageEditorState extends State<ImageEditor> {
                 children: <Widget>[
                   InkWell(
                       onTap: () {
+                        Analytics().logFontOpened();
                         DialogUtils.showFontChooser(
                             context, draggableText.getFontSize(), (fontSize) {
                           draggableText.setFontSize(fontSize);
@@ -496,6 +501,7 @@ class ImageEditorState extends State<ImageEditor> {
                           child: const Icon(Icons.font_download))),
                   InkWell(
                       onTap: () {
+                        Analytics().logColorOpened();
                         DialogUtils.showColorChooser(draggableText.getColor(),
                                 draggableText.getFontColor(), context)
                             .then((colors) {
@@ -509,6 +515,7 @@ class ImageEditorState extends State<ImageEditor> {
                           child: const Icon(Icons.color_lens))),
                   InkWell(
                       onTap: () {
+                        Analytics().logRatioChanged();
                         setState(() {
                           if (imageRatio.index < ImageRatio.values.length - 1) {
                             imageRatio =
@@ -527,6 +534,7 @@ class ImageEditorState extends State<ImageEditor> {
                           child: const Icon(Icons.aspect_ratio))),
                   InkWell(
                       onTap: () {
+                        Analytics().logPoemOpened();
                         DialogUtils.showPoemPickerDialog(
                                 context,
                                 Firestore.instance

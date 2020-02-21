@@ -293,6 +293,8 @@ PODS:
     - FirebaseCore (~> 6.0)
     - GTMSessionFetcher/Core (~> 1.1)
   - Flutter (1.0.0)
+  - flutter_email_sender (0.0.1):
+    - Flutter
   - flutter_plugin_android_lifecycle (0.0.1):
     - Flutter
   - fluttertoast (0.0.2):
@@ -355,6 +357,8 @@ PODS:
     - nanopb/encode (= 0.3.9011)
   - nanopb/decode (0.3.9011)
   - nanopb/encode (0.3.9011)
+  - package_info (0.0.1):
+    - Flutter
   - path_provider (0.0.1):
     - Flutter
   - PromisesObjC (1.2.8)
@@ -388,9 +392,11 @@ DEPENDENCIES:
   - firebase_remote_config (from `.symlinks/plugins/firebase_remote_config/ios`)
   - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
   - Flutter (from `Flutter`)
+  - flutter_email_sender (from `.symlinks/plugins/flutter_email_sender/ios`)
   - flutter_plugin_android_lifecycle (from `.symlinks/plugins/flutter_plugin_android_lifecycle/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
+  - package_info (from `.symlinks/plugins/package_info/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
   - shared_preferences_macos (from `.symlinks/plugins/shared_preferences_macos/ios`)
@@ -459,12 +465,16 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_storage/ios"
   Flutter:
     :path: Flutter
+  flutter_email_sender:
+    :path: ".symlinks/plugins/flutter_email_sender/ios"
   flutter_plugin_android_lifecycle:
     :path: ".symlinks/plugins/flutter_plugin_android_lifecycle/ios"
   fluttertoast:
     :path: ".symlinks/plugins/fluttertoast/ios"
   image_picker:
     :path: ".symlinks/plugins/image_picker/ios"
+  package_info:
+    :path: ".symlinks/plugins/package_info/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
   shared_preferences:
@@ -513,6 +523,7 @@ SPEC CHECKSUMS:
   FirebaseRemoteConfig: 4890e58b0e33c8328b8c5e8b7a5a237b9d851d8e
   FirebaseStorage: 6c5263796af3b1be82ed173598aade47535fe125
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  flutter_email_sender: f787522d0e82f50e5766c1213dbffff22fdcf009
   flutter_plugin_android_lifecycle: 47de533a02850f070f5696a623995e93eddcdb9b
   fluttertoast: b644586ef3b16f67fae9a1f8754cef6b2d6b634b
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
@@ -527,6 +538,7 @@ SPEC CHECKSUMS:
   image_picker: e3eacd46b94694dde7cf2705955cece853aa1a8f
   leveldb-library: 55d93ee664b4007aac644a782d11da33fba316f7
   nanopb: 18003b5e52dab79db540fe93fe9579f399bd1ccd
+  package_info: 48b108e75b8802c2d5e126f208ef540561c98aef
   path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
   PromisesObjC: c119f3cd559f50b7ae681fa59dc1acd19173b7e6
   Protobuf: 176220c526ad8bd09ab1fb40a978eac3fef665f7

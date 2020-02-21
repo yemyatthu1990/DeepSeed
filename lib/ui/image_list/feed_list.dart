@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
@@ -5,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:deep_seed/bloc/feed_list_bloc.dart';
+import 'package:deep_seed/util/Analytics.dart';
 import 'package:deep_seed/view/native_admob.dart';
 import 'package:flutter/material.dart';
 import 'package:deep_seed/model/Feed.dart';
@@ -28,6 +30,7 @@ import '../../main.dart';
 class FeedListScreen extends StatefulWidget {
   _FeedListScreenState _feedListScreenState;
   final Key key;
+  Timer _debounce;
 
   FeedListScreen({this.key}) : super(key: key);
   void refresh() {
@@ -167,297 +170,308 @@ class _FeedListScreenState extends State<FeedListScreen>
     return Scaffold(
         backgroundColor: Theme.of(context).dialogBackgroundColor,
         body: prefresh.PullToRefreshNotification(
-                    color: Colors.blue,
-                    onRefresh: () {
-                      isRefreshing = true;
-                      return _bloc.fetchFeedList(refresh: true);
-                    },
-                    maxDragOffset: 40,
-                    armedDragUpCancel: false,
-                    key: _refreshIndicatorKey,
-                    child: CustomScrollView(
-                        physics:
-                            prefresh.AlwaysScrollableClampingScrollPhysics(),
-                        controller: _buildScrollController(),
-                        slivers: <Widget>[
-                          SliverAppBar(
+            color: Colors.blue,
+            onRefresh: () {
+              isRefreshing = true;
+              return _bloc.fetchFeedList(refresh: true);
+            },
+            maxDragOffset: 40,
+            armedDragUpCancel: false,
+            key: _refreshIndicatorKey,
+            child: CustomScrollView(
+                physics: prefresh.AlwaysScrollableClampingScrollPhysics(),
+                controller: _buildScrollController(),
+                slivers: <Widget>[
+                  SliverAppBar(
 
-                              ///Properties of app bar
-                              backgroundColor:
-                                  Theme.of(context).dialogBackgroundColor,
-                              floating: false,
-                              pinned: true,
-                              centerTitle: false,
-                              expandedHeight: 100.0,
+                      ///Properties of app bar
+                      backgroundColor: Theme.of(context).dialogBackgroundColor,
+                      floating: false,
+                      pinned: true,
+                      centerTitle: false,
+                      expandedHeight: 100.0,
 
-                              ///Properties of the App Bar when it is expanded
-                              flexibleSpace: FlexibleSpaceBar(
-                                  centerTitle: true,
-                                  title: Text(
-                                    "Feed",
-                                    style: TextStyle(
-                                      color: Colors.black87,
-                                      fontSize: 20.0,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ))),
-                          prefresh.PullToRefreshContainer(
-                              buildPulltoRefreshHeader),
-                           showError
-            ? SliverToBoxAdapter(child: Error(
-                key: GlobalKey(),
-                errorMessage: message,
-                onRetryPressed: () {
-                  _bloc.fetchFeedList();
-                })):showLoading? SliverToBoxAdapter(
-                child: Loading(
-                    key: GlobalKey(debugLabel: "Loading"),
-                    loadingMessage: message,
-                  )) :new SliverList(
+                      ///Properties of the App Bar when it is expanded
+                      flexibleSpace: FlexibleSpaceBar(
+                          centerTitle: true,
+                          title: Text(
+                            "Feed",
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ))),
+                  prefresh.PullToRefreshContainer(buildPulltoRefreshHeader),
+                  showError
+                      ? SliverToBoxAdapter(
+                          child: Error(
+                              key: GlobalKey(),
+                              errorMessage: message,
+                              onRetryPressed: () {
+                                _bloc.fetchFeedList();
+                              }))
+                      : showLoading
+                          ? SliverToBoxAdapter(
+                              child: Loading(
+                              key: GlobalKey(debugLabel: "Loading"),
+                              loadingMessage: message,
+                            ))
+                          : new SliverList(
                               delegate: new SliverChildBuilderDelegate(
                                   (BuildContext buildContext, int index) {
-                            double imageHeight;
-                            Feed feed = feedList[index];
-                            Map<String, int> rgb =
-                                Utils.randomColor(feed.userId);
-                            if (feed.imageRatio == ImageRatio.Facebook.name) {
-                              imageHeight = MediaQuery.of(context).size.width *
-                                  ImageRatio.Facebook.ratio;
-                            } else {
-                              imageHeight =
-                                  (MediaQuery.of(context).size.width - 48) *
-                                      ImageRatio.Instagram.ratio;
-                            }
-                            return Container(
-                                margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color:
-                                            Theme.of(context).backgroundColor)),
-                                child: Container(
-                                    padding: EdgeInsets.all(8),
-                                    color: Colors.white,
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                            margin: EdgeInsets.only(bottom: 8),
-                                            child: Row(
-                                              children: <Widget>[
-                                                CircleAvatar(
-                                                    child: Text(feed.userId[1] +
-                                                        feed.userId[2]),
-                                                    backgroundColor:
-                                                        Color.fromRGBO(
-                                                            rgb["r"],
-                                                            rgb["g"],
-                                                            rgb["b"],
-                                                            1)),
-                                                Padding(
-                                                    padding: EdgeInsets.only(
-                                                        left: 16),
-                                                    child: Text(
-                                                        Utils.readTimestamp(feed
-                                                            .timeStamp),
-                                                        style: TextStyle(
+                              double imageHeight;
+                              Feed feed = feedList[index];
+                              Map<String, int> rgb =
+                                  Utils.randomColor(feed.userId);
+                              if (feed.imageRatio == ImageRatio.Facebook.name) {
+                                imageHeight =
+                                    MediaQuery.of(context).size.width -
+                                        48 * ImageRatio.Facebook.ratio;
+                              } else {
+                                imageHeight =
+                                    (MediaQuery.of(context).size.width - 48) *
+                                        ImageRatio.Instagram.ratio;
+                              }
+                              return Container(
+                                  margin:
+                                      const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                                  decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: Theme.of(context)
+                                              .backgroundColor)),
+                                  child: Container(
+                                      padding: EdgeInsets.all(8),
+                                      color: Colors.white,
+                                      child: Column(
+                                        children: [
+                                          Container(
+                                              margin:
+                                                  EdgeInsets.only(bottom: 8),
+                                              child: Row(
+                                                children: <Widget>[
+                                                  CircleAvatar(
+                                                      child: Text(
+                                                          feed.userId[1] +
+                                                              feed.userId[2]),
+                                                      backgroundColor:
+                                                          Color.fromRGBO(
+                                                              rgb["r"],
+                                                              rgb["g"],
+                                                              rgb["b"],
+                                                              1)),
+                                                  Padding(
+                                                      padding: EdgeInsets.only(
+                                                          left: 16),
+                                                      child: Text(
+                                                          Utils.readTimestamp(
+                                                              feed.timeStamp),
+                                                          style: TextStyle(
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .primaryColorDark,
+                                                              fontSize: 12))),
+                                                  Expanded(child: Container()),
+                                                  InkWell(
+                                                      onTapDown: (detail) {
+                                                        Future<dynamic>
+                                                            awaitFeed =
+                                                            _showPopupMenu(
+                                                                RelativeRect.fromLTRB(
+                                                                    detail
+                                                                        .globalPosition
+                                                                        .dx,
+                                                                    detail
+                                                                        .globalPosition
+                                                                        .dy,
+                                                                    0,
+                                                                    0),
+                                                                feed);
+                                                        awaitFeed.then((value) {
+                                                          print(value);
+                                                          if (value is Feed) {
+                                                            _bloc.report(
+                                                                value
+                                                                    .downloadUrl,
+                                                                () {
+                                                              Fluttertoast
+                                                                  .showToast(
+                                                                      msg:
+                                                                          "Successfully reported");
+                                                            });
+                                                          }
+                                                        });
+                                                      },
+                                                      onTap: () {
+                                                        log("Tap");
+                                                      },
+                                                      child: Padding(
+                                                          padding:
+                                                              EdgeInsets.all(4),
+                                                          child: Icon(
+                                                            Icons.more_vert,
+                                                            size: 20,
                                                             color: Theme.of(
                                                                     context)
                                                                 .primaryColorDark,
-                                                            fontSize: 12))),
-                                                Expanded(child: Container()),
-                                                InkWell(
-                                                    onTapDown: (detail) {
-                                                      Future<dynamic>
-                                                          awaitFeed =
-                                                          _showPopupMenu(
-                                                              RelativeRect.fromLTRB(
-                                                                  detail
-                                                                      .globalPosition
-                                                                      .dx,
-                                                                  detail
-                                                                      .globalPosition
-                                                                      .dy,
-                                                                  0,
-                                                                  0),
-                                                              feed);
-                                                      awaitFeed.then((value) {
-                                                        print(value);
-                                                        if (value is Feed) {
-                                                          _bloc.report(
-                                                              value.downloadUrl,
-                                                              () {
-                                                            Fluttertoast.showToast(
-                                                                msg:
-                                                                    "Successfully reported");
-                                                          });
+                                                          )))
+                                                ],
+                                              )),
+                                          Container(
+                                              width: MediaQuery.of(context)
+                                                  .size
+                                                  .width,
+                                              height: imageHeight,
+                                              child: InkWell(
+                                                  onTap: () {},
+                                                  child: CachedNetworkImage(
+                                                    imageUrl: feed.downloadUrl,
+                                                    cacheManager:
+                                                        ImageCacheManager(),
+                                                    fit: BoxFit.cover,
+                                                  ))),
+                                          Padding(
+                                              padding: EdgeInsets.only(
+                                                  left: 16, right: 16, top: 8),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.max,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: <Widget>[
+                                                  FlatButton(
+                                                      onPressed: () {
+                                                        setState(() {
+                                                          feed.clapCount = feed
+                                                                      .clapCount ==
+                                                                  null
+                                                              ? 0
+                                                              : feed.clapCount +
+                                                                  1;
+                                                        });
+
+                                                        if (widget._debounce
+                                                                ?.isActive ??
+                                                            false) {
+                                                          widget._debounce
+                                                              ?.cancel();
                                                         }
-                                                      });
-                                                    },
-                                                    onTap: () {
-                                                      log("Tap");
-                                                    },
-                                                    child: Padding(
-                                                        padding:
-                                                            EdgeInsets.all(4),
-                                                        child: Icon(
-                                                          Icons.more_vert,
-                                                          size: 20,
-                                                          color: Theme.of(
-                                                                  context)
-                                                              .primaryColorDark,
-                                                        )))
-                                              ],
-                                            )),
-                                        Container(
-                                            width: MediaQuery.of(context)
-                                                .size
-                                                .width,
-                                            height: imageHeight,
-                                            child: InkWell(
-                                                onTap: () {},
-                                                child: CachedNetworkImage(
-                                                  imageUrl: feed.downloadUrl,
-                                                  cacheManager:
-                                                      ImageCacheManager(),
-                                                  fit: BoxFit.cover,
-                                                ))),
-                                        Padding(
-                                            padding: EdgeInsets.only(
-                                                left: 16, right: 16, top: 8),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.max,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: <Widget>[
-                                                FlatButton(
-                                                    onPressed: () {
-                                                      setState(() {
-                                                        feed.clapCount = feed
-                                                                    .clapCount ==
-                                                                null
-                                                            ? 0
-                                                            : feed.clapCount +
-                                                                1;
-                                                      });
-                                                      _bloc.upvoteImage(
-                                                          feed.downloadUrl,
-                                                          () => {});
-                                                      /*   DialogUtils
-                                                              .showReportDialog(
-                                                                  context)
-                                                          .then((report) {
-                                                        if (report == null ||
-                                                            report == false) {
-                                                          return;
-                                                        } else {
-                                                          _bloc.report(
+                                                        widget._debounce =
+                                                            Timer(
+                                                                Duration(
+                                                                    seconds: 3),
+                                                                () {
+                                                          _bloc.upvoteImage(
                                                               feed.downloadUrl,
-                                                              () {
-                                                            Fluttertoast.showToast(
-                                                                msg:
-                                                                    "Sucessfuly reported.");
-                                                          });
-                                                        }
-                                                      });*/
-                                                    }, //
-                                                    child: Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceEvenly,
-                                                        mainAxisSize:
-                                                            MainAxisSize.max,
-                                                        children: [
-                                                          SvgPicture.asset(
-                                                            "graphics/clap.svg",
-                                                            width: 20,
-                                                            height: 20,
-                                                            color: Theme.of(
-                                                                    context)
-                                                                .primaryColorDark,
-                                                          ),
-                                                          if ((feed.clapCount ==
-                                                                      null
-                                                                  ? 0
-                                                                  : feed
-                                                                      .clapCount) >
-                                                              0)
+                                                              () => {},
+                                                              feed.clapCount);
+                                                        });
+                                                      }, //
+                                                      child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceEvenly,
+                                                          mainAxisSize:
+                                                              MainAxisSize.max,
+                                                          children: [
+                                                            SvgPicture.asset(
+                                                              "graphics/clap.svg",
+                                                              width: 20,
+                                                              height: 20,
+                                                              color: Theme.of(
+                                                                      context)
+                                                                  .primaryColorDark,
+                                                            ),
+                                                            if ((feed.clapCount ==
+                                                                        null
+                                                                    ? 0
+                                                                    : feed
+                                                                        .clapCount) >
+                                                                0)
+                                                              Text(
+                                                                feed.clapCount
+                                                                    .toString(),
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        12,
+                                                                    color: Theme.of(
+                                                                            context)
+                                                                        .primaryColorDark),
+                                                              ),
+                                                            SizedBox(
+                                                              width: 8,
+                                                            ),
                                                             Text(
-                                                              feed.clapCount
-                                                                  .toString(),
+                                                              "Clap",
                                                               style: TextStyle(
-                                                                  fontSize: 12,
                                                                   color: Theme.of(
                                                                           context)
                                                                       .primaryColorDark),
                                                             ),
-                                                          SizedBox(
-                                                            width: 8,
-                                                          ),
-                                                          Text(
-                                                            "Clap",
-                                                            style: TextStyle(
+                                                          ])),
+                                                  FlatButton(
+                                                      onPressed: () {
+                                                        ImageCacheManager()
+                                                            .getFileFromMemory(
+                                                                feed
+                                                                    .downloadUrl)
+                                                            .file
+                                                            .readAsBytes()
+                                                            .then(
+                                                                (value) async {
+                                                          String fileName = Timestamp
+                                                                      .now()
+                                                                  .millisecondsSinceEpoch
+                                                                  .toString() +
+                                                              ".jpg";
+                                                          final tempDir =
+                                                              await getTemporaryDirectory();
+                                                          final file =
+                                                              await new File(
+                                                                      '${tempDir.path}/$fileName')
+                                                                  .create();
+                                                          file.writeAsBytesSync(
+                                                              value);
+                                                          return fileName;
+                                                        }).then((fileName) {
+                                                          Analytics()
+                                                              .logShareFeed();
+                                                          Utils.shareImage(
+                                                              fileName);
+                                                        });
+                                                      },
+                                                      child: Row(
+                                                          mainAxisAlignment:
+                                                              MainAxisAlignment
+                                                                  .spaceEvenly,
+                                                          mainAxisSize:
+                                                              MainAxisSize.max,
+                                                          children: [
+                                                            Icon(Icons.share,
+                                                                size: 20,
                                                                 color: Theme.of(
                                                                         context)
                                                                     .primaryColorDark),
-                                                          ),
-                                                        ])),
-                                                FlatButton(
-                                                    onPressed: () {
-                                                      ImageCacheManager()
-                                                          .getFileFromMemory(
-                                                              feed.downloadUrl)
-                                                          .file
-                                                          .readAsBytes()
-                                                          .then((value) async {
-                                                        String fileName = Timestamp
-                                                                    .now()
-                                                                .millisecondsSinceEpoch
-                                                                .toString() +
-                                                            ".jpg";
-                                                        final tempDir =
-                                                            await getTemporaryDirectory();
-                                                        final file = await new File(
-                                                                '${tempDir.path}/$fileName')
-                                                            .create();
-                                                        file.writeAsBytesSync(
-                                                            value);
-                                                        return fileName;
-                                                      }).then((fileName) =>
-                                                              Utils.shareImage(
-                                                                  fileName));
-                                                    },
-                                                    child: Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceEvenly,
-                                                        mainAxisSize:
-                                                            MainAxisSize.max,
-                                                        children: [
-                                                          Icon(Icons.share,
-                                                              size: 20,
-                                                              color: Theme.of(
-                                                                      context)
-                                                                  .primaryColorDark),
-                                                          SizedBox(
-                                                            width: 8,
-                                                          ),
-                                                          Text(
-                                                            "Share",
-                                                            style: TextStyle(
-                                                                color: Theme.of(
-                                                                        context)
-                                                                    .primaryColorDark),
-                                                          ),
-                                                        ])),
-                                              ],
-                                            ))
-                                      ],
-                                    )));
-                          }, childCount: feedList.length)),
-                          new SliverToBoxAdapter(
-                            child: showFooter ? new Footer() : Container(),
-                          )
-                        ])));
+                                                            SizedBox(
+                                                              width: 8,
+                                                            ),
+                                                            Text(
+                                                              "Share",
+                                                              style: TextStyle(
+                                                                  color: Theme.of(
+                                                                          context)
+                                                                      .primaryColorDark),
+                                                            ),
+                                                          ])),
+                                                ],
+                                              ))
+                                        ],
+                                      )));
+                            }, childCount: feedList.length)),
+                  new SliverToBoxAdapter(
+                    child: showFooter ? new Footer() : Container(),
+                  )
+                ])));
   }
 
   @override
@@ -531,23 +545,26 @@ class Error extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-    height: MediaQuery.of(context).size.height,
-        child:Stack(
-      children: <Widget>[
-        Align(
-            alignment: Alignment.center,
-            child: Padding(
-                padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height/2-60, left: 40, right: 40),
-                child: Text(
-                  errorMessage,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold),
-                )))
-      ],
-    ));
+        height: MediaQuery.of(context).size.height,
+        child: Stack(
+          children: <Widget>[
+            Align(
+                alignment: Alignment.center,
+                child: Padding(
+                    padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).size.height / 2 - 60,
+                        left: 40,
+                        right: 40),
+                    child: Text(
+                      errorMessage,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    )))
+          ],
+        ));
   }
 }
 
@@ -568,17 +585,18 @@ class Loading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height,
-        child:Stack(
-      children: <Widget>[
-        Align(
-          alignment: Alignment.center,
-        child: Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height/2-60),
-            child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
-        ))),
-      ],
-    ));
+        height: MediaQuery.of(context).size.height,
+        child: Stack(
+          children: <Widget>[
+            Align(
+                alignment: Alignment.center,
+                child: Padding(
+                    padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).size.height / 2 - 60),
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                    ))),
+          ],
+        ));
   }
 }

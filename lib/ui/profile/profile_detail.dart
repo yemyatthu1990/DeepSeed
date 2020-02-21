@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:deep_seed/bloc/image_share_bloc.dart';
 import 'package:deep_seed/model/Feed.dart';
 import 'package:deep_seed/network/ApiResponse.dart';
+import 'package:deep_seed/util/Analytics.dart';
 import 'package:deep_seed/util/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -74,8 +75,10 @@ class ProfileDetailDialog extends StatelessWidget {
                                                 .create();
                                             file.writeAsBytesSync(value);
                                             return fileName;
-                                          }).then((fileName) =>
-                                                  Utils.shareImage(fileName));
+                                          }).then((fileName) {
+                                            Analytics().logShareProfile();
+                                            Utils.shareImage(fileName);
+                                          });
                                         },
                                         child: Align(
                                             alignment: Alignment.center,

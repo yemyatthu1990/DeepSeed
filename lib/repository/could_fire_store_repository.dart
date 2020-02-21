@@ -62,7 +62,7 @@ class CloudFireStoreRepository {
     });
   }
 
-  Future<QuerySnapshot> upvoteImage(String downloadUrl) async {
+  Future<QuerySnapshot> upvoteImage(String downloadUrl, int upvoteCount) async {
     var currentUser = await firebaseAuth.currentUser();
     if (currentUser == null) {
       await firebaseAuth.signInAnonymously();
@@ -75,16 +75,8 @@ class CloudFireStoreRepository {
     ref.then((value) {
       if (value != null &&
           value.documents != null &&
-          value.documents.length > 0) {
-        int reportCount = 0;
-        if (value.documents[0].data["clap_count"] == null) {
-          reportCount = 1;
-        } else {
-          reportCount = (value.documents[0].data["clap_count"] as int) + 1;
-        }
-
-        value.documents[0].reference.updateData({"clap_count": reportCount});
-      }
+          value.documents.length > 0)
+        value.documents[0].reference.updateData({"clap_count": upvoteCount});
     });
   }
 

@@ -27,13 +27,13 @@ class PhotoBloc {
       photoListSink.add(ApiResponse.completed(photos));
     } catch (e) {
       photoListSink.add(ApiResponse.error(pageNo == 1, e.toString()));
-      print(e);
     }
   }
 
   sendDownoadEvent(String url) {
     _photoRepository.sendDownloadLocationEvent(url);
   }
+
   dispose() {
     _photoListController?.close();
   }

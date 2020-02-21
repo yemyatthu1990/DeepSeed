@@ -11,7 +11,7 @@ description: DeepSeed
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+2
+version: 1.0.0+5
 
 environment:
   sdk: ">=2.6.0 <3.0.0"
@@ -45,7 +45,6 @@ dependencies:
   firebase_remote_config: ^0.3.0+1
   package_info: any
   flutter_email_sender: ^2.2.2
-  
   flutter:
     sdk: flutter
 

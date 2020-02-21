@@ -121,6 +121,7 @@ class _BottomBarState extends State<BottomBarScreen> {
                     children: <Widget>[
                       InkWell(
                           onTap: () {
+                            Analytics().logCamera();
                             ImagePicker.pickImage(source: ImageSource.camera)
                                 .then((value) {
                               if (value == null) return;
@@ -169,6 +170,7 @@ class _BottomBarState extends State<BottomBarScreen> {
                           ])),
                       InkWell(
                           onTap: () {
+                            Analytics().logGallery();
                             ImagePicker.pickImage(source: ImageSource.gallery)
                                 .then((value) {
                               if (value == null) return;
@@ -229,6 +231,7 @@ class _BottomBarState extends State<BottomBarScreen> {
           child: SearchBar(
               onSearchQueryChanged: (query) {
                 // Only first tab has search screen
+                Analytics().logSearch(query);
                 if (currentIndex == 0) {
                   setState(() {
                     (children[0] as PhotoListScreen).setQuery(query);
