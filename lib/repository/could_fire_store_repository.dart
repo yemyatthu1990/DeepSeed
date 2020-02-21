@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:deep_seed/model/Feed.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pull_to_refresh_notification/pull_to_refresh_notification.dart';
 
 class CloudFireStoreRepository {
   var fireStore = Firestore.instance;
@@ -9,17 +10,38 @@ class CloudFireStoreRepository {
     if (snapshot == null) {
       return await fireStore
           .collection("images")
+          .where("featured", isEqualTo: true)
           .orderBy("timestamp", descending: true)
           .limit(5)
           .getDocuments(source: Source.serverAndCache);
     } else {
       return await fireStore
           .collection("images")
+          .where("featured", isEqualTo: true)
           .orderBy("timestamp", descending: true)
           .limit(5)
           .startAfterDocument(snapshot)
           .getDocuments(source: Source.serverAndCache);
     }
+  }
+
+  Future<void> deleteMyImage(String downloadUrl) async {
+    var currentUser = await firebaseAuth.currentUser();
+    print("CURRENT USER" + currentUser.toString());
+    if (currentUser == null) {
+      return null;
+    }
+    return fireStore
+        .collection("images")
+        .limit(1)
+        .where("uid", isEqualTo: currentUser.uid)
+        .where("download_url", isEqualTo: downloadUrl)
+        .getDocuments(source: Source.serverAndCache)
+        .then((snapshot) {
+      if (snapshot.documents.length > 0) {
+        snapshot.documents[0].reference.delete();
+      }
+    });
   }
 
   Future<QuerySnapshot> getMyImages() async {
@@ -89,6 +111,7 @@ class CloudFireStoreRepository {
       "download_url": feed.downloadUrl,
       "image_ratio": feed.imageRatio,
       "timestamp": feed.timeStamp,
+      "featured": false
     });
   }
 }

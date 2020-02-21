@@ -59,34 +59,88 @@ class ProfileDetailDialog extends StatelessWidget {
                                       endIndent: 16,
                                       indent: 16,
                                     ),
-                                    FlatButton(
-                                        onPressed: () {
-                                          File(filePath)
-                                              .readAsBytes()
-                                              .then((value) async {
-                                            String fileName = Timestamp.now()
-                                                    .millisecondsSinceEpoch
-                                                    .toString() +
-                                                ".jpg";
-                                            final tempDir =
-                                                await getTemporaryDirectory();
-                                            final file = await new File(
-                                                    '${tempDir.path}/$fileName')
-                                                .create();
-                                            file.writeAsBytesSync(value);
-                                            return fileName;
-                                          }).then((fileName) {
-                                            Analytics().logShareProfile();
-                                            Utils.shareImage(fileName);
-                                          });
-                                        },
-                                        child: Align(
-                                            alignment: Alignment.center,
-                                            child: Text(
-                                              "Share",
-                                              style: TextStyle(
-                                                  color: Colors.black),
-                                            ))),
+                                    Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+                                          FlatButton(
+                                              onPressed: () {
+                                                showDialog(
+                                                    context: context,
+                                                    child: AlertDialog(
+                                                      title: Text(
+                                                        "Delete this deepseed?",
+                                                      ),
+                                                      content: Text(
+                                                        "Are you sure you want to delete? This can not be undone.",
+                                                      ),
+                                                      actions: <Widget>[
+                                                        FlatButton(
+                                                            onPressed: () {
+                                                              Navigator.pop(
+                                                                  context,
+                                                                  false);
+                                                            },
+                                                            child:
+                                                                Text("Cancel")),
+                                                        FlatButton(
+                                                            onPressed: () {
+                                                              Navigator.pop(
+                                                                  context,
+                                                                  true);
+                                                            },
+                                                            child: Text(
+                                                              "Ok",
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .red),
+                                                            )),
+                                                      ],
+                                                    )).then((delete) {
+                                                  if (delete) {
+                                                    Navigator.pop(
+                                                        context, "delete");
+                                                  }
+                                                });
+                                              },
+                                              child: Align(
+                                                  alignment: Alignment.center,
+                                                  child: Text(
+                                                    "Delete",
+                                                    style: TextStyle(
+                                                        color: Colors.red),
+                                                  ))),
+                                          FlatButton(
+                                              onPressed: () {
+                                                File(filePath)
+                                                    .readAsBytes()
+                                                    .then((value) async {
+                                                  String fileName = Timestamp
+                                                              .now()
+                                                          .millisecondsSinceEpoch
+                                                          .toString() +
+                                                      ".jpg";
+                                                  final tempDir =
+                                                      await getTemporaryDirectory();
+                                                  final file = await new File(
+                                                          '${tempDir.path}/$fileName')
+                                                      .create();
+                                                  file.writeAsBytesSync(value);
+                                                  return fileName;
+                                                }).then((fileName) {
+                                                  Analytics().logShareProfile();
+                                                  Utils.shareImage(fileName);
+                                                });
+                                              },
+                                              child: Align(
+                                                  alignment: Alignment.center,
+                                                  child: Text(
+                                                    "Share",
+                                                    style: TextStyle(
+                                                        color: Colors.black),
+                                                  )))
+                                        ]),
                                   ]))
                         ])))))));
   }

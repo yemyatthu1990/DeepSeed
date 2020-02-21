@@ -115,73 +115,72 @@ class _ProfileListScreenState extends State<ProfileListScreen> {
     return Scaffold(
         backgroundColor: Theme.of(context).dialogBackgroundColor,
         body: prefresh.PullToRefreshNotification(
-                    color: Colors.blue,
-                    onRefresh: () {
-                      return _bloc.fetchMyImages(true);
-                    },
-                    maxDragOffset: 40,
-                    armedDragUpCancel: false,
-                    key: _refreshIndicatorKey,
-                    child: new CustomScrollView(
-                      slivers: <Widget>[
-                        SliverAppBar(
-                          ///Properties of app bar
-                          backgroundColor:
-                              Theme.of(context).dialogBackgroundColor,
-                          floating: false,
-                          pinned: true,
-                          centerTitle: false,
-                          expandedHeight: 100.0,
-                          actions: <Widget>[
-                            IconButton(
-                              onPressed: (){
-                                DialogUtils.showAboutMe(context);
-                              },
-                              icon:Icon(
-                                Icons.settings,
-                                color: Colors.black87,
-                              )
-                            )
-                          ],
-                          ///Properties of the App Bar when it is expanded
-                          flexibleSpace: FlexibleSpaceBar(
-                            centerTitle: true,
-                            title: Text(
-                              "My DeepSeed",
-                              style: TextStyle(
-                                color: Colors.black87,
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            background: Container(
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  top: BorderSide(
-                                    color: Colors.black26,
-                                    width: 1.0,
-                                  ),
-                                ),
-                              ),
-                            ),
+            color: Colors.blue,
+            onRefresh: () {
+              return _bloc.fetchMyImages(true);
+            },
+            maxDragOffset: 40,
+            armedDragUpCancel: false,
+            key: _refreshIndicatorKey,
+            child: new CustomScrollView(
+              slivers: <Widget>[
+                SliverAppBar(
+                  ///Properties of app bar
+                  backgroundColor: Theme.of(context).dialogBackgroundColor,
+                  floating: false,
+                  pinned: true,
+                  centerTitle: false,
+                  expandedHeight: 100.0,
+                  actions: <Widget>[
+                    IconButton(
+                        onPressed: () {
+                          DialogUtils.showAboutMe(context);
+                        },
+                        icon: Icon(
+                          Icons.settings,
+                          color: Colors.black87,
+                        ))
+                  ],
+
+                  ///Properties of the App Bar when it is expanded
+                  flexibleSpace: FlexibleSpaceBar(
+                    centerTitle: true,
+                    title: Text(
+                      "My DeepSeed",
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontSize: 20.0,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    background: Container(
+                      decoration: BoxDecoration(
+                        border: Border(
+                          top: BorderSide(
+                            color: Colors.black26,
+                            width: 1.0,
                           ),
                         ),
-                        prefresh.PullToRefreshContainer(
-                            buildPulltoRefreshHeader),
-                         showError
-            ?  SliverToBoxAdapter( child:Error(
-                key: GlobalKey(),
-                errorMessage: message,
-                onRetryPressed: () {
-                  _bloc.fetchMyImages(true);
-                }))
-            : showLoading
-                ?  SliverToBoxAdapter( child:Loading(
-                    key: GlobalKey(debugLabel: "Loading"),
-                    loadingMessage: message,
-                  ))
-                :
-                        new SliverGrid(
+                      ),
+                    ),
+                  ),
+                ),
+                prefresh.PullToRefreshContainer(buildPulltoRefreshHeader),
+                showError
+                    ? SliverToBoxAdapter(
+                        child: Error(
+                            key: GlobalKey(),
+                            errorMessage: message,
+                            onRetryPressed: () {
+                              _bloc.fetchMyImages(true);
+                            }))
+                    : showLoading
+                        ? SliverToBoxAdapter(
+                            child: Loading(
+                            key: GlobalKey(debugLabel: "Loading"),
+                            loadingMessage: message,
+                          ))
+                        : new SliverGrid(
                             delegate: new SliverChildBuilderDelegate(
                                 (BuildContext buildContext, int index) {
                               return Padding(
@@ -202,9 +201,23 @@ class _ProfileListScreenState extends State<ProfileListScreen> {
                                                 "hero_tag": heroProfileTag +
                                                     index.toString()
                                               };
-                                              Navigator.pushNamed(
-                                                  context, profileDetailRoute,
-                                                  arguments: data);
+                                              Navigator.pushNamed(context,
+                                                      profileDetailRoute,
+                                                      arguments: data)
+                                                  .then((value) {
+                                                print(value);
+                                                if (value != null &&
+                                                    value == "delete") {
+                                                  _bloc
+                                                      .deleteMyImage(
+                                                          profileList[index]
+                                                              .downloadUrl)
+                                                      .then((value) {
+                                                    print("delete");
+                                                    _bloc.fetchMyImages(true);
+                                                  });
+                                                }
+                                              });
                                             },
                                             child: CachedNetworkImage(
                                               useOldImageOnUrlChange: true,
@@ -218,8 +231,8 @@ class _ProfileListScreenState extends State<ProfileListScreen> {
                             gridDelegate:
                                 new SliverGridDelegateWithFixedCrossAxisCount(
                                     crossAxisCount: 2))
-                      ],
-                    )));
+              ],
+            )));
   }
 
   @override
@@ -288,23 +301,24 @@ class Error extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-    height: MediaQuery.of(context).size.height,
-        child:Stack(
-      children: <Widget>[
-        Align(
-            alignment: Alignment.center,
-            child: Padding(
-                padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height/2-60),
-                child: Text(
-                  errorMessage,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold),
-                )))
-      ],
-    ));
+        height: MediaQuery.of(context).size.height,
+        child: Stack(
+          children: <Widget>[
+            Align(
+                alignment: Alignment.center,
+                child: Padding(
+                    padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).size.height / 2 - 60),
+                    child: Text(
+                      errorMessage,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
+                    )))
+          ],
+        ));
   }
 }
 
@@ -325,17 +339,20 @@ class Loading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: MediaQuery.of(context).size.height,
-        child:Stack(
-      children: <Widget>[
-        Align(
-          alignment: Alignment.center,
-        child: Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(context).size.height/2-60, left: 40, right: 40),
-            child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
-        ))),
-      ],
-    ));
+        height: MediaQuery.of(context).size.height,
+        child: Stack(
+          children: <Widget>[
+            Align(
+                alignment: Alignment.center,
+                child: Padding(
+                    padding: EdgeInsets.only(
+                        bottom: MediaQuery.of(context).size.height / 2 - 60,
+                        left: 40,
+                        right: 40),
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                    ))),
+          ],
+        ));
   }
 }

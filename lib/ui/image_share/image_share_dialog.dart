@@ -9,6 +9,8 @@ import 'package:deep_seed/util/Analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 typedef void OnImageShareListener(String path);
 
@@ -161,7 +163,7 @@ class ImageShareState extends State<ImageShareDialog> {
                                       ))));
                     }),
                     Padding(
-                        padding: EdgeInsets.all(16),
+                        padding: EdgeInsets.only(left: 16, right: 16, top: 16),
                         child: InkWell(
                             onTap: () {
                               setState(() {
@@ -180,6 +182,21 @@ class ImageShareState extends State<ImageShareDialog> {
                               ),
                               Text("Share to DeepSeed community too")
                             ]))),
+                    Padding(
+                        padding: EdgeInsets.only(left: 62, right: 16),
+                        child: Html(
+                          data: """
+                      By selecting this, you agree to DeepSeed's 
+                      <a href=https://terms.deepseed.co>Terms and Conditons</a>
+                      """,
+                          onLinkTap: (url) {
+                            canLaunch(url).then((can) {
+                              if (can) {
+                                launch(url);
+                              }
+                            });
+                          },
+                        )),
                     SizedBox(
                       height: 20,
                       width: 20,

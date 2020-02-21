@@ -43,6 +43,10 @@ class ProfileBloc {
     return true;
   }
 
+  Future<void> deleteMyImage(String downloadUrl) {
+    return _fireStoreRepository.deleteMyImage(downloadUrl);
+  }
+
   dispose() {
     _profileController?.close();
   }
