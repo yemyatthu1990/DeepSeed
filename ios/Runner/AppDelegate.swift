@@ -23,14 +23,15 @@ import Flutter
     }
     
     func shareFile(sharedItems:Any, controller:UIViewController) {
-        let filePath:NSMutableString = NSMutableString.init(string: sharedItems as! String);
+        let filePath:NSMutableString = NSMutableString.init(string: (sharedItems["path"] as! String));
+        let shareText:NSMutableString = NSMutableString.init(string: (sharedItems["shareText"] as! String));
         let docsPath:NSString = (NSSearchPathForDirectoriesInDomains(FileManager.SearchPathDirectory.cachesDirectory, FileManager.SearchPathDomainMask.userDomainMask, true)[0]) as NSString;
         let imagePath = docsPath.appendingPathComponent(filePath as String);
         let imageUrl = URL.init(fileURLWithPath: imagePath, relativeTo: nil);
         do {
             let imageData = try Data.init(contentsOf: imageUrl);
             let shareImage = UIImage.init(data: imageData);
-            let activityViewController:UIActivityViewController = UIActivityViewController.init(activityItems: [shareImage!], applicationActivities: nil);
+            let activityViewController:UIActivityViewController = UIActivityViewController.init(activityItems: [shareImage!, shareText], applicationActivities: nil);
             controller.present(activityViewController, animated: true, completion: nil);
         } catch let error {
             print(error.localizedDescription);
