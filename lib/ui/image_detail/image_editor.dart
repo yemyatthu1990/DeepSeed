@@ -73,9 +73,12 @@ class ImageEditorState extends State<ImageEditor> {
       DialogUtils.showImageShareDialog(
               context, _capturePng(captureKey), imageRatio)
           .then((imagePath) {
+        String shareText = (widget.photographerName != null)
+            ? "Photo by " + widget.photographerName + " on Unsplash"
+            : "";
         if (imagePath != null) {
           refreshValue = 1;
-          Utils.shareImage(imagePath);
+          Utils.shareImage(imagePath, shareText);
         }
       });
     });

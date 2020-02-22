@@ -17,12 +17,12 @@ import Flutter
         shareChannel.setMethodCallHandler({
             (call: FlutterMethodCall, result: FlutterResult) -> Void in
             if (call.method == "shareFile") {
-                self.shareFile(sharedItems: call.arguments!,controller: controller);
+                self.shareFile(sharedItems: call.arguments as! [String: Any],controller: controller);
             }
         });    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
     
-    func shareFile(sharedItems:Any, controller:UIViewController) {
+    func shareFile(sharedItems:[String: Any], controller:UIViewController) {
         let filePath:NSMutableString = NSMutableString.init(string: (sharedItems["path"] as! String));
         let shareText:NSMutableString = NSMutableString.init(string: (sharedItems["shareText"] as! String));
         let docsPath:NSString = (NSSearchPathForDirectoriesInDomains(FileManager.SearchPathDirectory.cachesDirectory, FileManager.SearchPathDomainMask.userDomainMask, true)[0]) as NSString;

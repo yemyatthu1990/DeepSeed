@@ -51,7 +51,7 @@ class MainActivity: FlutterActivity(), StreamHandler,
                     "native_admob_banner_view",NativeAdmobBannerViewFactory(flutterView))
     MethodChannel(flutterView,"channel:co.deepseed.deep_seed/share").setMethodCallHandler { methodCall, _ ->
         if (methodCall.method == "shareFile") {
-            shareFile(methodCall.arguments("path") as String, methodCall.arguments("shareText") as String)
+            shareFile(methodCall.argument<String>("path")!!, methodCall.argument<String>("shareText")!!)
         }
     }
     val channel = MethodChannel(flutterView, "flutter_native_admob")
@@ -82,7 +82,7 @@ class MainActivity: FlutterActivity(), StreamHandler,
     val shareIntent = Intent()
     shareIntent.action = Intent.ACTION_SEND
     shareIntent.type="image/jpg"
-    shareIntent.putExtra(Intent.EXTRA_TEXT, shareText)
+    shareIntent.putExtra(Intent.EXTRA_TEXT, shareText) //Share format `Photo by @photographerName on Unsplash
     shareIntent.putExtra(Intent.EXTRA_STREAM, contentUri)
     shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     val finalIntent = Intent.createChooser(shareIntent,"Share Image")

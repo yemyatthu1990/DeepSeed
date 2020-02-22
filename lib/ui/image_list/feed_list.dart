@@ -437,7 +437,7 @@ class _FeedListScreenState extends State<FeedListScreen>
                                                           Analytics()
                                                               .logShareFeed();
                                                           Utils.shareImage(
-                                                              fileName);
+                                                              fileName, "");
                                                         });
                                                       },
                                                       child: Row(

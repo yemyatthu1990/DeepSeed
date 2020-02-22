@@ -130,7 +130,8 @@ class ProfileDetailDialog extends StatelessWidget {
                                                   return fileName;
                                                 }).then((fileName) {
                                                   Analytics().logShareProfile();
-                                                  Utils.shareImage(fileName);
+                                                  Utils.shareImage(
+                                                      fileName, "");
                                                 });
                                               },
                                               child: Align(
