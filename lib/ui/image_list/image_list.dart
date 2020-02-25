@@ -58,42 +58,78 @@ class _PhotoListScreenState extends State<PhotoListScreen>
   @override
   void initState() {
     super.initState();
-    if (widget.initializationFinished == false) {
-      initializeRemoteConfig().then((value) {
-        _bloc.fetchPhotoList(_pageNo, query);
 
+    if (widget.initializationFinished == false) {
+      setState(() {
+        showLoading = true;
+        message = "";
+      });
+
+      initializeRemoteConfig().then((value) {
+        _bloc = PhotoBloc();
+        _bloc.photoListStream.listen((event) {
+          setState(() {
+            status = event.status;
+            if (status == Status.COMPLETED) {
+              showLoading = false;
+              showError = false;
+              showFooter = !(event.data == null || event.data.length == 0);
+
+              if (_pageNo == 1) {
+                photoList.clear();
+              }
+              if (event.data == null) return;
+              photoList.addAll(event.data);
+            } else if (status == Status.LOADING) {
+              if (event.show) {
+                showLoading = true;
+                message = event.message;
+              }
+            } else if (status == Status.ERROR) {
+              showLoading = false;
+              showFooter = false;
+              if (event.show) {
+                showError = true;
+                message = event.message;
+              }
+            }
+          });
+        });
+        _bloc.fetchPhotoList(_pageNo, query);
         widget.initializationFinished = true;
       });
-    }
-    _bloc = PhotoBloc();
-    _bloc.photoListStream.listen((event) {
-      setState(() {
-        status = event.status;
-        if (status == Status.COMPLETED) {
-          showLoading = false;
-          showError = false;
-          showFooter = !(event.data == null || event.data.length == 0);
+    } else {
+      _bloc = PhotoBloc();
+      _bloc.photoListStream.listen((event) {
+        setState(() {
+          status = event.status;
+          if (status == Status.COMPLETED) {
+            showLoading = false;
+            showError = false;
+            showFooter = !(event.data == null || event.data.length == 0);
 
-          if (_pageNo == 1) {
-            photoList.clear();
+            if (_pageNo == 1) {
+              photoList.clear();
+            }
+            if (event.data == null) return;
+            photoList.addAll(event.data);
+          } else if (status == Status.LOADING) {
+            if (event.show) {
+              showLoading = true;
+              message = event.message;
+            }
+          } else if (status == Status.ERROR) {
+            showLoading = false;
+            showFooter = false;
+            if (event.show) {
+              showError = true;
+              message = event.message;
+            }
           }
-          if (event.data == null) return;
-          photoList.addAll(event.data);
-        } else if (status == Status.LOADING) {
-          if (event.show) {
-            showLoading = true;
-            message = event.message;
-          }
-        } else if (status == Status.ERROR) {
-          showLoading = false;
-          showFooter = false;
-          if (event.show) {
-            showError = true;
-            message = event.message;
-          }
-        }
+        });
       });
-    });
+      _bloc.fetchPhotoList(_pageNo, query);
+    }
   }
 
   ScrollController _buildScrollController() {

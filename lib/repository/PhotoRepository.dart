@@ -8,8 +8,7 @@ import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 class PhotoRepository {
   ApiBaseHelper _helper = ApiBaseHelper();
-
-  static List<String> _defaultQueries = [
+  List<dynamic> defaultQueries = [
     "love relationship and marriage",
     "hate anger relationship",
     "coffee rainy",
@@ -34,8 +33,14 @@ class PhotoRepository {
     "girlfriend boyfriend",
     "book poem art"
   ];
-  String defaultQuery =
-      _defaultQueries[Random().nextInt(_defaultQueries.length - 1)];
+  String defaultQuery = "";
+
+  PhotoRepository() {
+    if (RemoteConfigKey.queries != null)
+      defaultQueries = RemoteConfigKey.queries;
+    defaultQuery =
+        defaultQueries[Random().nextInt(defaultQueries.length - 1)] as String;
+  }
 
   Future<List<Photo>> fetchPhotoList(int pageNo, String query) async {
     if (query == null || query.length == 0) query = defaultQuery;

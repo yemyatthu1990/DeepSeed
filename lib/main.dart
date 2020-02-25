@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
@@ -16,6 +17,7 @@ import 'package:flutter/rendering.dart';
 class RemoteConfigKey {
   static bool showWaterMark;
   static String apiKey;
+  static List<dynamic> queries;
 }
 
 void main() {
@@ -39,6 +41,12 @@ Future<RemoteConfig> initializeRemoteConfig() async {
     RemoteConfigKey.apiKey = instance.getString("u_a_key");
   else if (Platform.isIOS)
     RemoteConfigKey.apiKey = instance.getString("u_i_key");
+  try {
+    var queryJson = json.decode(instance.getString("search_query"));
+    RemoteConfigKey.queries = queryJson["queries"];
+  } catch (e) {
+    print(e.toString());
+  }
   return instance;
 }
 

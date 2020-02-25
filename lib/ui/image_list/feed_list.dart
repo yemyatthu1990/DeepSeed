@@ -17,6 +17,7 @@ import 'package:deep_seed/ui/image_detail/image_editor.dart';
 import 'package:deep_seed/ui/util/dialog_utils.dart';
 import 'package:deep_seed/util/utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:fluttertoast/fluttertoast.dart';
@@ -233,6 +234,8 @@ class _FeedListScreenState extends State<FeedListScreen>
                                     (MediaQuery.of(context).size.width - 48) *
                                         ImageRatio.Instagram.ratio;
                               }
+                              Color avatarBgColor = Color.fromRGBO(
+                                  rgb["r"], rgb["g"], rgb["b"], 1);
                               return Container(
                                   margin:
                                       const EdgeInsets.fromLTRB(16, 8, 16, 8),
@@ -251,15 +254,18 @@ class _FeedListScreenState extends State<FeedListScreen>
                                               child: Row(
                                                 children: <Widget>[
                                                   CircleAvatar(
-                                                      child: Text(
-                                                          feed.userId[1] +
-                                                              feed.userId[2]),
+                                                      child: Padding(
+                                                          padding:
+                                                              EdgeInsets.only(
+                                                                  left: 8,
+                                                                  right: 8,
+                                                                  top: 8),
+                                                          child: Image.asset(
+                                                            "graphics/deepseed_alpha.png",
+                                                            color: Colors.white,
+                                                          )),
                                                       backgroundColor:
-                                                          Color.fromRGBO(
-                                                              rgb["r"],
-                                                              rgb["g"],
-                                                              rgb["b"],
-                                                              1)),
+                                                          avatarBgColor),
                                                   Padding(
                                                       padding: EdgeInsets.only(
                                                           left: 16),
@@ -288,16 +294,24 @@ class _FeedListScreenState extends State<FeedListScreen>
                                                                     0),
                                                                 feed);
                                                         awaitFeed.then((value) {
-                                                          print(value);
                                                           if (value is Feed) {
-                                                            _bloc.report(
+                                                            String downloadUrl =
                                                                 value
-                                                                    .downloadUrl,
-                                                                () {
-                                                              Fluttertoast
-                                                                  .showToast(
-                                                                      msg:
-                                                                          "Successfully reported");
+                                                                    .downloadUrl;
+                                                            DialogUtils
+                                                                    .showReportDialog(
+                                                                        context)
+                                                                .then((value) {
+                                                              if (value) {
+                                                                _bloc.report(
+                                                                    downloadUrl,
+                                                                    () {
+                                                                  Fluttertoast
+                                                                      .showToast(
+                                                                          msg:
+                                                                              "Report successful. Thank you for being a responsible person.");
+                                                                });
+                                                              }
                                                             });
                                                           }
                                                         });
