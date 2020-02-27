@@ -56,21 +56,21 @@ packages:
       name: cloud_firestore
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.13.2+1"
+    version: "0.13.4"
   cloud_firestore_platform_interface:
     dependency: transitive
     description:
       name: cloud_firestore_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.0"
+    version: "1.1.0"
   cloud_firestore_web:
     dependency: transitive
     description:
       name: cloud_firestore_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.0+3"
+    version: "0.1.1"
   collection:
     dependency: transitive
     description:
@@ -193,10 +193,12 @@ packages:
   firebase_storage:
     dependency: "direct main"
     description:
-      name: firebase_storage
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "3.1.1"
+      path: "packages/firebase_storage"
+      ref: master
+      resolved-ref: "799566a9ae701decac09b445d859b685d7123166"
+      url: "git://github.com/danysz/flutterfire.git"
+    source: git
+    version: "3.1.0"
   flutter:
     dependency: "direct main"
     description: flutter

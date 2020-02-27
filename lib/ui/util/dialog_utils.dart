@@ -1,10 +1,14 @@
 import 'dart:typed_data';
 import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:deep_seed/main.dart';
 import 'package:deep_seed/model/poem.dart';
+import 'package:deep_seed/repository/firebase_storage_repository.dart';
 import 'package:deep_seed/ui/image_share/image_share_dialog.dart';
+import 'package:deep_seed/ui/util/font_picker.dart';
 import 'package:deep_seed/ui/util/poem_picker.dart';
 import 'package:deep_seed/util/preference_utils.dart';
+import 'package:deep_seed/util/rabbit.dart';
 import 'package:deep_seed/view/ColorChanger.dart';
 import 'package:deep_seed/view/StateAwareSlider.dart';
 import 'package:deep_seed/view/about_me_dialog.dart';
@@ -16,35 +20,18 @@ import 'block_picker.dart';
 typedef OnFontSizeChangeListener(double fontSize);
 
 class DialogUtils {
-  static Future<Font> showFontChooser(
+  static Future<String> showFontChooser(
       BuildContext context,
       double currentFontSize,
-      OnFontSizeChangeListener onFontSizeChangeListener) async {
-    var options = List<Widget>();
-    options.add(StateAwareSlider(
-        currentFontSize: currentFontSize,
-        onFontSizeChangeListener: onFontSizeChangeListener));
-    Font.values.forEach((element) {
-      options.add(SimpleDialogOption(
-        onPressed: () {
-          Navigator.pop(context, element);
-        },
-        child: Padding(
-            padding: EdgeInsets.only(top: 4, bottom: 4),
-            child: new Text(
-              element.name,
-              style: TextStyle(fontFamily: element.family),
-            )),
-      ));
-    });
-    return await showDialog<Font>(
+      OnFontSizeChangeListener onFontSizeChangeListener,
+      String currentFontName) async {
+    return await showDialog<String>(
         context: context,
         builder: (BuildContext context) {
-          return SimpleDialog(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(8.0))),
-            title: const Text('Fonts'),
-            children: options,
+          return FontPicker(
+            currentFontSize: currentFontSize,
+            onFontSizeChangeListener: onFontSizeChangeListener,
+            currentFontName: currentFontName,
           );
         });
   }
@@ -78,28 +65,25 @@ class DialogUtils {
 
   static Future<bool> showZawgyiDialog(BuildContext context) async {
     PreferenceUtils.zawgyiDialogHasShown();
+    final String dialogBody = Rabbit.uni2zg(
+        "ဇော်ဂျီဖောင့်၏ အားနည်းချက်အချို့ကြောင့် DeepSeed application ကို အသုံးပြုရာတွင် ချို့ယွင်းချက်များရှိနိုင်ပါသည်. \nဥပမာ။ ဖောင့်မမှန်ချင်း \n"
+        "ပိုမိုကောင်းမွန်သော အတွေ့အကြုံကိုရရှိရန် \bယူနီကုတ်ဖောင့်ကို ပြောင်းလဲအသုံးပြုဖို့ တိုက်တွန်းလိုပါသည်။");
+    final String dialogAction = Rabbit.uni2zg("Ok");
+
     return await showDialog<bool>(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8.0))),
-            title: Text(
-              "ဇော်ဂျီဖောင့်အသုံးပြုမှုအတွက် အသိပေးချက်",
-              style: TextStyle(fontFamily: Font.CHERRY.family),
-            ),
             content: SingleChildScrollView(
-              child: Text(
-                  "ဇော်ဂျီဖောင့်၏ အားနည်းချက်အချို့ကြောင့် DeepSeed application ကို အသုံးပြုရာတွင် ချို့ယွင်းချက်များရှိနိုင်ပါသည်. ဥပမာ။ ဖောင့်မမှန်ချင်း \n"
-                  "ပိုမိုကောင်းမွန်သော အတွေ့အကြုံကိုရရှိရန် ယူနီကုတ်ဖောင့်ကို ပြောင်းလဲအသုံးပြုဖို့ တိုက်တွန်းလိုပါသည်။",
-                  style: TextStyle(fontFamily: Font.CHERRY.family)),
+              child: Text(dialogBody),
             ),
             actions: <Widget>[
               FlatButton(
-                child: const Text(
-                  "အိုကေ",
-                  style: TextStyle(
-                      color: Colors.black, fontSize: 14, fontFamily: "Cherry"),
+                child: Text(
+                  dialogAction,
+                  style: TextStyle(color: Colors.black, fontSize: 14),
                 ),
                 onPressed: () {
                   Navigator.pop(context, true);
@@ -169,59 +153,5 @@ class DialogUtils {
         builder: (BuildContext context) {
           return PoemPicker(snapshots: snapshots);
         });
-  }
-}
-
-enum Font {
-  CHERRY,
-  PADAUK_GHOST,
-  PAUK_LAY,
-  PHET_SOT,
-  PHIK_SEL,
-  PONE_NYET,
-  SABAE,
-  SAGAR,
-  SANPYA,
-  TAGU,
-  THURIYA,
-  WASO,
-  YINMAR
-}
-
-extension FontExtension on Font {
-  String get name {
-    return this.family + "​\t\t\tကံကိုဆွဲ၍မှုန်း​သီခြယ်";
-  }
-
-  String get family {
-    switch (this) {
-      case Font.CHERRY:
-        return "Cherry";
-      case Font.PADAUK_GHOST:
-        return "Padauk Ghost";
-      case Font.PAUK_LAY:
-        return "Pauk Lay";
-      case Font.PHET_SOT:
-        return "Phet Sot";
-      case Font.PHIK_SEL:
-        return "Phik Sel";
-      case Font.PONE_NYET:
-        return "Pone Nyet";
-      case Font.SABAE:
-        return "Sabae";
-      case Font.SAGAR:
-        return "Sagar";
-      case Font.SANPYA:
-        return "San Pya";
-      case Font.TAGU:
-        return "Tagu";
-      case Font.THURIYA:
-        return "Thuriya";
-      case Font.WASO:
-        return "Waso";
-      case Font.YINMAR:
-        return "Yinmar";
-    }
-    return "";
   }
 }

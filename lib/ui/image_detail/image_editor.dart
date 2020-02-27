@@ -93,7 +93,7 @@ class ImageEditorState extends State<ImageEditor> {
   DraggableText draggableText = DraggableText();
   double height = 0;
   ImageRatio imageRatio = ImageRatio.Instagram;
-  Font currentFont = Font.WASO;
+  String currentFont = "";
   String _textFieldText = "";
   bool isFavorite = false;
   IconData favoriteIcon = Icons.favorite_border;
@@ -122,8 +122,7 @@ class ImageEditorState extends State<ImageEditor> {
           Navigator.pop(context, refreshValue);
           return false;
         },
-        child: SafeArea(
-            child: Stack(children: [
+        child: Stack(children: [
           Scaffold(
               backgroundColor: Theme.of(context).dialogBackgroundColor,
               appBar: AppBar(
@@ -183,7 +182,7 @@ class ImageEditorState extends State<ImageEditor> {
                                   child: Text("deepseed.co",
                                       style: TextStyle(
                                           fontSize: 12,
-                                          fontFamily: Font.SAGAR.family,
+                                          fontFamily: "Roboto",
                                           fontStyle: FontStyle.italic,
                                           color: Colors.black54)))),
                       ],
@@ -301,143 +300,158 @@ class ImageEditorState extends State<ImageEditor> {
                                           color: Colors.black87,
                                         ),
                                       ))))),
-                Align(alignment: Alignment.bottomCenter, child: _bottomBar())
+                SafeArea(
+                    child: Align(
+                        alignment: Alignment.bottomCenter, child: _bottomBar()))
               ])),
-          Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                  margin: const EdgeInsets.only(bottom: 96),
-                  width: MediaQuery.of(context).size.width,
-                  height: 60,
-                  child: Material(
-                      color: Theme.of(context).dialogBackgroundColor,
-                      child: Container(
-                          child: Padding(
-                              padding: const EdgeInsets.fromLTRB(32, 0, 32, 0),
-                              child: Container(
-                                  child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: <Widget>[
-                                  InkWell(
-                                      onTap: () {
-                                        Analytics().logFontOpened();
-                                        FocusScope.of(context)
-                                            .requestFocus(new FocusNode());
-                                        DialogUtils.showFontChooser(context,
-                                            draggableText.getFontSize(),
-                                            (fontSize) {
-                                          draggableText.setFontSize(fontSize);
-                                        }).then((font) {
-                                          if (font != null) {
-                                            setState(() {
-                                              currentFont = font;
-                                            });
-                                            draggableText.setFont(font);
-                                          }
-                                        });
-                                      },
-                                      child: Padding(
-                                          padding: const EdgeInsets.all(20),
-                                          child:
-                                              const Icon(Icons.font_download))),
-                                  InkWell(
-                                      onTap: () {
-                                        Analytics().logColorOpened();
-                                        FocusScope.of(context)
-                                            .requestFocus(new FocusNode());
-                                        DialogUtils.showColorChooser(
-                                                draggableText.getColor(),
-                                                draggableText.getFontColor(),
-                                                context)
-                                            .then((colors) {
-                                          if (colors != null) {
-                                            draggableText.setColor(colors);
-                                          }
-                                        });
-                                      },
-                                      child: Padding(
-                                          padding: const EdgeInsets.all(20),
-                                          child: const Icon(Icons.color_lens))),
-                                  InkWell(
-                                      onTap: () {
-                                        Analytics().logRatioChanged();
-                                        FocusScope.of(context)
-                                            .requestFocus(new FocusNode());
-                                        setState(() {
-                                          if (imageRatio.index <
-                                              ImageRatio.values.length - 1) {
-                                            imageRatio = ImageRatio
-                                                .values[imageRatio.index + 1];
-                                          } else {
-                                            imageRatio = ImageRatio.values[0];
-                                          }
-
-                                          height = MediaQuery.of(context)
-                                                  .size
-                                                  .width *
-                                              imageRatio.ratio;
-                                        });
-                                        draggableText.setOffSet(Offset(0, 80));
-                                      },
-                                      child: Padding(
-                                          padding: const EdgeInsets.all(20),
-                                          child:
-                                              const Icon(Icons.aspect_ratio))),
-                                  InkWell(
-                                      onTap: () {
-                                        Analytics().logPoemOpened();
-                                        FocusScope.of(context)
-                                            .requestFocus(new FocusNode());
-                                        DialogUtils.showPoemPickerDialog(
-                                                context,
-                                                Firestore.instance
-                                                    .collection("poems")
-                                                    .snapshots(
-                                                        includeMetadataChanges:
-                                                            false))
-                                            .then((poem) {
-                                          if (poem == null) return;
-                                          setState(() {
-                                            _textFieldText = poem.body +
-                                                "\n\n" +
-                                                poem.title +
-                                                " - " +
-                                                poem.author;
-                                          });
-                                          draggableText.setText(_textFieldText);
-                                          draggableText
-                                              .setOffSet(Offset(0, 80));
-                                        });
-                                      },
-                                      child: Padding(
-                                          padding: const EdgeInsets.all(20),
-                                          child: const Icon(Icons.art_track))),
-                                ],
-                              ))))))),
-          Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                  margin:
-                      const EdgeInsets.only(left: 32, right: 32, bottom: 16),
-                  width: MediaQuery.of(context).size.width,
-                  height: 60,
+          SafeArea(
+              child: Align(
+                  alignment: Alignment.bottomCenter,
                   child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.deepOrange,
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(4)),
-                      ),
-                      child: FlatButton(
-                          onPressed: () {
-                            _shareFinalImage(
-                                context, captureKey, imageRatio.name);
-                          },
-                          child: Text(
-                            "Share",
-                            style: TextStyle(fontSize: 20, color: Colors.white),
-                          )))))
-        ])));
+                      margin: const EdgeInsets.only(bottom: 96),
+                      width: MediaQuery.of(context).size.width,
+                      height: 60,
+                      child: Material(
+                          color: Theme.of(context).dialogBackgroundColor,
+                          child: Container(
+                              child: Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(32, 0, 32, 0),
+                                  child: Container(
+                                      child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: <Widget>[
+                                      InkWell(
+                                          onTap: () {
+                                            Analytics().logFontOpened();
+                                            FocusScope.of(context)
+                                                .requestFocus(new FocusNode());
+                                            DialogUtils.showFontChooser(context,
+                                                    draggableText.getFontSize(),
+                                                    (fontSize) {
+                                              draggableText
+                                                  .setFontSize(fontSize);
+                                            }, currentFont)
+                                                .then((font) {
+                                              if (font != null) {
+                                                setState(() {
+                                                  currentFont = font;
+                                                });
+                                                draggableText.setFont(font);
+                                              }
+                                            });
+                                          },
+                                          child: Padding(
+                                              padding: const EdgeInsets.all(20),
+                                              child: const Icon(
+                                                  Icons.font_download))),
+                                      InkWell(
+                                          onTap: () {
+                                            Analytics().logColorOpened();
+                                            FocusScope.of(context)
+                                                .requestFocus(new FocusNode());
+                                            DialogUtils.showColorChooser(
+                                                    draggableText.getColor(),
+                                                    draggableText
+                                                        .getFontColor(),
+                                                    context)
+                                                .then((colors) {
+                                              if (colors != null) {
+                                                draggableText.setColor(colors);
+                                              }
+                                            });
+                                          },
+                                          child: Padding(
+                                              padding: const EdgeInsets.all(20),
+                                              child: const Icon(
+                                                  Icons.color_lens))),
+                                      InkWell(
+                                          onTap: () {
+                                            Analytics().logRatioChanged();
+                                            FocusScope.of(context)
+                                                .requestFocus(new FocusNode());
+                                            setState(() {
+                                              if (imageRatio.index <
+                                                  ImageRatio.values.length -
+                                                      1) {
+                                                imageRatio = ImageRatio.values[
+                                                    imageRatio.index + 1];
+                                              } else {
+                                                imageRatio =
+                                                    ImageRatio.values[0];
+                                              }
+
+                                              height = MediaQuery.of(context)
+                                                      .size
+                                                      .width *
+                                                  imageRatio.ratio;
+                                            });
+                                            draggableText
+                                                .setOffSet(Offset(0, 80));
+                                          },
+                                          child: Padding(
+                                              padding: const EdgeInsets.all(20),
+                                              child: const Icon(
+                                                  Icons.aspect_ratio))),
+                                      InkWell(
+                                          onTap: () {
+                                            Analytics().logPoemOpened();
+                                            FocusScope.of(context)
+                                                .requestFocus(new FocusNode());
+                                            DialogUtils.showPoemPickerDialog(
+                                                    context,
+                                                    Firestore.instance
+                                                        .collection("poems")
+                                                        .snapshots(
+                                                            includeMetadataChanges:
+                                                                false))
+                                                .then((poem) {
+                                              if (poem == null) return;
+                                              setState(() {
+                                                _textFieldText = poem.body +
+                                                    "\n\n" +
+                                                    poem.title +
+                                                    " - " +
+                                                    poem.author;
+                                              });
+                                              draggableText
+                                                  .setText(_textFieldText);
+                                              draggableText
+                                                  .setOffSet(Offset(0, 80));
+                                            });
+                                          },
+                                          child: Padding(
+                                              padding: const EdgeInsets.all(20),
+                                              child:
+                                                  const Icon(Icons.art_track))),
+                                    ],
+                                  )))))))),
+          SafeArea(
+              child: Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                      margin: const EdgeInsets.only(
+                          left: 32, right: 32, bottom: 16),
+                      width: MediaQuery.of(context).size.width,
+                      height: 60,
+                      child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.deepOrange,
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(4)),
+                          ),
+                          child: FlatButton(
+                              onPressed: () {
+                                _shareFinalImage(
+                                    context, captureKey, imageRatio.name);
+                              },
+                              child: Text(
+                                "Share",
+                                style: TextStyle(
+                                    fontSize: 20, color: Colors.white),
+                              ))))))
+        ]));
   }
 
   @override
@@ -482,9 +496,11 @@ class ImageEditorState extends State<ImageEditor> {
                       onTap: () {
                         Analytics().logFontOpened();
                         DialogUtils.showFontChooser(
-                            context, draggableText.getFontSize(), (fontSize) {
+                                context, draggableText.getFontSize(),
+                                (fontSize) {
                           draggableText.setFontSize(fontSize);
-                        }).then((font) {
+                        }, currentFont)
+                            .then((font) {
                           if (font != null) {
                             setState(() {
                               currentFont = font;

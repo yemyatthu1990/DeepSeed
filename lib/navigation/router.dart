@@ -11,18 +11,23 @@ class Router {
         return MaterialPageRoute(builder: (_) => BottomBarScreen());
       case detailRoute:
         var data = settings.arguments as Map<String, dynamic>;
-
-        return MaterialPageRoute(
-            builder: (_) => ImageEditor(data["urls"],data["photographer_name"],data["username"], data["index"],
-                data["temp_file_url"], data["file_url"], data["hero_tag"]));
+        return ScaleRoute(
+            page: ImageEditor(
+                data["urls"],
+                data["photographer_name"],
+                data["username"],
+                data["index"],
+                data["temp_file_url"],
+                data["file_url"],
+                data["hero_tag"]));
 
       case profileDetailRoute:
         var data = settings.arguments as Map<String, dynamic>;
-        return MaterialPageRoute(
-            builder: (BuildContext buildContext) => ProfileDetailDialog(
-                  filePath: data["file_url"],
-                  heroTag: data["hero_tag"],
-                ));
+        return ScaleRoute(
+            page: ProfileDetailDialog(
+          filePath: data["file_url"],
+          heroTag: data["hero_tag"],
+        ));
 
       default:
         return MaterialPageRoute(
@@ -32,4 +37,27 @@ class Router {
                 ));
     }
   }
+}
+
+class ScaleRoute extends PageRouteBuilder {
+  final Widget page;
+
+  ScaleRoute({this.page})
+      : super(
+            pageBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+            ) =>
+                page,
+            transitionsBuilder: (
+              BuildContext context,
+              Animation<double> animation,
+              Animation<double> secondaryAnimation,
+              Widget child,
+            ) =>
+                FadeTransition(
+                  opacity: animation,
+                  child: child,
+                ));
 }

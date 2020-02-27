@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:deep_seed/model/poem.dart';
+import 'package:deep_seed/util/rabbit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import '../../main.dart';
 
 class PoemPicker extends StatefulWidget {
   final Stream<QuerySnapshot> snapshots;
@@ -24,9 +27,15 @@ class PoemPickerState extends State<PoemPicker> {
         showLoading = false;
         event.documents.forEach((snapshot) {
           Poem poem = new Poem();
-          poem.body = snapshot["body"];
-          poem.title = snapshot["title"];
-          poem.author = snapshot["author"];
+          poem.body = Encoding.isUnicode
+              ? snapshot["body"]
+              : Rabbit.uni2zg(snapshot["body"]);
+          poem.title = Encoding.isUnicode
+              ? snapshot["title"]
+              : Rabbit.uni2zg(snapshot["title"]);
+          poem.author = Encoding.isUnicode
+              ? snapshot["author"]
+              : Rabbit.uni2zg(snapshot["author"]);
           poems.add(poem);
         });
         showLoading = false;

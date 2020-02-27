@@ -241,7 +241,7 @@ class _BottomBarState extends State<BottomBarScreen> {
               onSuggestionShow: (show) {},
               icon: Icon(Icons.search),
               hintText: "Love, hate, relationship ...",
-              hintStyle: TextStyle(fontSize: 16),
+              hintStyle: TextStyle(fontSize: 14),
               textStyle: TextStyle(fontSize: 16),
               cancellationWidget: Icon(
                 Icons.close,

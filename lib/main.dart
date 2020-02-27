@@ -88,9 +88,9 @@ class MyApp extends StatelessWidget {
                     CupertinoThemeData(primaryColor: Colors.white),
 
                 // for others(Android, Fuchsia)
+
                 cursorColor: Colors.white,
-                primarySwatch: Colors.grey,
-                fontFamily: Font.CHERRY.family),
+                primarySwatch: Colors.grey),
             home: Scaffold(
               body: BottomBarScreen(),
             )));

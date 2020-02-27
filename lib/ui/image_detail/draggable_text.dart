@@ -1,10 +1,5 @@
 import 'dart:ui';
-
-import 'package:deep_seed/main.dart';
-import 'package:deep_seed/ui/util/dialog_utils.dart';
-import 'package:deep_seed/util/rabbit.dart';
 import 'package:flutter/material.dart';
-import 'package:matrix_gesture_detector/matrix_gesture_detector.dart';
 
 class DraggableText extends StatefulWidget {
   DraggableTextState _draggableTextState = DraggableTextState();
@@ -20,7 +15,7 @@ class DraggableText extends StatefulWidget {
     return _draggableTextState.getFontSize();
   }
 
-  void setFont(Font font) {
+  void setFont(String font) {
     _draggableTextState.setFont(font);
   }
 
@@ -50,13 +45,11 @@ class DraggableTextState extends State<DraggableText> {
   double maxY;
   double maxX;
   Offset offset;
-  double fontSize = 18;
+  double fontSize = 16;
   String value = "";
-  Font currentFont = Font.SABAE;
-  String zawgyiFontFamily = "Zawgyi";
+  String currentFont = "";
   Color currentColor = Colors.black38;
   Color currentFontColor = Colors.white;
-  FocusNode _focusNode = FocusNode();
   void setMaxXY(double maxX, double maxY) {
     this.maxY = maxY;
     this.maxX = maxX;
@@ -68,7 +61,7 @@ class DraggableTextState extends State<DraggableText> {
     });
   }
 
-  void setFont(Font font) {
+  void setFont(String font) {
     setState(() {
       currentFont = font;
     });
@@ -94,25 +87,6 @@ class DraggableTextState extends State<DraggableText> {
   @override
   void initState() {
     offset = Offset(0, maxY / 4);
-    if (!Encoding.isUnicode) {
-      bool isEncoding = false;
-      _focusNode.addListener(() {
-        if (!Encoding.isUnicode) {
-          setState(() {
-            if (isEncoding) return;
-            isEncoding = true;
-            if (_focusNode.hasFocus) {
-              zawgyiFontFamily = "Zawgyi";
-              value = Rabbit.uni2zg(value);
-            } else {
-              zawgyiFontFamily = currentFont.family;
-              value = Rabbit.zg2uni(value);
-            }
-            isEncoding = false;
-          });
-        }
-      });
-    }
     super.initState();
   }
 
@@ -158,13 +132,10 @@ class DraggableTextState extends State<DraggableText> {
                           height: 2,
                           color: currentFontColor,
                           fontSize: fontSize,
-                          fontFamily: Encoding.isUnicode
-                              ? currentFont.family
-                              : zawgyiFontFamily),
+                          fontFamily: currentFont),
                       textAlign: TextAlign.center,
                       enableSuggestions: false,
                       autocorrect: false,
-                      focusNode: Encoding.isUnicode ? null : _focusNode,
                       autofocus: true),
                   padding: EdgeInsets.only(left: 16, right: 16),
                 ))));
@@ -187,7 +158,6 @@ class DraggableTextState extends State<DraggableText> {
 
   @override
   void dispose() {
-    _focusNode.dispose();
     super.dispose();
   }
 }
