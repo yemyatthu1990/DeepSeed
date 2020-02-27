@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/painting.dart' as pt;
 
 class Utils {
   static Map<String, int> randomColor(String value) {
@@ -93,5 +94,21 @@ class Utils {
     }
 
     return HSVColor.fromAHSV(color.alpha, color.hue, s, v);
+  }
+
+  static bool isUnicode() {
+    final String text = "\u1000\u1039\u1000";
+    final Size txtSize = _getTextSize(text);
+    final Size secondTxtSize = _getTextSize("\u1000");
+    return txtSize.width == secondTxtSize.width;
+  }
+
+  static Size _getTextSize(String text) {
+    final TextPainter textPainter = TextPainter(
+        text: TextSpan(text: text),
+        maxLines: 1,
+        textDirection: pt.TextDirection.ltr)
+      ..layout(minWidth: 0, maxWidth: double.infinity);
+    return textPainter.size;
   }
 }

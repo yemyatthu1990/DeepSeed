@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:deep_seed/model/poem.dart';
 import 'package:deep_seed/ui/image_share/image_share_dialog.dart';
 import 'package:deep_seed/ui/util/poem_picker.dart';
+import 'package:deep_seed/util/preference_utils.dart';
 import 'package:deep_seed/view/ColorChanger.dart';
 import 'package:deep_seed/view/StateAwareSlider.dart';
 import 'package:deep_seed/view/about_me_dialog.dart';
@@ -72,6 +73,40 @@ class DialogUtils {
               contentPadding: EdgeInsets.all(0),
               content: SingleChildScrollView(
                   child: AboutMeDialog(info: packageInfo)));
+        });
+  }
+
+  static Future<bool> showZawgyiDialog(BuildContext context) async {
+    PreferenceUtils.zawgyiDialogHasShown();
+    return await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(Radius.circular(8.0))),
+            title: Text(
+              "ဇော်ဂျီဖောင့်အသုံးပြုမှုအတွက် အသိပေးချက်",
+              style: TextStyle(fontFamily: Font.CHERRY.family),
+            ),
+            content: SingleChildScrollView(
+              child: Text(
+                  "ဇော်ဂျီဖောင့်၏ အားနည်းချက်အချို့ကြောင့် DeepSeed application ကို အသုံးပြုရာတွင် ချို့ယွင်းချက်များရှိနိုင်ပါသည်. ဥပမာ။ ဖောင့်မမှန်ချင်း \n"
+                  "ပိုမိုကောင်းမွန်သော အတွေ့အကြုံကိုရရှိရန် ယူနီကုတ်ဖောင့်ကို ပြောင်းလဲအသုံးပြုဖို့ တိုက်တွန်းလိုပါသည်။",
+                  style: TextStyle(fontFamily: Font.CHERRY.family)),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                child: const Text(
+                  "အိုကေ",
+                  style: TextStyle(
+                      color: Colors.black, fontSize: 14, fontFamily: "Cherry"),
+                ),
+                onPressed: () {
+                  Navigator.pop(context, true);
+                },
+              )
+            ],
+          );
         });
   }
 

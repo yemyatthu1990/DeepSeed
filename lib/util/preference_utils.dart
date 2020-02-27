@@ -1,8 +1,12 @@
 import 'package:deep_seed/model/model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'utils.dart';
+
 class PreferenceUtils {
   static String favoriteKey = "Favorite";
+  static String zawgyiDialogKey = "zawgyiDiaog";
+  static String isUnicodeKey = "isUnicode";
   static Future<List<Urls>> getFavorites() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> url = prefs.getStringList(favoriteKey);
@@ -49,6 +53,30 @@ class PreferenceUtils {
         return;
       favorites.remove(url);
       await prefs.setStringList(favoriteKey, favorites);
+    }
+  }
+
+  static Future<bool> haveShownZawgyiDialog() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey(zawgyiDialogKey))
+      return prefs.getBool(zawgyiDialogKey);
+    else
+      return false;
+  }
+
+  static Future<void> zawgyiDialogHasShown() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool(zawgyiDialogKey, true);
+  }
+
+  static Future<bool> isUnicode() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.containsKey(isUnicodeKey)) {
+      return prefs.getBool(isUnicodeKey);
+    } else {
+      bool isUnicode = Utils.isUnicode();
+      prefs.setBool(isUnicodeKey, isUnicode);
+      return isUnicode;
     }
   }
 }

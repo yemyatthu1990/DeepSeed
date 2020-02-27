@@ -6,7 +6,9 @@ import 'package:deep_seed/constants.dart';
 import 'package:deep_seed/navigation/Router.dart';
 import 'package:deep_seed/ui/home/bottom_bar_screen.dart';
 import 'package:deep_seed/ui/image_detail/image_editor.dart';
+import 'package:deep_seed/ui/util/dialog_utils.dart';
 import 'package:deep_seed/util/Analytics.dart';
+import 'package:deep_seed/util/preference_utils.dart';
 import 'package:deep_seed/util/utils.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:flutter/cupertino.dart';
@@ -18,6 +20,10 @@ class RemoteConfigKey {
   static bool showWaterMark;
   static String apiKey;
   static List<dynamic> queries;
+}
+
+class Encoding {
+  static bool isUnicode = true;
 }
 
 void main() {
@@ -47,6 +53,7 @@ Future<RemoteConfig> initializeRemoteConfig() async {
   } catch (e) {
     print(e.toString());
   }
+  Encoding.isUnicode = await PreferenceUtils.isUnicode();
   return instance;
 }
 
@@ -82,7 +89,8 @@ class MyApp extends StatelessWidget {
 
                 // for others(Android, Fuchsia)
                 cursorColor: Colors.white,
-                primarySwatch: Colors.grey),
+                primarySwatch: Colors.grey,
+                fontFamily: Font.CHERRY.family),
             home: Scaffold(
               body: BottomBarScreen(),
             )));
