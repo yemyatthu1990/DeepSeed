@@ -32,6 +32,15 @@ class Utils {
     }
   }
 
+  static Future<String> getDefaultFont() async {
+    try {
+      final channel = const MethodChannel('channel:co.deepseed.deep_seed/font');
+      return channel.invokeMethod('getDefaultFont');
+    } catch (e) {
+      print('Share error: $e');
+    }
+  }
+
   static String readTimestamp(int timestamp) {
     var now = DateTime.now();
     var format = DateFormat('HH:mm a');

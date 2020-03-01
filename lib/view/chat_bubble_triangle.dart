@@ -11,12 +11,12 @@ class ChatBubbleTriangle extends CustomPainter {
 
     var path = Path();
     if (direction == DIRECTION.TOP) {
-      path.lineTo(-5, 30);
+      path.lineTo(-5, 50);
 
-      path.lineTo(5, 30);
+      path.lineTo(5, 50);
     } else if (direction == DIRECTION.RIGHT) {
-      path.lineTo(-22, -18);
-      path.lineTo(-50, -18);
+      path.lineTo(-50, -20);
+      path.lineTo(-80, -20);
     }
     canvas.drawPath(path, paint);
   }

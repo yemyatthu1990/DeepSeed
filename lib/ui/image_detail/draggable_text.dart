@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 
 class DraggableText extends StatefulWidget {
   DraggableTextState _draggableTextState = DraggableTextState();
+  void setWidth(double width) {
+    _draggableTextState.setWidth(width);
+  }
+
   void setMaxXY(double maxX, double maxY) {
     _draggableTextState.setMaxXY(maxX, maxY);
   }
@@ -45,11 +49,21 @@ class DraggableTextState extends State<DraggableText> {
   double maxY;
   double maxX;
   Offset offset;
-  double fontSize = 16;
+  double fontSize = 0;
   String value = "";
   String currentFont = "";
   Color currentColor = Colors.black38;
   Color currentFontColor = Colors.white;
+  double width = 0;
+  double pixelRatio = 1;
+  void setWidth(double width) {
+    this.width = width;
+  }
+
+  void setPixelRatio(double pixelRatio) {
+    this.pixelRatio = pixelRatio;
+  }
+
   void setMaxXY(double maxX, double maxY) {
     this.maxY = maxY;
     this.maxX = maxX;
@@ -87,13 +101,15 @@ class DraggableTextState extends State<DraggableText> {
   @override
   void initState() {
     offset = Offset(0, maxY / 4);
+    if (width == 0) width = MediaQuery.of(context).size.width;
+    if (fontSize == 0) fontSize = 14 * pixelRatio;
     super.initState();
   }
 
   Widget container() {
     double startOffset = 0;
     return Positioned(
-        width: MediaQuery.of(context).size.width,
+        width: width,
         top: offset.dy,
         child: GestureDetector(
             onPanStart: (value) {
@@ -129,7 +145,7 @@ class DraggableTextState extends State<DraggableText> {
                       minLines: 1,
                       decoration: InputDecoration(border: InputBorder.none),
                       style: TextStyle(
-                          height: 2,
+                          height: 2 * pixelRatio,
                           color: currentFontColor,
                           fontSize: fontSize,
                           fontFamily: currentFont),
@@ -137,7 +153,8 @@ class DraggableTextState extends State<DraggableText> {
                       enableSuggestions: false,
                       autocorrect: false,
                       autofocus: true),
-                  padding: EdgeInsets.only(left: 16, right: 16),
+                  padding: EdgeInsets.only(
+                      left: 16 * pixelRatio, right: 16 * pixelRatio),
                 ))));
   }
 

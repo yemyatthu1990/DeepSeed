@@ -230,27 +230,27 @@ class _SearchBarState extends State<SearchBar>
                       borderRadius: widget.searchBarStyle.borderRadius,
                       color: widget.searchBarStyle.backgroundColor,
                     ),
-                    child: Container(
-                      height: 36,
-                      child: Padding(
-                          padding: widget.searchBarStyle.padding,
-                          child: Theme(
-                              child: TextField(
-                                controller: _searchQueryController,
-                                onChanged: _onTextChanged,
-                                style: widget.textStyle,
-                                focusNode: _focusNode,
-                                cursorColor: Colors.black,
-                                decoration: InputDecoration(
-                                  icon: widget.icon,
-                                  border: InputBorder.none,
-                                  hintText: widget.hintText,
-                                  hintStyle: widget.hintStyle,
-                                ),
-                              ),
-                              data: Theme.of(context).copyWith(
-                                primaryColor: widget.iconActiveColor,
-                              ))),
+                    child: Padding(
+                      padding: widget.searchBarStyle.padding,
+                      child: Theme(
+                          child: TextField(
+                            controller: _searchQueryController,
+                            onChanged: _onTextChanged,
+                            maxLines: 100,
+                            keyboardType: TextInputType.text,
+                            style: widget.textStyle,
+                            focusNode: _focusNode,
+                            cursorColor: Colors.black,
+                            decoration: InputDecoration(
+                                icon: widget.icon,
+                                border: InputBorder.none,
+                                hintText: widget.hintText,
+                                hintStyle: widget.hintStyle,
+                                contentPadding: EdgeInsets.all(0)),
+                          ),
+                          data: Theme.of(context).copyWith(
+                            primaryColor: widget.iconActiveColor,
+                          )),
                     ),
                   ),
                 ),

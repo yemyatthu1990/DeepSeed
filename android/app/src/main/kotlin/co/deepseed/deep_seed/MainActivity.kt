@@ -9,11 +9,13 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.PixelFormat
 import android.graphics.Rect
+import android.graphics.Typeface
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
 import android.os.Handler
 import android.os.PersistableBundle
 import android.util.AttributeSet
+import android.util.Xml
 import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
@@ -29,10 +31,17 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformViewRegistry
 import io.flutter.plugins.GeneratedPluginRegistrant
 import io.flutter.view.FlutterView
+import org.xmlpull.v1.XmlPullParser
+import org.xmlpull.v1.XmlPullParserException
 import java.io.File
+import java.io.FileInputStream
+import java.io.FileNotFoundException
+import java.io.IOException
+import java.lang.RuntimeException
 import java.util.Random
 import java.util.Timer
 import java.util.TimerTask
+import java.util.logging.XMLFormatter
 
 class MainActivity: FlutterActivity(), StreamHandler,
     OnGlobalLayoutListener {
@@ -54,6 +63,13 @@ class MainActivity: FlutterActivity(), StreamHandler,
             shareFile(methodCall.argument<String>("path")!!, methodCall.argument<String>("shareText")!!)
         }
     }
+
+     MethodChannel(flutterView,"channel:co.deepseed.deep_seed/font").setMethodCallHandler { methodCall, result ->
+        if (methodCall.method == "getDefaultFont") {
+            result.success(getDefaultFont())
+        }
+    }
+
     val channel = MethodChannel(flutterView, "flutter_native_admob")
       channel.setMethodCallHandler{ methodCall, result ->
 
@@ -103,7 +119,7 @@ class MainActivity: FlutterActivity(), StreamHandler,
     p0: Any?,
     eventSink: EventSink?
   ) {
-     System.out.println("listening..")
+
      this.eventSink = eventSink
   }
 
@@ -154,6 +170,52 @@ class MainActivity: FlutterActivity(), StreamHandler,
   fun unregisterListener() {
    /* mainView?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
     mainView = null*/
+  }
+
+  private fun getDefaultFont(): String {
+        var configFilename =  File("/system/etc/system_fonts.xml")
+        if (!configFilename.exists()) {
+          configFilename = File("/system/etc/fonts.xml")
+          if (!configFilename.exists()) { configFilename = File("/system/etc/fallback_fonts.xml")
+          }
+        }
+        System.out.println(  " CONFIG FILE NAME exits: "+ configFilename.exists() +" : "+configFilename.path)
+        // sans-serif is the default font family name in Android SDK, check out the code in Typeface.java
+        var defaultFontName = "ZawgyiX1"
+
+    try {
+      val fontsIn =  FileInputStream(configFilename)
+      val parser = Xml.newPullParser()
+      parser.setInput(fontsIn, null)
+      var done = false
+      var getTheText = false
+      var eventType: Int
+      while (!done) {
+        eventType = parser.next()
+        System.out.println("parsername "+parser.name)
+        if (eventType == XmlPullParser.START_TAG && parser.name.toLowerCase() == "name") {
+          getTheText = true
+        }
+        if (eventType == XmlPullParser.TEXT && getTheText) {
+          // first name
+          defaultFontName = parser.text
+          done = true
+        }
+        if (eventType == XmlPullParser.END_DOCUMENT) {
+          done = true
+        }
+      }
+      System.out.println("Get the Text?: "+getTheText)
+    } catch (e: RuntimeException) {
+      System.err.println("GetDefaultFont: Didn't create default family (most likely, non-Minikin build)")
+    } catch ( e: FileNotFoundException) {
+      System.err.println("GetDefaultFont: config file Not found")
+    } catch ( e: IOException) {
+      System.err.println("GetDefaultFont: IO exception: " + e.message)
+    } catch ( e: XmlPullParserException) {
+      System.err.println("getDefaultFont: XML parse exception " + e.message)
+    }
+    return defaultFontName
   }
 
 }

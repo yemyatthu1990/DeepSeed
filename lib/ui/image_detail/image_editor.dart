@@ -101,22 +101,46 @@ class ImageEditorState extends State<ImageEditor> {
   ImageEditorState(this.photoUrls, this.index, this.tempFileUrl, this.fileUrl);
   double imageHeight = 0;
   bool showAdsLoading = false;
+  double imageToScreenRatio = 0;
+  double waterMarkPositionRight = 0;
+  double imageWidth = 0;
+  double devicePixelRatioModifier = 1;
   @override
   Widget build(BuildContext context) {
+    var wouldBeImageHeight =
+        MediaQuery.of(context).size.width * imageRatio.ratio;
+    var leftOverSpace = (MediaQuery.of(context).size.height -
+            kToolbarHeight -
+            MediaQuery.of(context).padding.top -
+            120 -
+            96) -
+        wouldBeImageHeight;
+    if (leftOverSpace < 0) {
+      leftOverSpace = 50;
+    }
+
+    devicePixelRatioModifier = leftOverSpace / 60.0;
+
+    if (devicePixelRatioModifier > 1) devicePixelRatioModifier = 1;
+    if (devicePixelRatioModifier >= 1)
+      imageWidth = MediaQuery.of(context).size.width;
+    else
+      imageWidth =
+          MediaQuery.of(context).size.width - (60 * devicePixelRatioModifier);
+
+    imageHeight = height > 0 ? height : imageWidth * imageRatio.ratio;
     Image image = Image.file(new File(fileUrl),
         gaplessPlayback: true,
-        width: MediaQuery.of(context).size.width,
-        height: height > 0
-            ? height
-            : MediaQuery.of(context).size.width * imageRatio.ratio,
+        width: imageWidth,
+        height: imageHeight,
         fit: BoxFit.cover);
-    draggableText.setMaxXY(0, image.height);
-    imageHeight = image.height;
     if (isFavorite) {
       favoriteIcon = Icons.favorite;
     } else {
       favoriteIcon = Icons.favorite_border;
     }
+    draggableText.setWidth(imageWidth);
+    draggableText.setMaxXY(0, imageHeight);
     return WillPopScope(
         onWillPop: () async {
           Navigator.pop(context, refreshValue);
@@ -143,7 +167,7 @@ class ImageEditorState extends State<ImageEditor> {
                               widget.photoUrls.small, widget.photoUrls.full);
                       },
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: EdgeInsets.all(16 * devicePixelRatioModifier),
                         child: Icon(
                           favoriteIcon,
                           color: Theme.of(context).primaryIconTheme.color,
@@ -154,7 +178,7 @@ class ImageEditorState extends State<ImageEditor> {
                         _shareFinalImage(context, captureKey, imageRatio.name);
                       },
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: EdgeInsets.all(16 * devicePixelRatioModifier),
                         child: Icon(
                           Icons.share,
                           color: Theme.of(context).primaryIconTheme.color,
@@ -163,34 +187,47 @@ class ImageEditorState extends State<ImageEditor> {
                 ],
               ),
               body: Stack(children: <Widget>[
-                RepaintBoundary(
-                    key: captureKey,
-                    child: Stack(
-                      children: <Widget>[
-                        Hero(tag: widget.heroTag, child: image),
-                        draggableText,
-                        if (RemoteConfigKey.showWaterMark)
-                          Positioned(
-                              top: image.height - 16,
-                              left: image.width - 80,
-                              child: Container(
-                                  padding: EdgeInsets.only(left: 8, right: 8),
-                                  decoration: BoxDecoration(
-                                      color: Colors.white38,
-                                      borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(8.0))),
-                                  child: Text("deepseed.co",
-                                      style: TextStyle(
-                                          fontSize: 12,
-                                          fontFamily: "Roboto",
-                                          fontStyle: FontStyle.italic,
-                                          color: Colors.black54)))),
-                      ],
-                    )),
+                Align(
+                    alignment: Alignment.topLeft,
+                    child: RepaintBoundary(
+                        key: captureKey,
+                        child: Stack(
+                          alignment: Alignment.topLeft,
+                          children: <Widget>[
+                            Hero(tag: widget.heroTag, child: image),
+                            draggableText,
+                            if (RemoteConfigKey.showWaterMark)
+                              Positioned(
+                                  top: image.height -
+                                      (22 * devicePixelRatioModifier),
+                                  left: image.width -
+                                      80 * devicePixelRatioModifier,
+                                  child: Container(
+                                      padding: EdgeInsets.only(
+                                          left: 8 * devicePixelRatioModifier,
+                                          right: 8 * devicePixelRatioModifier,
+                                          top: 4 * devicePixelRatioModifier,
+                                          bottom: 4 * devicePixelRatioModifier),
+                                      decoration: BoxDecoration(
+                                          color: Colors.white38,
+                                          borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(8.0 *
+                                                  devicePixelRatioModifier))),
+                                      child: Align(
+                                          alignment: Alignment.center,
+                                          child: Text("deepseed.co",
+                                              style: TextStyle(
+                                                  fontSize: 12 *
+                                                      devicePixelRatioModifier,
+                                                  fontFamily: "Roboto",
+                                                  fontStyle: FontStyle.italic,
+                                                  color: Colors.black54))))),
+                          ],
+                        ))),
                 if (widget.photographerName != null && widget.username != null)
                   Positioned(
-                      top: image.height + 8,
-                      left: 8,
+                      top: image.height + (8 * devicePixelRatioModifier),
+                      left: 16 * devicePixelRatioModifier,
                       child: Html(
                         data: """
                       Photo by 
@@ -198,8 +235,9 @@ class ImageEditorState extends State<ImageEditor> {
                       on 
                       <a href=https://unsplash.com/?utm_source=DeepSeed&utm_medium=referral>Unsplash</a>
                       """,
-                        defaultTextStyle:
-                            TextStyle(fontFamily: 'serif', fontSize: 12),
+                        defaultTextStyle: TextStyle(
+                            fontFamily: 'serif',
+                            fontSize: 12 * devicePixelRatioModifier),
                         linkStyle: const TextStyle(
                           color: Colors.orangeAccent,
                         ),
@@ -215,11 +253,13 @@ class ImageEditorState extends State<ImageEditor> {
                   Positioned(
                       top: imageRatio == ImageRatio.Instagram
                           ? image.height
-                          : image.height - 10,
-                      right: imageRatio == ImageRatio.Instagram ? 16 : 68,
+                          : image.height - 10 * devicePixelRatioModifier,
+                      left: imageRatio == ImageRatio.Instagram
+                          ? imageWidth - (16 * devicePixelRatioModifier)
+                          : imageWidth - (68 * devicePixelRatioModifier),
                       child: SizedBox(
-                        width: 20,
-                        height: 20,
+                        width: 20 * devicePixelRatioModifier,
+                        height: 20 * devicePixelRatioModifier,
                         child: CustomPaint(
                           painter: ChatBubbleTriangle(
                               direction: imageRatio == ImageRatio.Instagram
@@ -230,13 +270,16 @@ class ImageEditorState extends State<ImageEditor> {
                 if (RemoteConfigKey.showWaterMark)
                   Positioned(
                       top: imageRatio == ImageRatio.Instagram
-                          ? image.height + 30
-                          : image.height - 60,
-                      right: imageRatio == ImageRatio.Instagram ? 0 : 108,
+                          ? image.height + 30 * devicePixelRatioModifier
+                          : image.height - 60 * devicePixelRatioModifier,
+                      right: imageRatio == ImageRatio.Instagram
+                          ? 0
+                          : 164 * devicePixelRatioModifier,
                       child: DecoratedBox(
                           decoration: BoxDecoration(
                             color: Color(0xFFEEEEEE),
-                            borderRadius: BorderRadius.all(Radius.circular(50)),
+                            borderRadius: BorderRadius.all(
+                                Radius.circular(50 * devicePixelRatioModifier)),
                           ),
                           child: InkWell(
                               onTap: () {
@@ -287,159 +330,46 @@ class ImageEditorState extends State<ImageEditor> {
                               },
                               child: showAdsLoading
                                   ? SizedBox(
-                                      width: 228,
+                                      width: 228 * devicePixelRatioModifier,
                                       child: JumpingDotsProgressIndicator(
-                                        fontSize: 30.0,
+                                        fontSize:
+                                            22.0 * devicePixelRatioModifier,
                                       ))
                                   : Padding(
-                                      padding: EdgeInsets.all(20),
+                                      padding: EdgeInsets.all(
+                                          20 * devicePixelRatioModifier),
                                       child: Text(
                                         "Remove Watermark for FREE?",
                                         style: TextStyle(
-                                          fontSize: 14,
+                                          fontSize:
+                                              14 * devicePixelRatioModifier,
                                           color: Colors.black87,
                                         ),
                                       ))))),
-                SafeArea(
-                    child: Align(
-                        alignment: Alignment.bottomCenter, child: _bottomBar()))
+                if (!(devicePixelRatioModifier < 1))
+                  SafeArea(
+                      child: Align(
+                          alignment: Alignment.bottomCenter,
+                          child: _bottomBar()))
               ])),
+          devicePixelRatioModifier < 1
+              ? _verticalToolbar()
+              : _horizontalToolbar(),
           SafeArea(
               child: Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
-                      margin: const EdgeInsets.only(bottom: 96),
+                      margin: EdgeInsets.only(
+                          left: 32 * devicePixelRatioModifier,
+                          right: 32 * devicePixelRatioModifier,
+                          bottom: 16 * devicePixelRatioModifier),
                       width: MediaQuery.of(context).size.width,
-                      height: 60,
-                      child: Material(
-                          color: Theme.of(context).dialogBackgroundColor,
-                          child: Container(
-                              child: Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(32, 0, 32, 0),
-                                  child: Container(
-                                      child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: <Widget>[
-                                      InkWell(
-                                          onTap: () {
-                                            Analytics().logFontOpened();
-                                            FocusScope.of(context)
-                                                .requestFocus(new FocusNode());
-                                            DialogUtils.showFontChooser(context,
-                                                    draggableText.getFontSize(),
-                                                    (fontSize) {
-                                              draggableText
-                                                  .setFontSize(fontSize);
-                                            }, currentFont)
-                                                .then((font) {
-                                              if (font != null) {
-                                                setState(() {
-                                                  currentFont = font;
-                                                });
-                                                draggableText.setFont(font);
-                                              }
-                                            });
-                                          },
-                                          child: Padding(
-                                              padding: const EdgeInsets.all(20),
-                                              child: const Icon(
-                                                  Icons.font_download))),
-                                      InkWell(
-                                          onTap: () {
-                                            Analytics().logColorOpened();
-                                            FocusScope.of(context)
-                                                .requestFocus(new FocusNode());
-                                            DialogUtils.showColorChooser(
-                                                    draggableText.getColor(),
-                                                    draggableText
-                                                        .getFontColor(),
-                                                    context)
-                                                .then((colors) {
-                                              if (colors != null) {
-                                                draggableText.setColor(colors);
-                                              }
-                                            });
-                                          },
-                                          child: Padding(
-                                              padding: const EdgeInsets.all(20),
-                                              child: const Icon(
-                                                  Icons.color_lens))),
-                                      InkWell(
-                                          onTap: () {
-                                            Analytics().logRatioChanged();
-                                            FocusScope.of(context)
-                                                .requestFocus(new FocusNode());
-                                            setState(() {
-                                              if (imageRatio.index <
-                                                  ImageRatio.values.length -
-                                                      1) {
-                                                imageRatio = ImageRatio.values[
-                                                    imageRatio.index + 1];
-                                              } else {
-                                                imageRatio =
-                                                    ImageRatio.values[0];
-                                              }
-
-                                              height = MediaQuery.of(context)
-                                                      .size
-                                                      .width *
-                                                  imageRatio.ratio;
-                                            });
-                                            draggableText
-                                                .setOffSet(Offset(0, 80));
-                                          },
-                                          child: Padding(
-                                              padding: const EdgeInsets.all(20),
-                                              child: const Icon(
-                                                  Icons.aspect_ratio))),
-                                      InkWell(
-                                          onTap: () {
-                                            Analytics().logPoemOpened();
-                                            FocusScope.of(context)
-                                                .requestFocus(new FocusNode());
-                                            DialogUtils.showPoemPickerDialog(
-                                                    context,
-                                                    Firestore.instance
-                                                        .collection("poems")
-                                                        .snapshots(
-                                                            includeMetadataChanges:
-                                                                false))
-                                                .then((poem) {
-                                              if (poem == null) return;
-                                              setState(() {
-                                                _textFieldText = poem.body +
-                                                    "\n\n" +
-                                                    poem.title +
-                                                    " - " +
-                                                    poem.author;
-                                              });
-                                              draggableText
-                                                  .setText(_textFieldText);
-                                              draggableText
-                                                  .setOffSet(Offset(0, 80));
-                                            });
-                                          },
-                                          child: Padding(
-                                              padding: const EdgeInsets.all(20),
-                                              child:
-                                                  const Icon(Icons.art_track))),
-                                    ],
-                                  )))))))),
-          SafeArea(
-              child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                      margin: const EdgeInsets.only(
-                          left: 32, right: 32, bottom: 16),
-                      width: MediaQuery.of(context).size.width,
-                      height: 60,
+                      height: 60 * devicePixelRatioModifier,
                       child: Container(
                           decoration: BoxDecoration(
                             color: Colors.deepOrange,
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(4)),
+                            borderRadius: BorderRadius.all(
+                                Radius.circular(4 * devicePixelRatioModifier)),
                           ),
                           child: FlatButton(
                               onPressed: () {
@@ -449,7 +379,8 @@ class ImageEditorState extends State<ImageEditor> {
                               child: Text(
                                 "Share",
                                 style: TextStyle(
-                                    fontSize: 20, color: Colors.white),
+                                    fontSize: 20 * devicePixelRatioModifier,
+                                    color: Colors.white),
                               ))))))
         ]));
   }
@@ -486,7 +417,11 @@ class ImageEditorState extends State<ImageEditor> {
   Widget _bottomBar() {
     return Container(
       child: Padding(
-          padding: const EdgeInsets.fromLTRB(32, 8, 32, 0),
+          padding: EdgeInsets.fromLTRB(
+              32 * devicePixelRatioModifier,
+              8 * devicePixelRatioModifier,
+              32 * devicePixelRatioModifier,
+              0 * devicePixelRatioModifier),
           child: Material(
               color: Theme.of(context).dialogBackgroundColor,
               child: Row(
@@ -540,10 +475,12 @@ class ImageEditorState extends State<ImageEditor> {
                           height = MediaQuery.of(context).size.width *
                               imageRatio.ratio;
                         });
-                        draggableText.setOffSet(Offset(0, 80));
+                        draggableText.setOffSet(
+                            Offset(0, 80 * devicePixelRatioModifier));
                       },
                       child: Padding(
-                          padding: const EdgeInsets.all(20),
+                          padding:
+                              EdgeInsets.all(20 * devicePixelRatioModifier),
                           child: const Icon(Icons.aspect_ratio))),
                   InkWell(
                       onTap: () {
@@ -563,15 +500,265 @@ class ImageEditorState extends State<ImageEditor> {
                                 poem.author;
                           });
                           draggableText.setText(_textFieldText);
-                          draggableText.setOffSet(Offset(0, 80));
+                          draggableText.setOffSet(
+                              Offset(0, 80 * devicePixelRatioModifier));
                         });
                       },
                       child: Padding(
-                          padding: const EdgeInsets.all(20),
+                          padding:
+                              EdgeInsets.all(20 * devicePixelRatioModifier),
                           child: const Icon(Icons.art_track))),
                 ],
               ))),
     );
+  }
+
+  Widget _horizontalToolbar() {
+    return SafeArea(
+        child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+                margin: EdgeInsets.only(bottom: 96 * devicePixelRatioModifier),
+                width: MediaQuery.of(context).size.width,
+                height: 60 * devicePixelRatioModifier,
+                child: Material(
+                    color: Theme.of(context).dialogBackgroundColor,
+                    child: Container(
+                        child: Padding(
+                            padding: EdgeInsets.fromLTRB(
+                                32 * devicePixelRatioModifier,
+                                0,
+                                32 * devicePixelRatioModifier,
+                                0),
+                            child: Container(
+                                child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: <Widget>[
+                                InkWell(
+                                    onTap: () {
+                                      Analytics().logFontOpened();
+                                      FocusScope.of(context)
+                                          .requestFocus(new FocusNode());
+                                      DialogUtils.showFontChooser(context,
+                                              draggableText.getFontSize(),
+                                              (fontSize) {
+                                        draggableText.setFontSize(fontSize *
+                                            devicePixelRatioModifier);
+                                      }, currentFont)
+                                          .then((font) {
+                                        if (font != null) {
+                                          setState(() {
+                                            currentFont = font;
+                                          });
+                                          draggableText.setFont(font);
+                                        }
+                                      });
+                                    },
+                                    child: Padding(
+                                        padding: EdgeInsets.all(
+                                            20 * devicePixelRatioModifier),
+                                        child:
+                                            const Icon(Icons.font_download))),
+                                InkWell(
+                                    onTap: () {
+                                      Analytics().logColorOpened();
+                                      FocusScope.of(context)
+                                          .requestFocus(new FocusNode());
+                                      DialogUtils.showColorChooser(
+                                              draggableText.getColor(),
+                                              draggableText.getFontColor(),
+                                              context)
+                                          .then((colors) {
+                                        if (colors != null) {
+                                          draggableText.setColor(colors);
+                                        }
+                                      });
+                                    },
+                                    child: Padding(
+                                        padding: EdgeInsets.all(
+                                            20 * devicePixelRatioModifier),
+                                        child: const Icon(Icons.color_lens))),
+                                InkWell(
+                                    onTap: () {
+                                      Analytics().logRatioChanged();
+                                      FocusScope.of(context)
+                                          .requestFocus(new FocusNode());
+                                      setState(() {
+                                        if (imageRatio.index <
+                                            ImageRatio.values.length - 1) {
+                                          imageRatio = ImageRatio
+                                              .values[imageRatio.index + 1];
+                                        } else {
+                                          imageRatio = ImageRatio.values[0];
+                                        }
+
+                                        height =
+                                            MediaQuery.of(context).size.width *
+                                                imageRatio.ratio;
+                                      });
+                                      draggableText.setOffSet(Offset(
+                                          0, 80 * devicePixelRatioModifier));
+                                    },
+                                    child: Padding(
+                                        padding: EdgeInsets.all(
+                                            20 * devicePixelRatioModifier),
+                                        child: const Icon(Icons.aspect_ratio))),
+                                InkWell(
+                                    onTap: () {
+                                      Analytics().logPoemOpened();
+                                      FocusScope.of(context)
+                                          .requestFocus(new FocusNode());
+                                      DialogUtils.showPoemPickerDialog(
+                                              context,
+                                              Firestore.instance
+                                                  .collection("poems")
+                                                  .snapshots(
+                                                      includeMetadataChanges:
+                                                          false))
+                                          .then((poem) {
+                                        if (poem == null) return;
+                                        setState(() {
+                                          _textFieldText = poem.body +
+                                              "\n\n" +
+                                              poem.title +
+                                              " - " +
+                                              poem.author;
+                                        });
+                                        draggableText.setText(_textFieldText);
+                                        draggableText.setOffSet(Offset(
+                                            0, 80 * devicePixelRatioModifier));
+                                      });
+                                    },
+                                    child: Padding(
+                                        padding: EdgeInsets.all(
+                                            20 * devicePixelRatioModifier),
+                                        child: const Icon(Icons.art_track))),
+                              ],
+                            ))))))));
+  }
+
+  Widget _verticalToolbar() {
+    return SafeArea(
+        child: Align(
+            alignment: Alignment.topRight,
+            child: Container(
+                margin: EdgeInsets.only(top: kToolbarHeight + 8),
+                height: 300,
+                child: Material(
+                    color: Theme.of(context).dialogBackgroundColor,
+                    child: Container(
+                        child: Container(
+                            child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: <Widget>[
+                        InkWell(
+                            onTap: () {
+                              Analytics().logFontOpened();
+                              FocusScope.of(context)
+                                  .requestFocus(new FocusNode());
+                              DialogUtils.showFontChooser(
+                                      context, draggableText.getFontSize(),
+                                      (fontSize) {
+                                draggableText.setFontSize(
+                                    fontSize * devicePixelRatioModifier);
+                              }, currentFont)
+                                  .then((font) {
+                                if (font != null) {
+                                  setState(() {
+                                    currentFont = font;
+                                  });
+                                  draggableText.setFont(font);
+                                }
+                              });
+                            },
+                            child: Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                    14 * devicePixelRatioModifier,
+                                    20 * devicePixelRatioModifier,
+                                    14 * devicePixelRatioModifier,
+                                    20 * devicePixelRatioModifier),
+                                child: const Icon(Icons.font_download))),
+                        InkWell(
+                            onTap: () {
+                              Analytics().logColorOpened();
+                              FocusScope.of(context)
+                                  .requestFocus(new FocusNode());
+                              DialogUtils.showColorChooser(
+                                      draggableText.getColor(),
+                                      draggableText.getFontColor(),
+                                      context)
+                                  .then((colors) {
+                                if (colors != null) {
+                                  draggableText.setColor(colors);
+                                }
+                              });
+                            },
+                            child: Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                    14 * devicePixelRatioModifier,
+                                    20 * devicePixelRatioModifier,
+                                    14 * devicePixelRatioModifier,
+                                    20 * devicePixelRatioModifier),
+                                child: const Icon(Icons.color_lens))),
+                        InkWell(
+                            onTap: () {
+                              Analytics().logRatioChanged();
+                              FocusScope.of(context)
+                                  .requestFocus(new FocusNode());
+                              setState(() {
+                                if (imageRatio.index <
+                                    ImageRatio.values.length - 1) {
+                                  imageRatio =
+                                      ImageRatio.values[imageRatio.index + 1];
+                                } else {
+                                  imageRatio = ImageRatio.values[0];
+                                }
+                                height = imageWidth * imageRatio.ratio;
+                              });
+                              draggableText.setOffSet(
+                                  Offset(0, 80 * devicePixelRatioModifier));
+                            },
+                            child: Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                    14 * devicePixelRatioModifier,
+                                    20 * devicePixelRatioModifier,
+                                    14 * devicePixelRatioModifier,
+                                    20 * devicePixelRatioModifier),
+                                child: const Icon(Icons.aspect_ratio))),
+                        InkWell(
+                            onTap: () {
+                              Analytics().logPoemOpened();
+                              FocusScope.of(context)
+                                  .requestFocus(new FocusNode());
+                              DialogUtils.showPoemPickerDialog(
+                                      context,
+                                      Firestore.instance
+                                          .collection("poems")
+                                          .snapshots(
+                                              includeMetadataChanges: false))
+                                  .then((poem) {
+                                if (poem == null) return;
+                                setState(() {
+                                  _textFieldText = poem.body +
+                                      "\n\n" +
+                                      poem.title +
+                                      " - " +
+                                      poem.author;
+                                });
+                                draggableText.setText(_textFieldText);
+                                draggableText.setOffSet(
+                                    Offset(0, 80 * devicePixelRatioModifier));
+                              });
+                            },
+                            child: Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                    14 * devicePixelRatioModifier,
+                                    20 * devicePixelRatioModifier,
+                                    14 * devicePixelRatioModifier,
+                                    20 * devicePixelRatioModifier),
+                                child: const Icon(Icons.art_track))),
+                      ],
+                    )))))));
   }
 }
 
