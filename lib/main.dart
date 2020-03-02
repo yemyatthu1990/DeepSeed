@@ -24,7 +24,6 @@ class RemoteConfigKey {
 
 class Encoding {
   static bool isUnicode = true;
-  static String defaultFontFamily = "";
 }
 
 void main() async {
@@ -37,10 +36,8 @@ void main() async {
   RemoteConfigKey.showWaterMark = true;
   // Pass all uncaught errors from the framework to Crashlytics.
   FlutterError.onError = Crashlytics.instance.recordFlutterError;
-  if (Platform.isAndroid) {
-    Encoding.defaultFontFamily = await Utils.getDefaultFont();
-    print(Encoding.defaultFontFamily + "default font family");
-  }
+
+  Encoding.isUnicode = await Utils.isUnicode();
   runApp(MyApp());
 }
 
@@ -59,7 +56,6 @@ Future<RemoteConfig> initializeRemoteConfig() async {
   } catch (e) {
     print(e.toString());
   }
-  Encoding.isUnicode = await PreferenceUtils.isUnicode();
   return instance;
 }
 
@@ -95,7 +91,7 @@ class MyApp extends StatelessWidget {
 
                 // for others(Android, Fuchsia)
                 cursorColor: Colors.white,
-                fontFamily: "sans-serifd",
+                fontFamily: !Encoding.isUnicode ? "Zawgyi3" : "Roboto",
                 primarySwatch: Colors.grey),
             home: Scaffold(
               body: BottomBarScreen(),

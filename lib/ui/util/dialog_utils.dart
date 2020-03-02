@@ -65,9 +65,9 @@ class DialogUtils {
 
   static Future<bool> showZawgyiDialog(BuildContext context) async {
     PreferenceUtils.zawgyiDialogHasShown();
-    final String dialogBody = Rabbit.uni2zg(
-        "ဇော်ဂျီဖောင့်၏ အားနည်းချက်အချို့ကြောင့် DeepSeed application ကို အသုံးပြုရာတွင် ချို့ယွင်းချက်များရှိနိုင်ပါသည်. \nဥပမာ။ ဖောင့်မမှန်ချင်း \n"
-        "ပိုမိုကောင်းမွန်သော အတွေ့အကြုံကိုရရှိရန် \bယူနီကုတ်ဖောင့်ကို ပြောင်းလဲအသုံးပြုဖို့ တိုက်တွန်းလိုပါသည်။");
+    final String dialogBody =
+        "ေဇာ္ဂ်ီေဖာင့္၏ အားနည္းခ်က္အခ်ိဳ႕ေၾကာင့္ DeepSeed application ကို အသုံးျပဳရာတြင္ ခ်ိဳ႕ယြင္းခ်က္မ်ားရွိႏိုင္ပါသည္. \nဥပမာ။ ေဖာင့္မမွန္ခ်င္း \n"
+        "ပိုမိုေကာင္းမြန္ေသာ အေတြ႕အႀကဳံကိုရရွိရန္ \bယူနီကုတ္ေဖာင့္ကို ေျပာင္းလဲအသုံးျပဳဖို႔ တိုက္တြန္းလိုပါသည္။";
     final String dialogAction = Rabbit.uni2zg("Ok");
 
     return await showDialog<bool>(

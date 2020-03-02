@@ -47,17 +47,16 @@ class FirebaseStorageRepository {
     String folderName = isUnicode ? "unicode" : "zawgyi";
     StorageReference storageReference =
         storage.ref().child('fonts/$folderName');
-    print("downloading fonts");
     Map<dynamic, dynamic> fonts =
         await storageReference.listAll() as Map<dynamic, dynamic>;
-    print(fonts);
     List<String> fontList = new List();
-    (fonts["items"] as Map<dynamic, dynamic>).forEach((key, value) {
-      print("downloading $key");
-      fontList.add(key);
-      downloadFont(key, folderName);
+    var fontMap = fonts["items"] as Map<dynamic, dynamic>;
+    fontMap.keys.forEach((element) {
+      fontList.add(element);
     });
-
+    await Future.wait(fontList.map((key) async {
+      await downloadFont(key, folderName);
+    }));
     return fontList;
   }
 

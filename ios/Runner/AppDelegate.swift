@@ -11,15 +11,25 @@ import Flutter
         GeneratedPluginRegistrant.register(with: self)
         
         let shareChannelName = "channel:co.deepseed.deep_seed/share"
+        let fontChannelName = "channel:co.deepseed.deep_seed/font"
         let controller: FlutterViewController = self.window?.rootViewController as! FlutterViewController;
         let shareChannel:FlutterMethodChannel = FlutterMethodChannel.init(name: shareChannelName, binaryMessenger: controller as! FlutterBinaryMessenger);
+        let fontChannel:FlutterMethodChannel = FlutterMethodChannel.init(name: fontChannelName, binaryMessenger: controller as! FlutterBinaryMessenger);
         
         shareChannel.setMethodCallHandler({
             (call: FlutterMethodCall, result: FlutterResult) -> Void in
             if (call.method == "shareFile") {
                 self.shareFile(sharedItems: call.arguments as! [String: Any],controller: controller);
             }
-        });    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+        });
+        
+         fontChannel.setMethodCallHandler({
+                   (call: FlutterMethodCall, result: FlutterResult) -> Void in
+                   if (call.method == "getEncoding") {
+                    result(self.getEncoding())
+                   }
+               });
+        return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
     
     func shareFile(sharedItems:[String: Any], controller:UIViewController) {
@@ -38,4 +48,13 @@ import Flutter
         }
     }
     
+    func getEncoding() -> Bool {
+        let label1 = UILabel()
+        let label2 = UILabel()
+        label1.text = "က"
+        label2.text = "က္က"
+        label1.sizeToFit()
+        label2.sizeToFit()
+        return label2.frame.width == label1.frame.width
+      }
 }

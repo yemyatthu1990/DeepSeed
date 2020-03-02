@@ -32,12 +32,12 @@ class Utils {
     }
   }
 
-  static Future<String> getDefaultFont() async {
+  static Future<bool> isUnicode() async {
     try {
       final channel = const MethodChannel('channel:co.deepseed.deep_seed/font');
-      return channel.invokeMethod('getDefaultFont');
+      return channel.invokeMethod('getEncoding');
     } catch (e) {
-      print('Share error: $e');
+      print('Encoding error: $e');
     }
   }
 
@@ -103,13 +103,6 @@ class Utils {
     }
 
     return HSVColor.fromAHSV(color.alpha, color.hue, s, v);
-  }
-
-  static bool isUnicode() {
-    final String text = "\u1000\u1039\u1000";
-    final Size txtSize = _getTextSize(text);
-    final Size secondTxtSize = _getTextSize("\u1000");
-    return txtSize.width == secondTxtSize.width;
   }
 
   static Size _getTextSize(String text) {

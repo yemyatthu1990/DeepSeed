@@ -85,6 +85,11 @@ flutter:
     - graphics/app_icon.png
     - graphics/deepseed_alpha.png
 
+  fonts:
+    - family: Zawgyi3
+      fonts:
+        - asset: graphics/fonts/zawgyione.ttf
+
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
 
@@ -97,10 +102,10 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   # fonts:
-  #   - family: Schyler
+  #   - family: schyler
   #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
+  #       - asset: fonts/schyler-regular.ttf
+  #       - asset: fonts/schyler-italic.ttf
   #         style: italic
   #   - family: Trajan Pro
   #     fonts:

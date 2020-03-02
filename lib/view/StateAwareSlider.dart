@@ -24,7 +24,7 @@ class StateAwareSliderState extends State<StateAwareSlider> {
       Expanded(
           child: Slider(
         activeColor: Colors.black,
-        value: currentFontSize,
+        value: currentFontSize >= 12 ? currentFontSize : 12,
         onChanged: (value) {
           setState(() {
             currentFontSize = value;

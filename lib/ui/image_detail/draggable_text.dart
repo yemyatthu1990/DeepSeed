@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:deep_seed/main.dart';
 import 'package:flutter/material.dart';
 
 class DraggableText extends StatefulWidget {
@@ -51,7 +52,7 @@ class DraggableTextState extends State<DraggableText> {
   Offset offset;
   double fontSize = 0;
   String value = "";
-  String currentFont = "";
+  String currentFont = Encoding.isUnicode ? "Roboto" : "Zawgyi3";
   Color currentColor = Colors.black38;
   Color currentFontColor = Colors.white;
   double width = 0;

@@ -93,7 +93,7 @@ class ImageEditorState extends State<ImageEditor> {
   DraggableText draggableText = DraggableText();
   double height = 0;
   ImageRatio imageRatio = ImageRatio.Instagram;
-  String currentFont = "";
+  String currentFont = Encoding.isUnicode ? "Roboto" : "Zawgyi3";
   String _textFieldText = "";
   bool isFavorite = false;
   IconData favoriteIcon = Icons.favorite_border;
@@ -115,7 +115,7 @@ class ImageEditorState extends State<ImageEditor> {
             120 -
             96) -
         wouldBeImageHeight;
-    if (leftOverSpace < 0) {
+    if (leftOverSpace < 50) {
       leftOverSpace = 50;
     }
 
@@ -359,17 +359,13 @@ class ImageEditorState extends State<ImageEditor> {
               child: Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
-                      margin: EdgeInsets.only(
-                          left: 32 * devicePixelRatioModifier,
-                          right: 32 * devicePixelRatioModifier,
-                          bottom: 16 * devicePixelRatioModifier),
+                      margin: EdgeInsets.only(left: 32, right: 32, bottom: 16),
                       width: MediaQuery.of(context).size.width,
-                      height: 60 * devicePixelRatioModifier,
+                      height: 60,
                       child: Container(
                           decoration: BoxDecoration(
                             color: Colors.deepOrange,
-                            borderRadius: BorderRadius.all(
-                                Radius.circular(4 * devicePixelRatioModifier)),
+                            borderRadius: BorderRadius.all(Radius.circular(4)),
                           ),
                           child: FlatButton(
                               onPressed: () {
@@ -379,8 +375,7 @@ class ImageEditorState extends State<ImageEditor> {
                               child: Text(
                                 "Share",
                                 style: TextStyle(
-                                    fontSize: 20 * devicePixelRatioModifier,
-                                    color: Colors.white),
+                                    fontSize: 20, color: Colors.white),
                               ))))))
         ]));
   }

@@ -74,7 +74,7 @@ class PreferenceUtils {
     if (prefs.containsKey(isUnicodeKey)) {
       return prefs.getBool(isUnicodeKey);
     } else {
-      bool isUnicode = Utils.isUnicode();
+      bool isUnicode = await Utils.isUnicode();
       prefs.setBool(isUnicodeKey, isUnicode);
       return isUnicode;
     }

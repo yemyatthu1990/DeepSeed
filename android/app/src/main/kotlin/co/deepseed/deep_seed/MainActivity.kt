@@ -20,6 +20,7 @@ import android.view.SurfaceView
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.FileProvider
 import io.flutter.app.FlutterActivity
@@ -65,8 +66,8 @@ class MainActivity: FlutterActivity(), StreamHandler,
     }
 
      MethodChannel(flutterView,"channel:co.deepseed.deep_seed/font").setMethodCallHandler { methodCall, result ->
-        if (methodCall.method == "getDefaultFont") {
-            result.success(getDefaultFont())
+        if (methodCall.method == "getEncoding") {
+            result.success(getEncoding())
         }
     }
 
@@ -172,50 +173,20 @@ class MainActivity: FlutterActivity(), StreamHandler,
     mainView = null*/
   }
 
-  private fun getDefaultFont(): String {
-        var configFilename =  File("/system/etc/system_fonts.xml")
-        if (!configFilename.exists()) {
-          configFilename = File("/system/etc/fonts.xml")
-          if (!configFilename.exists()) { configFilename = File("/system/etc/fallback_fonts.xml")
-          }
-        }
-        System.out.println(  " CONFIG FILE NAME exits: "+ configFilename.exists() +" : "+configFilename.path)
-        // sans-serif is the default font family name in Android SDK, check out the code in Typeface.java
-        var defaultFontName = "ZawgyiX1"
+  private fun getEncoding(): Boolean {
+        val textView = TextView(this, null)
+        textView.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT)
 
-    try {
-      val fontsIn =  FileInputStream(configFilename)
-      val parser = Xml.newPullParser()
-      parser.setInput(fontsIn, null)
-      var done = false
-      var getTheText = false
-      var eventType: Int
-      while (!done) {
-        eventType = parser.next()
-        System.out.println("parsername "+parser.name)
-        if (eventType == XmlPullParser.START_TAG && parser.name.toLowerCase() == "name") {
-          getTheText = true
-        }
-        if (eventType == XmlPullParser.TEXT && getTheText) {
-          // first name
-          defaultFontName = parser.text
-          done = true
-        }
-        if (eventType == XmlPullParser.END_DOCUMENT) {
-          done = true
-        }
-      }
-      System.out.println("Get the Text?: "+getTheText)
-    } catch (e: RuntimeException) {
-      System.err.println("GetDefaultFont: Didn't create default family (most likely, non-Minikin build)")
-    } catch ( e: FileNotFoundException) {
-      System.err.println("GetDefaultFont: config file Not found")
-    } catch ( e: IOException) {
-      System.err.println("GetDefaultFont: IO exception: " + e.message)
-    } catch ( e: XmlPullParserException) {
-      System.err.println("getDefaultFont: XML parse exception " + e.message)
-    }
-    return defaultFontName
+        textView.text = "\u1000"
+        textView.measure(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        val length1 = textView.measuredWidth
+
+        textView.text = "\u1000\u1039\u1000"
+        textView.measure(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        val length2 = textView.measuredWidth
+
+         return length1 == length2
   }
 
 }
