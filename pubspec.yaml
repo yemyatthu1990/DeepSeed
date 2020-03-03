@@ -84,6 +84,7 @@ flutter:
     - graphics/clap.svg
     - graphics/app_icon.png
     - graphics/deepseed_alpha.png
+    - graphics/poem.png
 
   fonts:
     - family: Zawgyi3
