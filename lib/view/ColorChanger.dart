@@ -60,10 +60,11 @@ class ColorChangerState extends State<ColorChanger> {
                                   ],
                                 ),
                                 Container(
-                                    height: 460,
+                                    height: MediaQuery.of(context).size.height/1.49 > 500?
+                                    500: MediaQuery.of(context).size.height/1.49,
                                     child: TabBarView(children: [
                                       Container(
-                                          height: 460,
+
                                           child: BlockPicker(
                                             alphaValue: widget
                                                 .currentColor.alpha
@@ -74,7 +75,7 @@ class ColorChangerState extends State<ColorChanger> {
                                             },
                                           )),
                                       Container(
-                                          height: 460,
+
                                           child: BlockPicker(
                                             alphaValue: widget
                                                 .currentFontColor.alpha

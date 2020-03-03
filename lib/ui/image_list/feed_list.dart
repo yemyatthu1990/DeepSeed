@@ -225,8 +225,7 @@ class _FeedListScreenState extends State<FeedListScreen>
                               Feed feed = feedList[index];
                               Map<String, int> rgb =
                                   Utils.randomColor(feed.userId);
-                              print(feed.imageRatio);
-                              print(ImageRatio.Facebook.name);
+
                               if (feed.imageRatio == ImageRatio.Facebook.name) {
                                 imageHeight =
                                     (MediaQuery.of(context).size.width - 48) *

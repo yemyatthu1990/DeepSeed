@@ -76,13 +76,17 @@ class FontPickerState extends State<FontPicker> {
       shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(8.0))),
       children: showLoading
-          ? [
+          ? [ SimpleDialogOption(
+      child: StateAwareSlider(
+          currentFontSize: widget.currentFontSize,
+          onFontSizeChangeListener: widget.onFontSizeChangeListener),
+    ),
               Container(
-                  decoration: decoration,
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height,
-                  padding: EdgeInsets.all(100),
-                  child: Center(
+                  margin: EdgeInsets.only(top: 150),
+                  child: Align(
+                    alignment: Alignment.topCenter,
                       child: SizedBox(
                           width: 32,
                           height: 32,

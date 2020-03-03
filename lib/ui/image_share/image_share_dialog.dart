@@ -180,7 +180,7 @@ class ImageShareState extends State<ImageShareDialog> {
                                 },
                                 value: initialValue,
                               ),
-                              Text("Share to DeepSeed community too")
+                              Flexible( child: Text("Share to DeepSeed community too" ))
                             ]))),
                     Padding(
                         padding: EdgeInsets.only(left: 62, right: 16),

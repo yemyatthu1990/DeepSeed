@@ -64,18 +64,18 @@ class BlockPicker extends StatefulWidget {
       PickerItem child,
       OnAlphaChanged onAlphaChanged,
       bool showSlider) {
-    Orientation orientation = MediaQuery.of(context).orientation;
-
+    var deviceHeight = MediaQuery.of(context).size.height;
+    var deviceWidth = MediaQuery.of(context).size.width;
     return Column(
         mainAxisAlignment: MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
+        mainAxisSize: MainAxisSize.max,
         children: [
           Container(
             margin: EdgeInsets.only(top: 16, bottom: 16),
-            width: orientation == Orientation.portrait ? 300.0 : 300.0,
-            height: orientation == Orientation.portrait ? 380.0 : 200.0,
+            height: deviceHeight/1.89 > 400? 400: deviceHeight/1.89,
+            width: deviceWidth/1.34,
             child: GridView.count(
-              crossAxisCount: orientation == Orientation.portrait ? 4 : 6,
+              crossAxisCount:  4 ,
               crossAxisSpacing: 5.0,
               mainAxisSpacing: 5.0,
               children: colors.map((Color color) => child(color)).toList(),

@@ -141,6 +141,7 @@ class ImageEditorState extends State<ImageEditor> {
     }
     draggableText.setWidth(imageWidth);
     draggableText.setMaxXY(0, imageHeight);
+    print(image.width);
     return WillPopScope(
         onWillPop: () async {
           Navigator.pop(context, refreshValue);
@@ -167,7 +168,7 @@ class ImageEditorState extends State<ImageEditor> {
                               widget.photoUrls.small, widget.photoUrls.full);
                       },
                       child: Padding(
-                        padding: EdgeInsets.all(16 * devicePixelRatioModifier),
+                        padding: EdgeInsets.all(16),
                         child: Icon(
                           favoriteIcon,
                           color: Theme.of(context).primaryIconTheme.color,
@@ -178,7 +179,7 @@ class ImageEditorState extends State<ImageEditor> {
                         _shareFinalImage(context, captureKey, imageRatio.name);
                       },
                       child: Padding(
-                        padding: EdgeInsets.all(16 * devicePixelRatioModifier),
+                        padding: EdgeInsets.all(16 ),
                         child: Icon(
                           Icons.share,
                           color: Theme.of(context).primaryIconTheme.color,
@@ -199,26 +200,24 @@ class ImageEditorState extends State<ImageEditor> {
                             if (RemoteConfigKey.showWaterMark)
                               Positioned(
                                   top: image.height -
-                                      (22 * devicePixelRatioModifier),
+                                      (22 ),
                                   left: image.width -
-                                      80 * devicePixelRatioModifier,
+                                      80,
                                   child: Container(
                                       padding: EdgeInsets.only(
-                                          left: 8 * devicePixelRatioModifier,
-                                          right: 8 * devicePixelRatioModifier,
-                                          top: 4 * devicePixelRatioModifier,
-                                          bottom: 4 * devicePixelRatioModifier),
+                                          left: 8,
+                                          right: 8 ,
+                                          top: 4,
+                                          bottom: 4 ),
                                       decoration: BoxDecoration(
                                           color: Colors.white38,
                                           borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(8.0 *
-                                                  devicePixelRatioModifier))),
+                                              topLeft: Radius.circular(8.0 ))),
                                       child: Align(
                                           alignment: Alignment.center,
                                           child: Text("deepseed.co",
                                               style: TextStyle(
-                                                  fontSize: 12 *
-                                                      devicePixelRatioModifier,
+                                                  fontSize: 12 ,
                                                   fontFamily: "Roboto",
                                                   fontStyle: FontStyle.italic,
                                                   color: Colors.black54))))),
@@ -226,8 +225,8 @@ class ImageEditorState extends State<ImageEditor> {
                         ))),
                 if (widget.photographerName != null && widget.username != null)
                   Positioned(
-                      top: image.height + (8 * devicePixelRatioModifier),
-                      left: 16 * devicePixelRatioModifier,
+                      top: image.height + (8),
+                      left: 16 ,
                       child: Html(
                         data: """
                       Photo by 
@@ -237,7 +236,7 @@ class ImageEditorState extends State<ImageEditor> {
                       """,
                         defaultTextStyle: TextStyle(
                             fontFamily: 'serif',
-                            fontSize: 12 * devicePixelRatioModifier),
+                            fontSize: 12 ),
                         linkStyle: const TextStyle(
                           color: Colors.orangeAccent,
                         ),
@@ -271,10 +270,10 @@ class ImageEditorState extends State<ImageEditor> {
                   Positioned(
                       top: imageRatio == ImageRatio.Instagram
                           ? image.height + 30 * devicePixelRatioModifier
-                          : image.height - 60 * devicePixelRatioModifier,
+                          : image.height - 80 * devicePixelRatioModifier,
                       right: imageRatio == ImageRatio.Instagram
                           ? 0
-                          : 164 * devicePixelRatioModifier,
+                          : image.width > 310? 140:image.width-170,
                       child: DecoratedBox(
                           decoration: BoxDecoration(
                             color: Color(0xFFEEEEEE),
@@ -295,10 +294,9 @@ class ImageEditorState extends State<ImageEditor> {
                                         testDevices: [
                                           "kGADSimulatorID",
                                           "3F97607562BF91239F6A61ED252FE5A8"
-                                        ]));
+                                        ],keywords: ["Poem", "Romantic", "Myanmar", "Teens"]));
                                 RewardedVideoAd.instance.listener =
                                     (adEvent, {rewardAmount, rewardType}) {
-                                  print(adEvent);
                                   if (adEvent == RewardedVideoAdEvent.loaded) {
                                     if (showAdsLoading) {
                                       setState(() {
@@ -328,21 +326,16 @@ class ImageEditorState extends State<ImageEditor> {
                                   }
                                 };
                               },
-                              child: showAdsLoading
-                                  ? SizedBox(
-                                      width: 228 * devicePixelRatioModifier,
-                                      child: JumpingDotsProgressIndicator(
-                                        fontSize:
-                                            22.0 * devicePixelRatioModifier,
-                                      ))
-                                  : Padding(
+                              child: Container(
+                                width: 220,
+                                      alignment: Alignment.center,
                                       padding: EdgeInsets.all(
-                                          20 * devicePixelRatioModifier),
+                                          18 ),
                                       child: Text(
-                                        "Remove Watermark for FREE?",
+                                        showAdsLoading?"Loading Ads":"View Ads to remove watermark?",
                                         style: TextStyle(
                                           fontSize:
-                                              14 * devicePixelRatioModifier,
+                                              12,
                                           color: Colors.black87,
                                         ),
                                       ))))),
@@ -413,10 +406,10 @@ class ImageEditorState extends State<ImageEditor> {
     return Container(
       child: Padding(
           padding: EdgeInsets.fromLTRB(
-              32 * devicePixelRatioModifier,
-              8 * devicePixelRatioModifier,
-              32 * devicePixelRatioModifier,
-              0 * devicePixelRatioModifier),
+              32 ,
+              8 ,
+              32,
+              0 ),
           child: Material(
               color: Theme.of(context).dialogBackgroundColor,
               child: Row(
@@ -467,8 +460,7 @@ class ImageEditorState extends State<ImageEditor> {
                             imageRatio = ImageRatio.values[0];
                           }
 
-                          height = MediaQuery.of(context).size.width *
-                              imageRatio.ratio;
+                          height = 0;
                         });
                         draggableText.setOffSet(
                             Offset(0, 80 * devicePixelRatioModifier));
@@ -638,7 +630,7 @@ class ImageEditorState extends State<ImageEditor> {
             alignment: Alignment.topRight,
             child: Container(
                 margin: EdgeInsets.only(top: kToolbarHeight + 8),
-                height: 300,
+                height: imageHeight >= 300? 300: imageHeight,
                 child: Material(
                     color: Theme.of(context).dialogBackgroundColor,
                     child: Container(
@@ -708,7 +700,7 @@ class ImageEditorState extends State<ImageEditor> {
                                 } else {
                                   imageRatio = ImageRatio.values[0];
                                 }
-                                height = imageWidth * imageRatio.ratio;
+                                height = 0;
                               });
                               draggableText.setOffSet(
                                   Offset(0, 80 * devicePixelRatioModifier));
