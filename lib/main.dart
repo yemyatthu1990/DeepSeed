@@ -72,7 +72,7 @@ class MyApp extends StatelessWidget {
           }
         },
         child: MaterialApp(
-            title: 'Flutter Demo',
+            title: 'DeepSeed',
             debugShowCheckedModeBanner: false,
             onGenerateRoute: Router.generateRoute,
             initialRoute: bottomBarRoute,

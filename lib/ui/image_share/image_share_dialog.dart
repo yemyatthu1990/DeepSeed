@@ -136,6 +136,19 @@ class ImageShareState extends State<ImageShareDialog> {
                         height = width * ImageRatio.Facebook.ratio;
                       }
 
+
+                      if(MediaQuery.of(context).size.height/1.4 - height  < 80) {
+
+                        height = height - (80 - ((MediaQuery.of(context).size.height/1.4)- height));
+                        if (widget.imageRatio == ImageRatio.Instagram.name) {
+                        width = height/ImageRatio.Instagram.ratio;
+                      } else if (widget.imageRatio ==
+                          ImageRatio.Facebook.name) {
+                        height = height/ImageRatio.Facebook.ratio;
+                      }
+
+                      }
+
                       return showLoading
                           ? Container(
                               width: width,

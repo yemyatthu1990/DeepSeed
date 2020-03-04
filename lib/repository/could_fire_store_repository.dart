@@ -27,7 +27,7 @@ class CloudFireStoreRepository {
 
   Future<void> deleteMyImage(String downloadUrl) async {
     var currentUser = await firebaseAuth.currentUser();
-    print("CURRENT USER" + currentUser.toString());
+
     if (currentUser == null) {
       return null;
     }
@@ -46,11 +46,9 @@ class CloudFireStoreRepository {
 
   Future<QuerySnapshot> getMyImages() async {
     var currentUser = await firebaseAuth.currentUser();
-    print("CURRENT USER" + currentUser.toString());
     if (currentUser == null) {
       return null;
     }
-    print("current user uid: " + currentUser.uid);
     return fireStore
         .collection("images")
         .limit(25)
