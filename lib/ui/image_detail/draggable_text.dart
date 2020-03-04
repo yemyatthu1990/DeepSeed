@@ -103,7 +103,7 @@ class DraggableTextState extends State<DraggableText> {
   void initState() {
     offset = Offset(0, maxY / 4);
     if (width == 0) width = MediaQuery.of(context).size.width;
-    if (fontSize == 0) fontSize = 14 * pixelRatio;
+    if (fontSize == 0) fontSize = 14;
     super.initState();
   }
 

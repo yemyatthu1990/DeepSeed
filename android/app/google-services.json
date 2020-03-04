@@ -30,6 +30,51 @@
             {
               "client_id": "377858334264-4gp96sruoohet6es1k7j59sbv9a0e8g2.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "377858334264-rs4e6quprr4p2jp2tgjr5s280v13n8rn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "co.deepseed.deepSeed",
+                "app_store_id": "1499529378"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:377858334264:android:26d2863a4bdc0c29fe90cd",
+        "android_client_info": {
+          "package_name": "co.deepseed.deepseed_admin"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "377858334264-4gp96sruoohet6es1k7j59sbv9a0e8g2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjCWbZsZRbr2qZD4DIaJvQH8ofb8nv4XY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "377858334264-4gp96sruoohet6es1k7j59sbv9a0e8g2.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "377858334264-rs4e6quprr4p2jp2tgjr5s280v13n8rn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "co.deepseed.deepSeed",
+                "app_store_id": "1499529378"
+              }
             }
           ]
         }

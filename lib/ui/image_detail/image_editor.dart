@@ -529,8 +529,7 @@ class ImageEditorState extends State<ImageEditor> {
                                       DialogUtils.showFontChooser(context,
                                               draggableText.getFontSize(),
                                               (fontSize) {
-                                        draggableText.setFontSize(fontSize *
-                                            devicePixelRatioModifier);
+                                        draggableText.setFontSize(fontSize);
                                       }, currentFont)
                                           .then((font) {
                                         if (font != null) {
@@ -647,7 +646,7 @@ class ImageEditorState extends State<ImageEditor> {
                                       context, draggableText.getFontSize(),
                                       (fontSize) {
                                 draggableText.setFontSize(
-                                    fontSize * devicePixelRatioModifier);
+                                    fontSize);
                               }, currentFont)
                                   .then((font) {
                                 if (font != null) {
