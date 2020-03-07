@@ -44,8 +44,8 @@ class BottomBarScreen extends StatefulWidget {
       PhotoListScreen(
         key: PageStorageKey("PhotoList"),
         query: "",
-        onRefreshValueChanged: (value) {
-          if (value) _bottomBarState.refreshAllTab();
+        onRefreshValueChanged: (value, goToFeed) {
+          if (value) _bottomBarState.refreshAllTab(goToFeed);
         },
       ),
       FeedListScreen(key: PageStorageKey("FeedList")),
@@ -63,9 +63,12 @@ class _BottomBarState extends State<BottomBarScreen> {
   final PageStorageBucket bucket = PageStorageBucket();
   final List<Widget> children;
 
-  void refreshAllTab() {
+  void refreshAllTab(bool goToFeed) {
     Future.delayed(Duration(milliseconds: 200), () {
       setState(() {
+        if (goToFeed) {
+          currentIndex = 1;
+        }
         (children[1] as FeedListScreen).refresh();
         (children[3] as ProfileListScreen).refresh();
         (children[2] as FavoriteListScreen).refresh();

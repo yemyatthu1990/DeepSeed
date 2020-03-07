@@ -12,7 +12,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-typedef void OnImageShareListener(String path);
+typedef void OnImageShareListener(String path, bool shareToDeepseed);
 
 class ImageShareDialog extends StatefulWidget {
   final bool initialValue;
@@ -89,20 +89,19 @@ class ImageShareState extends State<ImageShareDialog> {
           feed.downloadUrl = value.toString();
           _imageShareBloc.uploadImage(feed);
         });
-        onImageShareListener(fileName);
       }
     });
     _imageShareBloc.photoFilePathStream.listen((event) {
       if (event == null) {
-        onImageShareListener(null);
+        onImageShareListener(null, false);
       } else {
-        if (initialValue == false) {
-          onImageShareListener(event["name"]);
-        } else {
+        onImageShareListener(event["name"], initialValue);
+
+        /*if (initialValue) {
           filePath = event["path"];
           fileName = event["name"];
           _imageShareBloc.getUser();
-        }
+        }*/
       }
     });
   }
@@ -136,17 +135,18 @@ class ImageShareState extends State<ImageShareDialog> {
                         height = width * ImageRatio.Facebook.ratio;
                       }
 
-
-                      if(MediaQuery.of(context).size.height/1.4 - height  < 80) {
-
-                        height = height - (80 - ((MediaQuery.of(context).size.height/1.4)- height));
+                      if (MediaQuery.of(context).size.height / 1.4 - height <
+                          80) {
+                        height = height -
+                            (80 -
+                                ((MediaQuery.of(context).size.height / 1.4) -
+                                    height));
                         if (widget.imageRatio == ImageRatio.Instagram.name) {
-                        width = height/ImageRatio.Instagram.ratio;
-                      } else if (widget.imageRatio ==
-                          ImageRatio.Facebook.name) {
-                        height = height/ImageRatio.Facebook.ratio;
-                      }
-
+                          width = height / ImageRatio.Instagram.ratio;
+                        } else if (widget.imageRatio ==
+                            ImageRatio.Facebook.name) {
+                          height = height / ImageRatio.Facebook.ratio;
+                        }
                       }
 
                       return showLoading
@@ -193,7 +193,9 @@ class ImageShareState extends State<ImageShareDialog> {
                                 },
                                 value: initialValue,
                               ),
-                              Flexible( child: Text("Share to DeepSeed community too" ))
+                              Flexible(
+                                  child:
+                                      Text("Share to DeepSeed community too"))
                             ]))),
                     Padding(
                         padding: EdgeInsets.only(left: 62, right: 16),

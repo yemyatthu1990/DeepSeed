@@ -127,18 +127,19 @@ class DialogUtils {
         });
   }
 
-  static Future<String> showImageShareDialog(
+  static Future<Map> showImageShareDialog(
     BuildContext context,
     Future<Uint8List> imageBytes,
     String imageRatio,
   ) async {
-    return await showDialog<String>(
+    return await showDialog<Map>(
         context: context,
         builder: (BuildContext context) {
           return ImageShareDialog(
             initialValue: true,
-            onImageShareListener: (path) {
-              Navigator.pop(context, path);
+            onImageShareListener: (path, shareToDeepSeed) {
+              Navigator.pop(context,
+                  {"fileName": path, "shareToDeepseed": shareToDeepSeed});
             },
             imageBytes: imageBytes,
             imageRatio: imageRatio,

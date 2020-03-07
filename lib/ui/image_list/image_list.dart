@@ -9,7 +9,7 @@ import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 
 import '../../main.dart';
 
-typedef OnRefreshValueChanged(bool value);
+typedef OnRefreshValueChanged(bool value, bool goToFeed);
 
 class PhotoListScreen extends StatefulWidget {
   String query;
@@ -225,9 +225,9 @@ class _PhotoListScreenState extends State<PhotoListScreen>
                                                     context, detailRoute,
                                                     arguments: data)
                                                 .then((value) {
-                                              if (value != null && value == 1) {
+                                              if (value != null) {
                                                 widget.onRefreshValueChanged(
-                                                    true);
+                                                    true, value == 1);
                                               }
                                             });
                                           },

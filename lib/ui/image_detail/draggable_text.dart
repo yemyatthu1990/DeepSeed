@@ -141,8 +141,9 @@ class DraggableTextState extends State<DraggableText> {
                       onChanged: (changedText) {
                         value = changedText;
                       },
+                      textInputAction: TextInputAction.newline,
                       keyboardType: TextInputType.multiline,
-                      maxLines: 100,
+                      maxLines: 10000,
                       minLines: 1,
                       decoration: InputDecoration(border: InputBorder.none),
                       style: TextStyle(

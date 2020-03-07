@@ -407,7 +407,7 @@ DEPENDENCIES:
   - url_launcher_web (from `.symlinks/plugins/url_launcher_web/ios`)
 
 SPEC REPOS:
-  trunk:
+  https://github.com/cocoapods/specs.git:
     - abseil
     - BoringSSL-GRPC
     - Crashlytics
@@ -552,4 +552,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 7b1aa36db0309733411dedd74cadfc5fd11ee60e
 
-COCOAPODS: 1.9.0.beta.3
+COCOAPODS: 1.7.5

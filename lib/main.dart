@@ -19,6 +19,7 @@ import 'package:flutter/rendering.dart';
 class RemoteConfigKey {
   static bool showWaterMark;
   static String apiKey;
+  static bool featureDefault = true;
   static List<dynamic> queries;
 }
 
@@ -43,9 +44,10 @@ void main() async {
 
 Future<RemoteConfig> initializeRemoteConfig() async {
   RemoteConfig instance = await RemoteConfig.instance;
-  await instance.fetch(expiration: const Duration(hours: 2));
+  await instance.fetch(expiration: const Duration(hours: 0));
   await instance.activateFetched();
   RemoteConfigKey.showWaterMark = instance.getBool("showWaterMark");
+  RemoteConfigKey.featureDefault = instance.getBool("featureDefault");
   if (Platform.isAndroid)
     RemoteConfigKey.apiKey = instance.getString("u_a_key");
   else if (Platform.isIOS)

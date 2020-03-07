@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:deep_seed/main.dart';
 import 'package:deep_seed/model/Feed.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:pull_to_refresh_notification/pull_to_refresh_notification.dart';
@@ -109,7 +110,7 @@ class CloudFireStoreRepository {
       "download_url": feed.downloadUrl,
       "image_ratio": feed.imageRatio,
       "timestamp": feed.timeStamp,
-      "featured": false
+      "featured": RemoteConfigKey.featureDefault
     });
   }
 }

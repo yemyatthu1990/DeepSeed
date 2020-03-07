@@ -6,9 +6,12 @@ import 'dart:ui';
 import 'dart:ui' as ui;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:deep_seed/bloc/image_editor_bloc.dart';
 import 'package:deep_seed/main.dart';
+import 'package:deep_seed/model/Feed.dart';
 import 'package:deep_seed/model/model.dart';
 import 'package:deep_seed/model/poem.dart';
+import 'package:deep_seed/network/ApiResponse.dart';
 import 'package:deep_seed/network/image_cache_manager.dart';
 import 'package:deep_seed/ui/image_detail/draggable_text.dart';
 import 'package:deep_seed/ui/util/dialog_utils.dart';
@@ -45,6 +48,8 @@ class ImageEditor extends StatefulWidget {
 }
 
 class ImageEditorState extends State<ImageEditor> {
+  String currentUserId = "";
+
   Future<Uint8List> _capturePng(GlobalKey globalKey) async {
     ui.Image image;
     bool catched = false;
@@ -73,18 +78,24 @@ class ImageEditorState extends State<ImageEditor> {
     Future.delayed(Duration(milliseconds: 200), () {
       DialogUtils.showImageShareDialog(
               context, _capturePng(captureKey), imageRatio)
-          .then((imagePath) {
+          .then((map) {
         String shareText = (widget.photographerName != null)
             ? "Photo by " + widget.photographerName + " on Unsplash"
             : "";
-        if (imagePath != null) {
+
+        if (map != null) {
+          if (map["shareToDeepseed"]) {
+            _imageEditorBloc.getUser();
+          }
+          fileName = map["fileName"];
           refreshValue = 1;
-          Utils.shareImage(imagePath, shareText);
+          Utils.shareImage(fileName, shareText);
         }
       });
     });
   }
 
+  String fileName = "";
   final Urls photoUrls;
   final int index;
   int refreshValue = -1;
@@ -141,7 +152,6 @@ class ImageEditorState extends State<ImageEditor> {
     }
     draggableText.setWidth(imageWidth);
     draggableText.setMaxXY(0, imageHeight);
-    print(image.width);
     return WillPopScope(
         onWillPop: () async {
           Navigator.pop(context, refreshValue);
@@ -155,7 +165,7 @@ class ImageEditorState extends State<ImageEditor> {
                 actions: <Widget>[
                   InkWell(
                       onTap: () {
-                        refreshValue = 1;
+                        refreshValue = 2;
                         setState(() {
                           isFavorite = !isFavorite;
                         });
@@ -179,7 +189,7 @@ class ImageEditorState extends State<ImageEditor> {
                         _shareFinalImage(context, captureKey, imageRatio.name);
                       },
                       child: Padding(
-                        padding: EdgeInsets.all(16 ),
+                        padding: EdgeInsets.all(16),
                         child: Icon(
                           Icons.share,
                           color: Theme.of(context).primaryIconTheme.color,
@@ -199,25 +209,20 @@ class ImageEditorState extends State<ImageEditor> {
                             draggableText,
                             if (RemoteConfigKey.showWaterMark)
                               Positioned(
-                                  top: image.height -
-                                      (22 ),
-                                  left: image.width -
-                                      80,
+                                  top: image.height - (22),
+                                  left: image.width - 80,
                                   child: Container(
                                       padding: EdgeInsets.only(
-                                          left: 8,
-                                          right: 8 ,
-                                          top: 4,
-                                          bottom: 4 ),
+                                          left: 8, right: 8, top: 4, bottom: 4),
                                       decoration: BoxDecoration(
                                           color: Colors.white38,
                                           borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(8.0 ))),
+                                              topLeft: Radius.circular(8.0))),
                                       child: Align(
                                           alignment: Alignment.center,
                                           child: Text("deepseed.co",
                                               style: TextStyle(
-                                                  fontSize: 12 ,
+                                                  fontSize: 12,
                                                   fontFamily: "Roboto",
                                                   fontStyle: FontStyle.italic,
                                                   color: Colors.black54))))),
@@ -226,7 +231,7 @@ class ImageEditorState extends State<ImageEditor> {
                 if (widget.photographerName != null && widget.username != null)
                   Positioned(
                       top: image.height + (8),
-                      left: 16 ,
+                      left: 16,
                       child: Html(
                         data: """
                       Photo by 
@@ -234,9 +239,8 @@ class ImageEditorState extends State<ImageEditor> {
                       on 
                       <a href=https://unsplash.com/?utm_source=DeepSeed&utm_medium=referral>Unsplash</a>
                       """,
-                        defaultTextStyle: TextStyle(
-                            fontFamily: 'serif',
-                            fontSize: 12 ),
+                        defaultTextStyle:
+                            TextStyle(fontFamily: 'serif', fontSize: 12),
                         linkStyle: const TextStyle(
                           color: Colors.orangeAccent,
                         ),
@@ -273,7 +277,7 @@ class ImageEditorState extends State<ImageEditor> {
                           : image.height - 80 * devicePixelRatioModifier,
                       right: imageRatio == ImageRatio.Instagram
                           ? 0
-                          : image.width > 310? 140:image.width-170,
+                          : image.width > 310 ? 140 : image.width - 170,
                       child: DecoratedBox(
                           decoration: BoxDecoration(
                             color: Color(0xFFEEEEEE),
@@ -294,7 +298,13 @@ class ImageEditorState extends State<ImageEditor> {
                                         testDevices: [
                                           "kGADSimulatorID",
                                           "3F97607562BF91239F6A61ED252FE5A8"
-                                        ],keywords: ["Poem", "Romantic", "Myanmar", "Teens"]));
+                                        ],
+                                        keywords: [
+                                          "Poem",
+                                          "Romantic",
+                                          "Myanmar",
+                                          "Teens"
+                                        ]));
                                 RewardedVideoAd.instance.listener =
                                     (adEvent, {rewardAmount, rewardType}) {
                                   if (adEvent == RewardedVideoAdEvent.loaded) {
@@ -327,18 +337,18 @@ class ImageEditorState extends State<ImageEditor> {
                                 };
                               },
                               child: Container(
-                                width: 220,
-                                      alignment: Alignment.center,
-                                      padding: EdgeInsets.all(
-                                          18 ),
-                                      child: Text(
-                                        showAdsLoading?"Loading Ads":"View Ads to remove watermark?",
-                                        style: TextStyle(
-                                          fontSize:
-                                              12,
-                                          color: Colors.black87,
-                                        ),
-                                      ))))),
+                                  width: 220,
+                                  alignment: Alignment.center,
+                                  padding: EdgeInsets.all(18),
+                                  child: Text(
+                                    showAdsLoading
+                                        ? "Loading Ads"
+                                        : "View Ads to remove watermark?",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.black87,
+                                    ),
+                                  ))))),
                 if (!(devicePixelRatioModifier < 1))
                   SafeArea(
                       child: Align(
@@ -373,6 +383,7 @@ class ImageEditorState extends State<ImageEditor> {
         ]));
   }
 
+  var _imageEditorBloc = ImageEditorBloc();
   @override
   void initState() {
     super.initState();
@@ -382,6 +393,41 @@ class ImageEditorState extends State<ImageEditor> {
         setState(() {
           isFavorite = value;
         });
+      });
+      _imageEditorBloc.authenticationListStream.listen((event) {
+        if (event.status == Status.LOADING) {
+          /*setState(() {
+          showProgress = true;
+      });*/
+        } else if (event.status == Status.COMPLETED) {
+          //user already login
+          if (event.data != null) {
+            currentUserId = event.data.uid;
+            _imageEditorBloc.getShareFilePath(fileName).then((filePath) {
+              _imageEditorBloc.uploadPhoto(currentUserId, filePath, fileName);
+            });
+          }
+          //may be user is not logged in
+          else {
+            _imageEditorBloc.signIn();
+          }
+        }
+      });
+
+      _imageEditorBloc.storageTaskStream.listen((event) {
+        if (event.status == Status.COMPLETED) {
+          /*  setState(() {
+          showProgress = false;
+        });*/
+          Feed feed = new Feed();
+          feed.timeStamp = Timestamp.now().millisecondsSinceEpoch;
+          feed.userId = currentUserId;
+          feed.imageRatio = imageRatio.name;
+          event.data.ref.getDownloadURL().then((value) {
+            feed.downloadUrl = value.toString();
+            _imageEditorBloc.uploadImage(feed);
+          });
+        }
       });
       if (fileUrl != photoUrls.full) {
         ImageCacheManager().downloadFile(photoUrls.full).then((fileInfo) {
@@ -405,11 +451,7 @@ class ImageEditorState extends State<ImageEditor> {
   Widget _bottomBar() {
     return Container(
       child: Padding(
-          padding: EdgeInsets.fromLTRB(
-              32 ,
-              8 ,
-              32,
-              0 ),
+          padding: EdgeInsets.fromLTRB(32, 8, 32, 0),
           child: Material(
               color: Theme.of(context).dialogBackgroundColor,
               child: Row(
@@ -618,7 +660,10 @@ class ImageEditorState extends State<ImageEditor> {
                                     child: Padding(
                                         padding: EdgeInsets.all(
                                             20 * devicePixelRatioModifier),
-                                        child: const ImageIcon(AssetImage("graphics/poem.png"),color: Colors.black,)))
+                                        child: const ImageIcon(
+                                          AssetImage("graphics/poem.png"),
+                                          color: Colors.black,
+                                        )))
                               ],
                             ))))))));
   }
@@ -629,7 +674,7 @@ class ImageEditorState extends State<ImageEditor> {
             alignment: Alignment.topRight,
             child: Container(
                 margin: EdgeInsets.only(top: kToolbarHeight + 8),
-                height: imageHeight >= 300? 300: imageHeight,
+                height: imageHeight >= 300 ? 300 : imageHeight,
                 child: Material(
                     color: Theme.of(context).dialogBackgroundColor,
                     child: Container(
@@ -645,8 +690,7 @@ class ImageEditorState extends State<ImageEditor> {
                               DialogUtils.showFontChooser(
                                       context, draggableText.getFontSize(),
                                       (fontSize) {
-                                draggableText.setFontSize(
-                                    fontSize);
+                                draggableText.setFontSize(fontSize);
                               }, currentFont)
                                   .then((font) {
                                 if (font != null) {
@@ -742,7 +786,9 @@ class ImageEditorState extends State<ImageEditor> {
                                     20 * devicePixelRatioModifier,
                                     14 * devicePixelRatioModifier,
                                     20 * devicePixelRatioModifier),
-                                child: const ImageIcon(AssetImage("graphics/poem.png"), color: Colors.black))),
+                                child: const ImageIcon(
+                                    AssetImage("graphics/poem.png"),
+                                    color: Colors.black))),
                       ],
                     )))))));
   }
