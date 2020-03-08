@@ -44,7 +44,7 @@ void main() async {
 
 Future<RemoteConfig> initializeRemoteConfig() async {
   RemoteConfig instance = await RemoteConfig.instance;
-  await instance.fetch(expiration: const Duration(hours: 0));
+  await instance.fetch(expiration: const Duration(hours: 2));
   await instance.activateFetched();
   RemoteConfigKey.showWaterMark = instance.getBool("showWaterMark");
   RemoteConfigKey.featureDefault = instance.getBool("featureDefault");
