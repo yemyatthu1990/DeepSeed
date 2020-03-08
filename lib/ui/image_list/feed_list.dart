@@ -228,11 +228,11 @@ class _FeedListScreenState extends State<FeedListScreen>
 
                               if (feed.imageRatio == ImageRatio.Facebook.name) {
                                 imageHeight =
-                                    (MediaQuery.of(context).size.width - 48) *
+                                    (MediaQuery.of(context).size.width - 32) *
                                         ImageRatio.Facebook.ratio;
                               } else {
                                 imageHeight =
-                                    (MediaQuery.of(context).size.width - 48) *
+                                    (MediaQuery.of(context).size.width - 32) *
                                         ImageRatio.Instagram.ratio;
                               }
                               Color avatarBgColor = Color.fromRGBO(
