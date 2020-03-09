@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:deep_seed/model/Feed.dart';
 import 'package:deep_seed/network/ApiResponse.dart';
 import 'package:deep_seed/repository/could_fire_store_repository.dart';
+import 'package:deep_seed/util/preference_utils.dart';
 
 typedef OnReportFinished();
 typedef OnUpvoteFinished();
@@ -12,6 +13,7 @@ class FeedListBloc {
   DocumentSnapshot lastDocumentSnapshot;
   bool feedListLoading = false;
   CloudFireStoreRepository _fireStoreRepository;
+
 
   StreamController _feedListController;
 
@@ -48,9 +50,11 @@ class FeedListBloc {
       QuerySnapshot querySnapshot = await _fireStoreRepository
           .getListOfImages(refresh ? null : lastDocumentSnapshot);
       List<Feed> feeds = List();
-      querySnapshot.documents.forEach((document) {
+       querySnapshot.documents.forEach((document) async{
+
         Feed feed = new Feed();
         feed.userId = document["uid"];
+        await
         feed.downloadUrl = document["download_url"];
         feed.imageRatio = document["image_ratio"];
         feed.timeStamp = document["timestamp"];
