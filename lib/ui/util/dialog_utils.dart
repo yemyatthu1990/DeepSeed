@@ -94,17 +94,17 @@ class DialogUtils {
         });
   }
 
-  static Future<bool> showReportDialog(BuildContext context) async {
+  static Future<bool> showReportDialog(BuildContext context, String titleText, String bodyText, String actionText) async {
     return await showDialog<bool>(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8.0))),
-            title: Text("Are you sure you want to report this?"),
+            title: Text(titleText),
             content: SingleChildScrollView(
               child: Text(
-                  "Photos that have nudity, violence, animal abuse, and harrasment should be reported."),
+                  bodyText),
             ),
             actions: <Widget>[
               FlatButton(
@@ -114,8 +114,8 @@ class DialogUtils {
                 },
               ),
               FlatButton(
-                child: const Text(
-                  "Report",
+                child:  Text(
+                  actionText,
                   style: TextStyle(color: Colors.redAccent),
                 ),
                 onPressed: () {

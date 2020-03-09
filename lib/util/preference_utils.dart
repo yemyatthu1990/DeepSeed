@@ -5,8 +5,10 @@ import 'utils.dart';
 
 class PreferenceUtils {
   static String favoriteKey = "Favorite";
+  static String hideKey = "Hide";
   static String zawgyiDialogKey = "zawgyiDiaog";
   static String isUnicodeKey = "isUnicode";
+  static String blockKey = "Block";
   static Future<List<Urls>> getFavorites() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     List<String> url = prefs.getStringList(favoriteKey);
@@ -41,6 +43,52 @@ class PreferenceUtils {
     favorites.add(url);
 
     await prefs.setStringList(favoriteKey, favorites);
+  }
+
+  static List<String> _hideImageList;
+  static List<String> _blockUserList;
+
+  static Future<void> addToHideImageList(String url) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+
+    if (preferences.containsKey(hideKey)) {
+      _hideImageList = preferences.getStringList(hideKey);
+    }
+    if (_hideImageList == null) _hideImageList = new List();
+    _hideImageList.add(url);
+    await preferences.setStringList(hideKey, _hideImageList);
+  }
+
+
+  static Future<bool> isImageHidden(String url) async{
+    if (_hideImageList == null) {
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      _hideImageList = preferences.getStringList(hideKey);
+    }
+    if (_hideImageList == null) return false;
+    return _hideImageList.contains(url);
+  }
+
+
+  static Future<void> addToBlockList(String userId) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+
+    if (preferences.containsKey(blockKey)) {
+      _blockUserList = preferences.getStringList(blockKey);
+    }
+    if (_blockUserList == null) _blockUserList = new List();
+    _blockUserList.add(userId);
+    await preferences.setStringList(blockKey, _blockUserList);
+  }
+
+
+  static Future<bool> isUserBlocked(String userId) async{
+    if (_blockUserList == null) {
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      _blockUserList = preferences.getStringList(blockKey);
+    }
+    if (_blockUserList == null) return false;
+    return _blockUserList.contains(userId);
   }
 
   static Future<void> removeFromFavorite(
