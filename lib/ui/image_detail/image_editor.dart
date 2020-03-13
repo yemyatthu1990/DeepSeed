@@ -536,7 +536,10 @@ class ImageEditorState extends State<ImageEditor> {
                       child: Padding(
                           padding:
                               EdgeInsets.all(20 * devicePixelRatioModifier),
-                          child: const Icon(Icons.art_track))),
+                          child: const ImageIcon(
+                            AssetImage("graphics/poem.png"),
+                            color: Colors.black,
+                          ))),
                 ],
               ))),
     );
