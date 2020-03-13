@@ -155,14 +155,15 @@ class _FeedListScreenState extends State<FeedListScreen>
       _refreshIndicatorKey =
       new GlobalKey<prefresh.PullToRefreshNotificationState>();
 
-  Future<Map<String, dynamic>> _showPopupMenu(RelativeRect rect, Feed feed) async {
-    var valueMapOne = new Map<String,dynamic>();
+  Future<Map<String, dynamic>> _showPopupMenu(
+      RelativeRect rect, Feed feed) async {
+    var valueMapOne = new Map<String, dynamic>();
     valueMapOne["index"] = 0;
     valueMapOne["feed"] = feed;
-    var valueMapTwo = new Map<String,dynamic>();
+    var valueMapTwo = new Map<String, dynamic>();
     valueMapTwo["index"] = 1;
     valueMapTwo["feed"] = feed;
-    var valueMapThree = new Map<String,dynamic>();
+    var valueMapThree = new Map<String, dynamic>();
     valueMapThree["index"] = 2;
     valueMapThree["feed"] = feed;
     return await showMenu(
@@ -306,38 +307,35 @@ class _FeedListScreenState extends State<FeedListScreen>
                                                                     0),
                                                                 feed);
                                                         awaitFeed.then((value) {
-                                                          var valueMap = value as Map<String, dynamic>;
-                                                          if(valueMap == null) return;
-                                                          if (valueMap["index"] == 0) {
+                                                          var valueMap = value
+                                                              as Map<String,
+                                                                  dynamic>;
+                                                          if (valueMap == null)
+                                                            return;
+                                                          if (valueMap[
+                                                                  "index"] ==
+                                                              0) {
                                                             String downloadUrl =
-                                                                (valueMap["feed"] as Feed)
+                                                                (valueMap["feed"]
+                                                                        as Feed)
                                                                     .downloadUrl;
-                                                            DialogUtils
-                                                                    .showReportDialog(
-                                                                        context, "Are you sure you want to report this?",
-                                                            "Photos that have nudity, violence, animal abuse, and harrasment should be reported.",
-                                                            "Report")
-                                                                .then((value) {
-                                                              if (value) {
-
-                                                              }
-                                                            });
-                                                          }
-                                                           else if (valueMap["index"] == 1) {
-                                                            String downloadUrl =
-                                                                (valueMap["feed"] as Feed)
-                                                                    .downloadUrl;
-                                                            DialogUtils
-                                                                    .showReportDialog(
-                                                                        context,
-                                                                "Are you sure you want to hide this?",
-                                                                "Photo hidden by you will not show up on Feed. This action can not be undone.",
-                                                            "Hide")
+                                                            DialogUtils.showReportDialog(
+                                                                    context,
+                                                                    "Are you sure you want to report this?",
+                                                                    "Photos that have nudity, violence, animal abuse, and harrasment should be reported.",
+                                                                    "Report")
                                                                 .then((value) {
                                                               if (value) {
                                                                 _bloc.report(
                                                                     downloadUrl,
                                                                     () {
+                                                                  _bloc
+                                                                      .hideImage(
+                                                                          downloadUrl)
+                                                                      .then(
+                                                                          (_) {
+                                                                    refresh();
+                                                                  });
                                                                   Fluttertoast
                                                                       .showToast(
                                                                           msg:
@@ -345,25 +343,55 @@ class _FeedListScreenState extends State<FeedListScreen>
                                                                 });
                                                               }
                                                             });
-                                                          }    else if (valueMap["index"] == 2) {
+                                                          } else if (valueMap[
+                                                                  "index"] ==
+                                                              1) {
                                                             String downloadUrl =
-                                                                (valueMap["feed"] as Feed)
+                                                                (valueMap["feed"]
+                                                                        as Feed)
                                                                     .downloadUrl;
-                                                            DialogUtils
-                                                                    .showReportDialog(
-                                                                        context,
-                                                                "Are you sure you want to block this user?",
-                                                                "If you block a user, all of that user's photos will not show up on Feed. This action can not be undone",
-                                                            "Block")
+                                                            DialogUtils.showReportDialog(
+                                                                    context,
+                                                                    "Are you sure you want to hide this?",
+                                                                    "Photo hidden by you will not show up on Feed. This action can not be undone.",
+                                                                    "Hide")
                                                                 .then((value) {
                                                               if (value) {
-                                                                _bloc.report(
-                                                                    downloadUrl,
-                                                                    () {
+                                                                _bloc
+                                                                    .hideImage(
+                                                                        downloadUrl)
+                                                                    .then((_) {
                                                                   Fluttertoast
                                                                       .showToast(
                                                                           msg:
-                                                                              "Report successful. Thank you for being a responsible person.");
+                                                                              "Hide image sucessfully.");
+                                                                  refresh();
+                                                                });
+                                                              }
+                                                            });
+                                                          } else if (valueMap[
+                                                                  "index"] ==
+                                                              2) {
+                                                            String userId =
+                                                                (valueMap["feed"]
+                                                                        as Feed)
+                                                                    .userId;
+                                                            DialogUtils.showReportDialog(
+                                                                    context,
+                                                                    "Are you sure you want to block this user?",
+                                                                    "If you block a user, all of that user's photos will not show up on Feed. This action can not be undone",
+                                                                    "Block")
+                                                                .then((value) {
+                                                              if (value) {
+                                                                _bloc
+                                                                    .blockUser(
+                                                                        userId)
+                                                                    .then((_) {
+                                                                  Fluttertoast
+                                                                      .showToast(
+                                                                          msg:
+                                                                              "Blocked user sucessfully.");
+                                                                  refresh();
                                                                 });
                                                               }
                                                             });

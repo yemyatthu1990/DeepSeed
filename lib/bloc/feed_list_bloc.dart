@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:deep_seed/model/Feed.dart';
@@ -13,7 +14,6 @@ class FeedListBloc {
   DocumentSnapshot lastDocumentSnapshot;
   bool feedListLoading = false;
   CloudFireStoreRepository _fireStoreRepository;
-
 
   StreamController _feedListController;
 
@@ -50,17 +50,20 @@ class FeedListBloc {
       QuerySnapshot querySnapshot = await _fireStoreRepository
           .getListOfImages(refresh ? null : lastDocumentSnapshot);
       List<Feed> feeds = List();
-       querySnapshot.documents.forEach((document) async{
-
+      await Future.wait(querySnapshot.documents.map((document) async {
         Feed feed = new Feed();
         feed.userId = document["uid"];
-        await
+        bool isBlocked = await PreferenceUtils.isUserBlocked(feed.userId);
         feed.downloadUrl = document["download_url"];
-        feed.imageRatio = document["image_ratio"];
-        feed.timeStamp = document["timestamp"];
-        feed.clapCount = document["clap_count"];
-        feeds.add(feed);
-      });
+        bool isHidden = await PreferenceUtils.isImageHidden(feed.downloadUrl);
+        if (!(isBlocked || isHidden)) {
+          feed.imageRatio = document["image_ratio"];
+          feed.timeStamp = document["timestamp"];
+          feed.clapCount = document["clap_count"];
+          feeds.add(feed);
+        }
+      }));
+
       lastDocumentSnapshot =
           querySnapshot.documents[querySnapshot.documents.length - 1];
       feedListSink.add(ApiResponse.completed(feeds));
@@ -71,6 +74,14 @@ class FeedListBloc {
       feedListLoading = false;
     }
     return true;
+  }
+
+  Future<void> blockUser(String userId) async {
+    return PreferenceUtils.addToBlockList(userId);
+  }
+
+  Future<void> hideImage(String downloadUrl) async {
+    return PreferenceUtils.addToHideImageList(downloadUrl);
   }
 
   dispose() {
