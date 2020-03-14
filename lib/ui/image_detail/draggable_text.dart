@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:deep_seed/main.dart';
+import 'package:deep_seed/util/utils.dart';
 import 'package:flutter/material.dart';
 
 class DraggableText extends StatefulWidget {
@@ -99,16 +100,23 @@ class DraggableTextState extends State<DraggableText> {
     return context.size;
   }
 
+  TextEditingControllerWorkaroud _controller;
+  int _sel = 0;
   @override
   void initState() {
     offset = Offset(0, maxY / 4);
     if (width == 0) width = MediaQuery.of(context).size.width;
     if (fontSize == 0) fontSize = 14;
+    _controller = new TextEditingControllerWorkaroud();
     super.initState();
   }
 
   Widget container() {
     double startOffset = 0;
+    /*_controller = TextEditingController.fromValue(TextEditingValue(
+        text: value, selection: TextSelection.collapsed(offset: value.length)));*/
+
+    _controller.setTextAndPosition(value);
     return Positioned(
         width: width,
         top: offset.dy,
@@ -132,12 +140,10 @@ class DraggableTextState extends State<DraggableText> {
                 color: currentColor,
                 child: Padding(
                   child: TextField(
-                      controller: value.length > 0
-                          ? TextEditingController.fromValue(TextEditingValue(
-                              text: value,
-                              selection: TextSelection.collapsed(
-                                  offset: value.length)))
-                          : null,
+                      controller: value.length > 0 ? _controller : null,
+                      cursorColor: Utils.useWhiteCursor(currentColor)
+                          ? Colors.white
+                          : Colors.black,
                       onChanged: (changedText) {
                         value = changedText;
                       },
@@ -178,5 +184,17 @@ class DraggableTextState extends State<DraggableText> {
   @override
   void dispose() {
     super.dispose();
+  }
+}
+
+class TextEditingControllerWorkaroud extends TextEditingController {
+  TextEditingControllerWorkaroud({String text}) : super(text: text);
+
+  void setTextAndPosition(String newText, {int caretPosition}) {
+    int offset = caretPosition != null ? caretPosition : newText.length;
+    value = value.copyWith(
+        text: newText,
+        selection: TextSelection.collapsed(offset: offset),
+        composing: TextRange.empty);
   }
 }

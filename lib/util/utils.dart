@@ -74,6 +74,10 @@ class Utils {
     return 1.05 / (color.computeLuminance() + 0.05) > 4.5 && color.alpha > 120;
   }
 
+  static bool useWhiteCursor(Color color) {
+    return 1.05 / (color.computeLuminance() + 0.05) > 4.5;
+  }
+
   /// reference: https://en.wikipedia.org/wiki/HSL_and_HSV#HSV_to_HSL
   static HSLColor hsvToHsl(HSVColor color) {
     double s = 0.0;
@@ -105,9 +109,11 @@ class Utils {
     return HSVColor.fromAHSV(color.alpha, color.hue, s, v);
   }
 
-  static Size _getTextSize(String text) {
+  static Size getTextSize(String text, String fontFamily, double fontSize) {
     final TextPainter textPainter = TextPainter(
-        text: TextSpan(text: text),
+        text: TextSpan(
+            text: text,
+            style: TextStyle(fontFamily: fontFamily, fontSize: fontSize)),
         maxLines: 1,
         textDirection: pt.TextDirection.ltr)
       ..layout(minWidth: 0, maxWidth: double.infinity);
