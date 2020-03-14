@@ -209,23 +209,30 @@ class ImageEditorState extends State<ImageEditor> {
                             draggableText,
                             if (RemoteConfigKey.showWaterMark)
                               Positioned(
-                                  top: image.height - (22),
-                                  left: image.width - 80,
-                                  child: Container(
-                                      padding: EdgeInsets.only(
-                                          left: 8, right: 8, top: 4, bottom: 4),
-                                      decoration: BoxDecoration(
-                                          color: Colors.white38,
-                                          borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(8.0))),
-                                      child: Align(
-                                          alignment: Alignment.center,
-                                          child: Text("deepseed.co",
-                                              style: TextStyle(
-                                                  fontSize: 12,
-                                                  fontFamily: "Roboto",
-                                                  fontStyle: FontStyle.italic,
-                                                  color: Colors.black54))))),
+                                  right: 0,
+                                  bottom: 0,
+                                  child: Align(
+                                      alignment: Alignment.bottomRight,
+                                      child: Container(
+                                          padding: EdgeInsets.only(
+                                              left: 8,
+                                              right: 8,
+                                              top: 4,
+                                              bottom: 4),
+                                          decoration: BoxDecoration(
+                                              color: Colors.white38,
+                                              borderRadius: BorderRadius.only(
+                                                  topLeft:
+                                                      Radius.circular(8.0))),
+                                          child: Align(
+                                              alignment: Alignment.center,
+                                              child: Text("deepseed.co",
+                                                  style: TextStyle(
+                                                      fontSize: 12,
+                                                      fontStyle:
+                                                          FontStyle.italic,
+                                                      color:
+                                                          Colors.black54)))))),
                           ],
                         ))),
                 if (widget.photographerName != null && widget.username != null)
