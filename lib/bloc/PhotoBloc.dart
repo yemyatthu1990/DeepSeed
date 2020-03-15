@@ -20,8 +20,8 @@ class PhotoBloc {
     _photoRepository = PhotoRepository();
   }
 
-  fetchPhotoList(int pageNo, String query) async {
-    photoListSink.add(ApiResponse.loading(pageNo == 1, ''));
+  fetchPhotoList(int pageNo, String query, {bool showLoading = true}) async {
+    photoListSink.add(ApiResponse.loading(pageNo == 1 && showLoading, ''));
     try {
       List<Photo> photos = await _photoRepository.fetchPhotoList(pageNo, query);
       photoListSink.add(ApiResponse.completed(photos));

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:deep_seed/bloc/PhotoBloc.dart';
 import 'package:deep_seed/constants.dart';
@@ -43,10 +45,17 @@ class _PhotoListScreenState extends State<PhotoListScreen>
   bool showFooter = false;
   bool showError = false;
   bool showLoading = false;
-  void setQuery(String query) {
+  void setQuery(String query, {bool showLoading = true}) {
     this.query = query;
+    if (this.query.length == 0 &&
+        RemoteConfigKey.queries != null &&
+        RemoteConfigKey.queries.length > 0) {
+      this.query = RemoteConfigKey
+              .queries[Random().nextInt(RemoteConfigKey.queries.length - 1)]
+          as String;
+    }
     this._pageNo = 1;
-    _bloc.fetchPhotoList(this._pageNo, this.query);
+    _bloc.fetchPhotoList(this._pageNo, this.query, showLoading: showLoading);
   }
 
   _PhotoListScreenState({this.query});
@@ -55,6 +64,8 @@ class _PhotoListScreenState extends State<PhotoListScreen>
   List<Photo> photoList = new List<Photo>();
   Status status;
   String message;
+  List<Widget> filterList = new List();
+  var selectedIndex = -1;
   @override
   void initState() {
     super.initState();
@@ -67,41 +78,14 @@ class _PhotoListScreenState extends State<PhotoListScreen>
 
       initializeRemoteConfig().then((value) {
         _bloc = PhotoBloc();
+        if (RemoteConfigKey.queries != null &&
+            RemoteConfigKey.queries.length > 0) {
+          if (this.query.length == 0) {
+            query = RemoteConfigKey.queries[
+                Random().nextInt(RemoteConfigKey.queries.length - 1)] as String;
+          }
+        }
         _bloc.photoListStream.listen((event) {
-          setState(() {
-            status = event.status;
-            if (status == Status.COMPLETED) {
-              showLoading = false;
-              showError = false;
-              showFooter = !(event.data == null || event.data.length == 0);
-
-              if (_pageNo == 1) {
-                photoList.clear();
-              }
-              if (event.data == null) return;
-              photoList.addAll(event.data);
-            } else if (status == Status.LOADING) {
-              if (event.show) {
-                showLoading = true;
-                message = event.message;
-              }
-            } else if (status == Status.ERROR) {
-              showLoading = false;
-              showFooter = false;
-              if (event.show) {
-                showError = true;
-                message = event.message;
-              }
-            }
-          });
-        });
-        _bloc.fetchPhotoList(_pageNo, query);
-        widget.initializationFinished = true;
-      });
-    } else {
-      _bloc = PhotoBloc();
-      _bloc.photoListStream.listen((event) {
-        setState(() {
           status = event.status;
           if (status == Status.COMPLETED) {
             showLoading = false;
@@ -112,21 +96,64 @@ class _PhotoListScreenState extends State<PhotoListScreen>
               photoList.clear();
             }
             if (event.data == null) return;
-            photoList.addAll(event.data);
+            setState(() {
+              photoList.addAll(event.data);
+            });
           } else if (status == Status.LOADING) {
             if (event.show) {
-              showLoading = true;
-              message = event.message;
+              setState(() {
+                showLoading = true;
+                message = event.message;
+              });
             }
           } else if (status == Status.ERROR) {
             showLoading = false;
             showFooter = false;
             if (event.show) {
-              showError = true;
-              message = event.message;
+              setState(() {
+                showError = true;
+                message = event.message;
+              });
             }
           }
         });
+
+        _bloc.fetchPhotoList(_pageNo, query);
+        widget.initializationFinished = true;
+      });
+    } else {
+      _bloc = PhotoBloc();
+      _bloc.photoListStream.listen((event) {
+        status = event.status;
+        if (status == Status.COMPLETED) {
+          showLoading = false;
+          showError = false;
+          showFooter = !(event.data == null || event.data.length == 0);
+
+          if (_pageNo == 1) {
+            photoList.clear();
+          }
+          if (event.data == null) return;
+          setState(() {
+            photoList.addAll(event.data);
+          });
+        } else if (status == Status.LOADING) {
+          if (event.show) {
+            setState(() {
+              showLoading = true;
+              message = event.message;
+            });
+          }
+        } else if (status == Status.ERROR) {
+          showLoading = false;
+          showFooter = false;
+          if (event.show) {
+            setState(() {
+              showError = true;
+              message = event.message;
+            });
+          }
+        }
       });
       _bloc.fetchPhotoList(_pageNo, query);
     }
@@ -169,6 +196,36 @@ class _PhotoListScreenState extends State<PhotoListScreen>
 
   @override
   Widget build(BuildContext context) {
+    filterList.clear();
+    if (RemoteConfigKey.queries != null &&
+        RemoteConfigKey.queries.length > 0 &&
+        RemoteConfigKey.queries.contains(this.query)) {
+      RemoteConfigKey.queries.asMap().forEach((index, query) {
+        if (this.query == query) selectedIndex = index;
+        var filterChip = Padding(
+            padding: EdgeInsets.only(left: 4, right: 4),
+            child: ChoiceChip(
+                label: Padding(
+                    padding: EdgeInsets.only(left: 4, right: 4),
+                    child: Text(
+                      query,
+                      style: TextStyle(
+                          color: selectedIndex == index
+                              ? Colors.white
+                              : Colors.black87,
+                          fontSize: 12),
+                    )),
+                selected: selectedIndex == index,
+                selectedColor: Colors.orange,
+                onSelected: (value) {
+                  setState(() {
+                    if (value) selectedIndex = index;
+                  });
+                  setQuery(query, showLoading: false);
+                }));
+        filterList.add(filterChip);
+      });
+    }
     return Scaffold(
         backgroundColor: Theme.of(context).dialogBackgroundColor,
         body: showError
@@ -187,6 +244,11 @@ class _PhotoListScreenState extends State<PhotoListScreen>
                 : CustomScrollView(
                     controller: _buildScrollController(),
                     slivers: <Widget>[
+                      SliverToBoxAdapter(
+                        child: Padding(
+                            padding: const EdgeInsets.only(left: 8, right: 8),
+                            child: Wrap(children: filterList)),
+                      ),
                       new SliverGrid(
                           delegate: new SliverChildBuilderDelegate(
                               (BuildContext buildContext, int index) {

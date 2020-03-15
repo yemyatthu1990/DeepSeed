@@ -20,6 +20,7 @@ class RemoteConfigKey {
   static bool showWaterMark;
   static String apiKey;
   static bool featureDefault = true;
+  static String apiOrderBy = "relevant";
   static List<dynamic> queries;
 }
 
@@ -48,6 +49,7 @@ Future<RemoteConfig> initializeRemoteConfig() async {
   await instance.activateFetched();
   RemoteConfigKey.showWaterMark = instance.getBool("showWaterMark");
   RemoteConfigKey.featureDefault = instance.getBool("featureDefault");
+  RemoteConfigKey.apiOrderBy = instance.getString("apiOrderBy");
   if (Platform.isAndroid)
     RemoteConfigKey.apiKey = instance.getString("u_a_key");
   else if (Platform.isIOS)

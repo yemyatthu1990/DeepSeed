@@ -46,7 +46,7 @@ class PhotoRepository {
     if (query == null || query.length == 0) query = defaultQuery;
     final response =
         /* :*/ await _helper.get(
-            "search/photos/?page=$pageNo&&query=$query&&client_id=${RemoteConfigKey.apiKey}&&order_by=latest");
+            "search/photos/?page=$pageNo&&query=$query&&client_id=${RemoteConfigKey.apiKey}&&order_by=${RemoteConfigKey.apiOrderBy}");
 
     List<Photo> results = new List<Photo>();
     response["results"].forEach((v) {
