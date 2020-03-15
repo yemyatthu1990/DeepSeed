@@ -1,6 +1,5 @@
 package co.deepseed.deep_seed
 
-import NativeAdmobBannerViewFactory
 import android.annotation.TargetApi
 import android.app.Activity
 import android.app.Application.ActivityLifecycleCallbacks
@@ -56,9 +55,6 @@ class MainActivity: FlutterActivity(), StreamHandler,
     super.onCreate(savedInstanceState)
 
     GeneratedPluginRegistrant.registerWith(this)
-    registrarFor("")
-            .platformViewRegistry().registerViewFactory(
-                    "native_admob_banner_view",NativeAdmobBannerViewFactory(flutterView))
     MethodChannel(flutterView,"channel:co.deepseed.deep_seed/share").setMethodCallHandler { methodCall, _ ->
         if (methodCall.method == "shareFile") {
             shareFile(methodCall.argument<String>("path")!!, methodCall.argument<String>("shareText")!!)
@@ -70,15 +66,6 @@ class MainActivity: FlutterActivity(), StreamHandler,
             result.success(getEncoding())
         }
     }
-
-    val channel = MethodChannel(flutterView, "flutter_native_admob")
-      channel.setMethodCallHandler{ methodCall, result ->
-
-        result.notImplemented()
-      }
-
-
-
 
 
 

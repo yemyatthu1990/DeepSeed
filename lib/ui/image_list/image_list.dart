@@ -1,13 +1,14 @@
+import 'dart:io' as io;
 import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:deep_seed/bloc/PhotoBloc.dart';
 import 'package:deep_seed/constants.dart';
-import 'package:deep_seed/model/model.dart';
 import 'package:deep_seed/network/ApiResponse.dart';
 import 'package:deep_seed/network/image_cache_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:flutter_native_admob/flutter_native_admob.dart';
+import 'package:flutter_native_admob/native_admob_controller.dart';
 
 import '../../main.dart';
 
@@ -61,15 +62,23 @@ class _PhotoListScreenState extends State<PhotoListScreen>
   _PhotoListScreenState({this.query});
   PhotoBloc _bloc;
   int _pageNo = 1;
-  List<Photo> photoList = new List<Photo>();
+  List<dynamic> photoList = new List<dynamic>();
   Status status;
   String message;
   List<Widget> filterList = new List();
   var selectedIndex = -1;
+  var admobList = List<NativeAdmob>();
+  var admobIndex = -1;
+  var relatedIndex = -1;
   @override
   void initState() {
     super.initState();
-
+    var adUnitId = "ca-app-pub-7811418762973637/4266376782";
+    if (io.Platform.isAndroid) {
+      adUnitId = "ca-app-pub-7811418762973637/4266376782";
+    } else if (io.Platform.isIOS) {
+      adUnitId = "ca-app-pub-7811418762973637/9055475516";
+    }
     if (widget.initializationFinished == false) {
       setState(() {
         showLoading = true;
@@ -99,6 +108,16 @@ class _PhotoListScreenState extends State<PhotoListScreen>
             setState(() {
               photoList.addAll(event.data);
             });
+            var admobController = NativeAdmobController();
+
+            admobController.setAdUnitID(adUnitId);
+            var admob = NativeAdmob(
+              adUnitID: adUnitId,
+              controller: admobController,
+            );
+            admobIndex = admobIndex + 1;
+            photoList.insert(photoList.length - 5, admobIndex);
+            admobList.add(admob);
           } else if (status == Status.LOADING) {
             if (event.show) {
               setState(() {
@@ -171,29 +190,6 @@ class _PhotoListScreenState extends State<PhotoListScreen>
     return _scrollController;
   }
 
-  /* Widget _buildPhotoList() {
-    if (_pageNo == 1) {
-      switch (status) {
-        case Status.LOADING:
-          return Loading(
-            loadingMessage: message,
-          );
-          break;
-        case Status.ERROR:
-          return Error(
-              errorMessage: message,
-              onRetryPressed: () {
-                _pageNo = 1;
-                return _bloc.fetchPhotoList(1);
-              });
-
-          break;
-        case Status.COMPLETED:
-
-      }
-    }
-  }*/
-
   @override
   Widget build(BuildContext context) {
     filterList.clear();
@@ -252,54 +248,61 @@ class _PhotoListScreenState extends State<PhotoListScreen>
                       new SliverGrid(
                           delegate: new SliverChildBuilderDelegate(
                               (BuildContext buildContext, int index) {
-                            return Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Hero(
-                                  tag: heroPhotoTag + index.toString(),
-                                  child: Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                          onTap: () {
-                                            _bloc.sendDownoadEvent(
-                                                photoList[index]
-                                                    .links
-                                                    .downloadLocation);
-                                            Map<String, dynamic> data = {
-                                              "urls": photoList[index].urls,
-                                              "photographer_name":
-                                                  photoList[index].user.name,
-                                              "username": photoList[index]
-                                                  .user
-                                                  .username,
-                                              "index": index,
-                                              "temp_file_url":
-                                                  ImageCacheManager()
-                                                      .getFileFromMemory(
-                                                          photoList[index]
-                                                              .urls
-                                                              .small)
-                                                      .file
-                                                      .path,
-                                              "hero_tag": heroPhotoTag +
-                                                  index.toString()
-                                            };
-                                            Navigator.pushNamed(
-                                                    context, detailRoute,
-                                                    arguments: data)
-                                                .then((value) {
-                                              if (value != null) {
-                                                widget.onRefreshValueChanged(
-                                                    true, value == 1);
-                                              }
-                                            });
-                                          },
-                                          child: CachedNetworkImage(
-                                            imageUrl:
-                                                photoList[index].urls.small,
-                                            cacheManager: ImageCacheManager(),
-                                            fit: BoxFit.cover,
-                                          )))),
-                            );
+                            if (photoList[index] is int) {
+                              return Container(
+                                  child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: admobList[photoList[index]]));
+                            } else {
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Hero(
+                                    tag: heroPhotoTag + index.toString(),
+                                    child: Material(
+                                        color: Colors.transparent,
+                                        child: InkWell(
+                                            onTap: () {
+                                              _bloc.sendDownoadEvent(
+                                                  photoList[index]
+                                                      .links
+                                                      .downloadLocation);
+                                              Map<String, dynamic> data = {
+                                                "urls": photoList[index].urls,
+                                                "photographer_name":
+                                                    photoList[index].user.name,
+                                                "username": photoList[index]
+                                                    .user
+                                                    .username,
+                                                "index": index,
+                                                "temp_file_url":
+                                                    ImageCacheManager()
+                                                        .getFileFromMemory(
+                                                            photoList[index]
+                                                                .urls
+                                                                .small)
+                                                        .file
+                                                        .path,
+                                                "hero_tag": heroPhotoTag +
+                                                    index.toString()
+                                              };
+                                              Navigator.pushNamed(
+                                                      context, detailRoute,
+                                                      arguments: data)
+                                                  .then((value) {
+                                                if (value != null) {
+                                                  widget.onRefreshValueChanged(
+                                                      true, value == 1);
+                                                }
+                                              });
+                                            },
+                                            child: CachedNetworkImage(
+                                              imageUrl:
+                                                  photoList[index].urls.small,
+                                              cacheManager: ImageCacheManager(),
+                                              fit: BoxFit.cover,
+                                            )))),
+                              );
+                            }
                           }, childCount: photoList.length),
                           gridDelegate:
                               new SliverGridDelegateWithFixedCrossAxisCount(
