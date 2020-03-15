@@ -487,8 +487,11 @@ class ImageEditorState extends State<ImageEditor> {
                   InkWell(
                       onTap: () {
                         Analytics().logColorOpened();
-                        DialogUtils.showColorChooser(draggableText.getColor(),
-                                draggableText.getFontColor(), context)
+                        DialogUtils.showColorChooser(
+                                draggableText.getColor(),
+                                draggableText.getFontColor(),
+                                draggableText.isShadowEnabled(),
+                                context)
                             .then((colors) {
                           if (colors != null) {
                             draggableText.setColor(colors);
@@ -605,6 +608,7 @@ class ImageEditorState extends State<ImageEditor> {
                                       DialogUtils.showColorChooser(
                                               draggableText.getColor(),
                                               draggableText.getFontColor(),
+                                              draggableText.isShadowEnabled(),
                                               context)
                                           .then((colors) {
                                         if (colors != null) {
@@ -726,6 +730,7 @@ class ImageEditorState extends State<ImageEditor> {
                               DialogUtils.showColorChooser(
                                       draggableText.getColor(),
                                       draggableText.getFontColor(),
+                                      draggableText.isShadowEnabled(),
                                       context)
                                   .then((colors) {
                                 if (colors != null) {

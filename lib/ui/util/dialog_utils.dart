@@ -36,16 +36,21 @@ class DialogUtils {
         });
   }
 
-  static Future<List<Color>> showColorChooser(
-      Color currentColor, Color currentFontColor, BuildContext context) async {
-    return await showDialog<List<Color>>(
+  static Future<List<dynamic>> showColorChooser(
+      Color currentColor,
+      Color currentFontColor,
+      bool currentShadowEnabled,
+      BuildContext context) async {
+    return await showDialog<List<dynamic>>(
         context: context,
         builder: (BuildContext context) {
           return ColorChanger(
               currentColor: currentColor,
               currentFontColor: currentFontColor,
-              onColorPicked: (bgColor, fontColor) =>
-                  Navigator.pop(context, [bgColor, fontColor]));
+              currentShadowEnabled: currentShadowEnabled,
+              onColorPicked: (bgColor, fontColor, isShadowEnabled) =>
+                  Navigator.pop(
+                      context, [bgColor, fontColor, isShadowEnabled]));
         });
   }
 
@@ -94,7 +99,8 @@ class DialogUtils {
         });
   }
 
-  static Future<bool> showReportDialog(BuildContext context, String titleText, String bodyText, String actionText) async {
+  static Future<bool> showReportDialog(BuildContext context, String titleText,
+      String bodyText, String actionText) async {
     return await showDialog<bool>(
         context: context,
         builder: (BuildContext context) {
@@ -103,8 +109,7 @@ class DialogUtils {
                 borderRadius: BorderRadius.all(Radius.circular(8.0))),
             title: Text(titleText),
             content: SingleChildScrollView(
-              child: Text(
-                  bodyText),
+              child: Text(bodyText),
             ),
             actions: <Widget>[
               FlatButton(
@@ -114,7 +119,7 @@ class DialogUtils {
                 },
               ),
               FlatButton(
-                child:  Text(
+                child: Text(
                   actionText,
                   style: TextStyle(color: Colors.redAccent),
                 ),

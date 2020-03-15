@@ -29,7 +29,7 @@ class DraggableText extends StatefulWidget {
     _draggableTextState.setText(value);
   }
 
-  void setColor(List<Color> colors) {
+  void setColor(List<dynamic> colors) {
     _draggableTextState.setColor(colors);
   }
 
@@ -40,6 +40,7 @@ class DraggableText extends StatefulWidget {
   Color getColor() => _draggableTextState.currentColor;
   Color getFontColor() => _draggableTextState.currentFontColor;
   double getHeight() => _draggableTextState.context.size.height;
+  bool isShadowEnabled() => _draggableTextState.isShadowEnabled;
 
   @override
   State<StatefulWidget> createState() {
@@ -56,6 +57,7 @@ class DraggableTextState extends State<DraggableText> {
   String currentFont = Encoding.isUnicode ? "Roboto" : "Zawgyi3";
   Color currentColor = Colors.black38;
   Color currentFontColor = Colors.white;
+  bool isShadowEnabled = false;
   double width = 0;
   double pixelRatio = 1;
   void setWidth(double width) {
@@ -83,10 +85,13 @@ class DraggableTextState extends State<DraggableText> {
     });
   }
 
-  void setColor(List<Color> colors) {
+  void setColor(List<dynamic> colors) {
     setState(() {
       currentColor = colors[0];
       currentFontColor = colors[1];
+      if (colors[2] != null) {
+        isShadowEnabled = colors[2];
+      }
     });
   }
 
@@ -156,6 +161,14 @@ class DraggableTextState extends State<DraggableText> {
                           height: 2 * pixelRatio,
                           color: currentFontColor,
                           fontSize: fontSize,
+                          shadows: isShadowEnabled
+                              ? <Shadow>[
+                                  Shadow(
+                                      offset: Offset(0.0, 0.0),
+                                      blurRadius: 2.0,
+                                      color: currentFontColor),
+                                ]
+                              : null,
                           fontFamily: currentFont),
                       textAlign: TextAlign.center,
                       enableSuggestions: false,

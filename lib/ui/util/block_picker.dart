@@ -32,9 +32,13 @@ typedef PickerLayoutBuilder = Widget Function(
     double alphaValue,
     PickerItem child,
     OnAlphaChanged onAlphaChanged,
-    bool showSlider);
+    OnShadowChanged onShadowChanged,
+    bool showSlider,
+    bool showShadow,
+    bool isShadowEnabled);
 typedef PickerItem = Widget Function(Color color);
 typedef OnAlphaChanged(double value);
+typedef OnShadowChanged(bool value);
 typedef PickerItemBuilder = Widget Function(
   Color color,
   bool isCurrentColor,
@@ -42,28 +46,36 @@ typedef PickerItemBuilder = Widget Function(
 );
 
 class BlockPicker extends StatefulWidget {
-  const BlockPicker({
+  BlockPicker({
     @required this.pickerColor,
     @required this.alphaValue,
     @required this.onColorChanged,
+    @required this.onShadowChanged,
+    this.isShadowEnabled,
     this.showAlphaPicker = true,
+    this.showShadowPicker = false,
     this.layoutBuilder = defaultLayoutBuilder,
     this.itemBuilder = defaultItemBuilder,
   });
   final bool showAlphaPicker;
+  final bool showShadowPicker;
   final Color pickerColor;
   final double alphaValue;
   final ValueChanged<Color> onColorChanged;
+  final ValueChanged<bool> onShadowChanged;
   final PickerLayoutBuilder layoutBuilder;
   final PickerItemBuilder itemBuilder;
-
+  final isShadowEnabled;
   static Widget defaultLayoutBuilder(
       BuildContext context,
       List<Color> colors,
       double alphaValue,
       PickerItem child,
       OnAlphaChanged onAlphaChanged,
-      bool showSlider) {
+      OnShadowChanged onShadowChanged,
+      bool showSlider,
+      bool showShadow,
+      bool isShadowEnabled) {
     var deviceHeight = MediaQuery.of(context).size.height;
     var deviceWidth = MediaQuery.of(context).size.width;
     return Column(
@@ -72,10 +84,10 @@ class BlockPicker extends StatefulWidget {
         children: [
           Container(
             margin: EdgeInsets.only(top: 16, bottom: 16),
-            height: deviceHeight/1.89 > 400? 400: deviceHeight/1.89,
-            width: deviceWidth/1.34,
+            height: deviceHeight / 1.89 > 400 ? 400 : deviceHeight / 1.89,
+            width: deviceWidth / 1.34,
             child: GridView.count(
-              crossAxisCount:  4 ,
+              crossAxisCount: 4,
               crossAxisSpacing: 5.0,
               mainAxisSpacing: 5.0,
               children: colors.map((Color color) => child(color)).toList(),
@@ -91,7 +103,20 @@ class BlockPicker extends StatefulWidget {
                     onAlphaChanged(value);
                   },
                 )
-              : Container()
+              : Container(),
+          showShadow
+              ? Padding(
+                  padding: EdgeInsets.only(left: 16, right: 16),
+                  child: Row(mainAxisSize: MainAxisSize.max, children: [
+                    Checkbox(
+                      onChanged: (value) {
+                        onShadowChanged(value);
+                      },
+                      value: isShadowEnabled,
+                    ),
+                    Flexible(child: Text("Add font shadow"))
+                  ]))
+              : Container(),
         ]);
   }
 
@@ -132,17 +157,19 @@ class BlockPicker extends StatefulWidget {
   State<StatefulWidget> createState() => _BlockPickerState();
 }
 
-class _BlockPickerState extends State<BlockPicker> {
+class _BlockPickerState extends State<BlockPicker>
+    with AutomaticKeepAliveClientMixin<BlockPicker> {
   Color _currentColor;
 
   double _currentAlphaValue;
+  bool _isShadowEnabled;
   List<Color> availableColors = new List();
 
   @override
   void initState() {
     if (_currentColor == null) _currentColor = widget.pickerColor;
     if (_currentAlphaValue == null) _currentAlphaValue = widget.alphaValue;
-
+    if (_isShadowEnabled == null) _isShadowEnabled = widget.isShadowEnabled;
     _defaultColors.forEach((element) {
       availableColors.add(element.withAlpha(widget.alphaValue.toInt()));
     });
@@ -168,6 +195,14 @@ class _BlockPickerState extends State<BlockPicker> {
     widget.onColorChanged(_currentColor);
   }
 
+  void changeShadow(bool value) {
+    setState(() {
+      _isShadowEnabled = value;
+    });
+
+    widget.onShadowChanged(value);
+  }
+
   @override
   Widget build(BuildContext context) {
     return widget.layoutBuilder(
@@ -181,6 +216,12 @@ class _BlockPickerState extends State<BlockPicker> {
                 _currentColor.blue == color.blue),
             () => changeColor(color.withAlpha(_currentAlphaValue.toInt()))),
         (alpha) => changeAlpha(alpha),
-        widget.showAlphaPicker);
+        (shadow) => changeShadow(shadow),
+        widget.showAlphaPicker,
+        widget.showShadowPicker,
+        _isShadowEnabled);
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

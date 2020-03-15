@@ -2,15 +2,17 @@ import 'package:deep_seed/ui/util/block_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-typedef OnColorPicked(Color bgColor, Color fontColor);
+typedef OnColorPicked(Color bgColor, Color fontColor, bool showShadow);
 
 class ColorChanger extends StatefulWidget {
   final Color currentColor;
   final Color currentFontColor;
+  final bool currentShadowEnabled;
   final OnColorPicked onColorPicked;
   ColorChanger(
       {this.currentColor = Colors.white,
       this.currentFontColor = Colors.white,
+      this.currentShadowEnabled = false,
       this.onColorPicked});
   @override
   State<StatefulWidget> createState() {
@@ -24,6 +26,7 @@ class ColorChangerState extends State<ColorChanger> {
   Widget build(BuildContext context) {
     Color pickedColor = widget.currentColor;
     Color pickedFontColor = widget.currentFontColor;
+    bool isShadowEnabled = widget.currentShadowEnabled;
     return Padding(
         padding: EdgeInsets.all(30),
         child: Align(
@@ -60,33 +63,43 @@ class ColorChangerState extends State<ColorChanger> {
                                   ],
                                 ),
                                 Container(
-                                    height: MediaQuery.of(context).size.height/1.49 > 500?
-                                    500: MediaQuery.of(context).size.height/1.49,
+                                    height: MediaQuery.of(context).size.height /
+                                                1.49 >
+                                            500
+                                        ? 500
+                                        : MediaQuery.of(context).size.height /
+                                            1.49,
                                     child: TabBarView(children: [
                                       Container(
-
                                           child: BlockPicker(
-                                            alphaValue: widget
-                                                .currentColor.alpha
-                                                .toDouble(),
-                                            pickerColor: widget.currentColor,
-                                            onColorChanged: (color) {
-                                              pickedColor = color;
-                                            },
-                                          )),
+                                        alphaValue: widget.currentColor.alpha
+                                            .toDouble(),
+                                        showAlphaPicker: true,
+                                        showShadowPicker: false,
+                                        pickerColor: pickedColor,
+                                        onColorChanged: (color) {
+                                          pickedColor = color;
+                                        },
+                                        onShadowChanged: (value) {
+                                          //do nothing
+                                        },
+                                      )),
                                       Container(
-
                                           child: BlockPicker(
-                                            alphaValue: widget
-                                                .currentFontColor.alpha
-                                                .toDouble(),
-                                            showAlphaPicker: false,
-                                            pickerColor:
-                                                widget.currentFontColor,
-                                            onColorChanged: (color) {
-                                              pickedFontColor = color;
-                                            },
-                                          )),
+                                        alphaValue: widget
+                                            .currentFontColor.alpha
+                                            .toDouble(),
+                                        showAlphaPicker: false,
+                                        showShadowPicker: true,
+                                        isShadowEnabled: isShadowEnabled,
+                                        pickerColor: pickedFontColor,
+                                        onColorChanged: (color) {
+                                          pickedFontColor = color;
+                                        },
+                                        onShadowChanged: (value) {
+                                          isShadowEnabled = value;
+                                        },
+                                      )),
                                     ]))
                               ])),
                       Divider(
@@ -96,7 +109,8 @@ class ColorChangerState extends State<ColorChanger> {
                       ),
                       FlatButton(
                           onPressed: () {
-                            widget.onColorPicked(pickedColor, pickedFontColor);
+                            widget.onColorPicked(
+                                pickedColor, pickedFontColor, isShadowEnabled);
                           },
                           child: Align(
                               alignment: Alignment.center,
