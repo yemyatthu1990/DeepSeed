@@ -224,18 +224,36 @@ class ImageShareState extends State<ImageShareDialog> {
                       endIndent: 16,
                       indent: 16,
                     ),
-                    FlatButton(
+                    Padding(
+                      padding: EdgeInsets.only(left: 20, right: 20, bottom: 30, top: 30),
+                    child: Row(
+                      children: <Widget>[
+                        Expanded( child:SizedBox(
+                        width: 30,
+                            height: 30,
+                            child:Image(image: AssetImage("graphics/fb_logo.png")))),
+                        Expanded( child:SizedBox(
+                        width: 30,
+                            height: 30,
+                            child:Image(image: AssetImage("graphics/ig_logo.png")))),
+                        Expanded( child:SizedBox(
+                        width: 30,
+                            height: 30,
+                            child:Image(image: AssetImage("graphics/fb_logo.png"))))
+                      ],
+                    ))
+                    /*FlatButton(
                         onPressed: () {
                           Analytics().logShareImage(initialValue);
                           _imageShareBloc.getSharePhoto(imgBytes);
-                        },
+                        },`
                         child: Align(
                             alignment: Alignment.center,
                             child: Text(
                               "OK",
                               style: TextStyle(
                                   color: Colors.black87, fontSize: 18),
-                            ))),
+                            )))*/,
                   ]))
             ]))));
   }

@@ -82,11 +82,7 @@ flutter:
   #  - images/a_dot_ham.jpeg
 
   assets:
-    - graphics/transparent_circle.svg
-    - graphics/clap.svg
-    - graphics/app_icon.png
-    - graphics/deepseed_alpha.png
-    - graphics/poem.png
+    - graphics/
 
   fonts:
     - family: Zawgyi3
