@@ -236,10 +236,15 @@ class ImageShareState extends State<ImageShareDialog> {
                         width: 30,
                             height: 30,
                             child:Image(image: AssetImage("graphics/ig_logo.png")))),
-                        Expanded( child:SizedBox(
+                        Expanded( child:InkWell(
+                        onTap: (){
+                          Analytics().logShareImage(initialValue);
+                          _imageShareBloc.getSharePhoto(imgBytes);
+                        },
+                            child:SizedBox(
                         width: 30,
                             height: 30,
-                            child:Image(image: AssetImage("graphics/fb_logo.png"))))
+                            child: Icon(Icons.share))))
                       ],
                     ))
                     /*FlatButton(
